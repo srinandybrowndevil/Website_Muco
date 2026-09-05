@@ -822,7 +822,7 @@ def build_home():
               <span class="pulse-dot" aria-hidden="true"></span>
               Founder-led studio &middot; {city}, {region}
             </div>
-            <h1>We turn business ideas into software that actually ships.</h1>
+            <h1>We turn business ideas into software that <span class="accent-serif">actually</span> ships.</h1>
             <p class="lead">
               Websites, mobile apps, custom software and AI automation for businesses in
               {city} and across {region} &mdash; built by the person you talk to, priced
@@ -1261,7 +1261,7 @@ def build_work():
 
     body = page_header(
         "Work",
-        "Six things we are actually building",
+        "Six things we are <span class='accent-serif'>actually</span> building",
         "One client project and five of our own products. Each one says plainly what stage it is "
         "at, because a specification is not a shipped product and we are not going to pretend "
         "otherwise.",
@@ -1370,7 +1370,7 @@ def build_pricing():
 
     body = page_header(
         "Pricing",
-        "We quote from a scope, not from a price list",
+        "We quote from a <span class='accent-serif'>scope</span>, not from a price list",
         "We do not publish package prices, and we would rather tell you why than pretend. Two "
         "websites that look similar can differ by four times in build time. A number posted here "
         "would be either so low it is meaningless or so high it scares off work we would have "
@@ -1489,7 +1489,7 @@ def build_local_erode():
       <div class="container">
         {crumbs}
         <span class="eyebrow">Erode, Tamil Nadu</span>
-        <h1>Website development in Erode</h1>
+        <h1>Website development in <span class="accent-serif">Erode</span></h1>
         <p class="lead">{brand} is a software studio based in {city}. We build websites, mobile
           apps and business systems for businesses here and across {region} &mdash; quoted from a
           written scope, built to work on the phones your customers actually own, and handed over
@@ -1722,7 +1722,7 @@ def build_about():
         <div class="split" style="align-items:start;">
           <div>
             <span class="eyebrow">About</span>
-            <h1>A founder-led software studio in {city}.</h1>
+            <h1>A <span class="accent-serif">founder-led</span> software studio in {city}.</h1>
             <p class="lead">{brand} builds websites, mobile apps, custom software and AI
               automation for businesses across {region}. We are small on purpose: it is the
               only way to keep direct accountability between the person who promises something
@@ -1854,7 +1854,7 @@ def build_contact():
     body = """    <section>
       <div class="container">
         <span class="eyebrow">Contact</span>
-        <h1>Tell us what you want to build.</h1>
+        <h1>Tell us what you want to <span class="accent-serif">build</span>.</h1>
         <p class="lead">Send a short description and we will come back with questions, a suggested
           approach and a written scope. If we are not the right people for it, we will tell you that
           instead of taking the project.</p>
@@ -2032,7 +2032,7 @@ def build_faq():
 
     body = page_header(
         "FAQ",
-        "The questions we actually get asked",
+        "The questions we <span class='accent-serif'>actually</span> get asked",
         "Pricing, process, ownership and the things other agencies avoid answering. If your "
         "question is not here, ask it directly.",
     ) + """    <section style="padding-top:0;">
@@ -2867,6 +2867,35 @@ need a backend, which this repository does not have yet.
     return len(txt)
 
 
+# The serif accent font is subsetted to only the glyphs the accent words use
+# (2 KB instead of 22 KB). That is a real saving and a real trap: change an
+# accent word to one containing a letter outside this set and the browser
+# silently falls back to Georgia for that letter, which looks broken. So the
+# build refuses to finish quietly if that happens — re-run build_fonts.py to
+# regenerate the subset, then update this string.
+SERIF_SUBSET = "-Eabcdefilnoprstuy"
+
+
+def check_serif_subset():
+    """Fail loudly if an accent word needs a glyph the subset does not carry."""
+    used = set()
+    for name in os.listdir(ROOT):
+        if not name.endswith(".html"):
+            continue
+        html = open(os.path.join(ROOT, name), encoding="utf-8").read()
+        for word in re.findall(r'<span class=["\']accent-serif["\']>(.*?)</span>', html):
+            used |= set(word)
+    missing = sorted(used - set(SERIF_SUBSET))
+    if missing:
+        raise SystemExit(
+            "\n  ERROR: the serif accent uses glyphs missing from the subsetted font: %s\n"
+            "  Those letters would silently render in Georgia instead.\n"
+            "  Fix: run `python3 build_fonts.py --serif` and update SERIF_SUBSET.\n"
+            % "".join(missing)
+        )
+    return len(used)
+
+
 def build_all():
     jobs = [
         ("index.html", build_home),
@@ -2898,3 +2927,4 @@ def build_all():
         total += size
         print("  %-18s %6.1f KB" % (name, size / 1024.0))
     print("  %-18s %6.1f KB total across %d files" % ("", total / 1024.0, len(jobs)))
+    print("  serif accent glyphs in use: %d, all present in the subset" % check_serif_subset())

@@ -19,8 +19,11 @@ means declaring the real variable axis range ('font-weight: 200 800'), otherwise
 the browser synthesises the heavier weights instead of using the actual axis.
 """
 
+import glob
 import os
 import re
+import subprocess
+import sys
 import urllib.request
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +55,67 @@ def fetch(url):
     return urllib.request.urlopen(
         urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30
     ).read()
+
+
+SERIF_URL = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap"
+SERIF_FILE = "instrument-serif-italic-latin.woff2"
+
+
+def subset_serif():
+    """Re-download the serif accent face and cut it down to the glyphs the site
+    actually renders with it — currently about five words, so 22 KB of font
+    becomes roughly 2 KB.
+
+    Needs fonttools and brotli, which are not site dependencies. If they are
+    missing the full face is kept: a larger file is a cost, a missing glyph is
+    a visible defect.
+
+        python3 -m venv /tmp/fontenv
+        /tmp/fontenv/bin/pip install fonttools brotli
+    """
+    os.makedirs(OUT, exist_ok=True)
+    css = fetch(SERIF_URL).decode("utf-8")
+    block = next(
+        b for n, b in re.findall(r"/\*\s*([a-z-]+)\s*\*/\s*(@font-face\s*\{.*?\})", css, re.S)
+        if n == "latin"
+    )
+    url = re.search(r"url\((https://[^)]+)\)", block).group(1)
+    full = os.path.join(OUT, "_serif-full.woff2")
+    open(full, "wb").write(fetch(url))
+
+    # Every character the site sets in the serif accent.
+    chars = set()
+    for path in glob.glob(os.path.join(ROOT, "*.html")):
+        html = open(path, encoding="utf-8").read()
+        for word in re.findall(r"<span class=[\"']accent-serif[\"']>(.*?)</span>", html):
+            chars |= set(word)
+    if not chars:
+        print("No .accent-serif spans found — build the site first.")
+        return
+    subset = "".join(sorted(chars))
+
+    out = os.path.join(OUT, SERIF_FILE)
+    try:
+        subprocess.run(
+            # Invoke fontTools as a module rather than hunting for the
+            # pyftsubset script, so this works under whichever interpreter
+            # actually has fonttools installed.
+            [sys.executable, "-m", "fontTools.subset", full,
+             "--output-file=" + out, "--flavor=woff2", "--text=" + subset,
+             "--layout-features=", "--no-hinting", "--desubroutinize"],
+            check=True, capture_output=True)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        os.replace(full, out)
+        print("fonttools not available — kept the full face (%.1f KB)."
+              % (os.path.getsize(out) / 1024.0))
+        print("A bigger file is a cost; a missing glyph is a defect.")
+        return
+
+    before, after = os.path.getsize(full), os.path.getsize(out)
+    os.remove(full)
+    print("  %s  %.1f KB -> %.1f KB  (%d glyphs: %s)"
+          % (SERIF_FILE, before / 1024.0, after / 1024.0, len(subset), subset))
+    print("\n  Now set SERIF_SUBSET in content.py to exactly:\n    %r" % subset)
 
 
 def main():
@@ -96,4 +160,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--serif" in sys.argv:
+        subset_serif()
+    else:
+        main()

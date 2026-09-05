@@ -509,6 +509,7 @@ SHELL = """<!DOCTYPE html>
 <link rel="manifest" href="site.webmanifest" />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/instrument-serif-italic-latin.woff2" crossorigin />
 <link rel="stylesheet" href="style.css" />
 {schema}{analytics}</head>
 <body>
