@@ -2,13 +2,13 @@
 
 Official website for MUCO LABS. Your Vision, Our Technology.
 
-Static HTML with no server-side build. Deployed from `main`.
+Static HTML plus one serverless function (`api/lead.js`). Deployed from `main`.
 
 ## Contact
 
 - **Founder:** Srinivash Mahalingam
 - **Website:** <https://mucolabs.com>
-- **Email:** mucolabs2026@gmail.com
+- **Email:** contact@mucolabs.com
 - **Phone:** +91 6381809844
 
 ## How this repo works
@@ -38,6 +38,20 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 
 Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
 Careers · Privacy · Terms · Refund · 404
+
+## Enquiry form
+
+The contact form posts to `api/lead.js`, a Vercel serverless function. It
+validates server-side, rate limits by IP, drops honeypot submissions, and
+writes every accepted lead to the function log before doing anything else — so
+a lead survives an email outage or a missing API key.
+
+Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
+enquiry to you. Without it nothing breaks; the leads are in
+Vercel → Deployments → Functions → Logs, filtered on `[lead]`.
+
+The browser opens WhatsApp *before* awaiting the request, because doing it
+afterwards loses the click gesture and pop-up blockers eat the window.
 
 ## Turning on analytics
 

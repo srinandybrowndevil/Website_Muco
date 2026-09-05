@@ -260,7 +260,7 @@
    * anywhere else. Server-side validation arrives with the backend.
    */
   var WHATSAPP_NUMBER = '916381809844';
-  var CONTACT_EMAIL = 'mucolabs2026@gmail.com';
+  var CONTACT_EMAIL = 'contact@mucolabs.com';
 
   function initEnquiryForm() {
     var form = document.getElementById('enquiry-form');
@@ -363,21 +363,93 @@
 
       var body = buildMessage();
 
+      // Open WhatsApp or the mail client first, synchronously. Doing it after
+      // an awaited fetch loses the user-gesture context and pop-up blockers
+      // then swallow the window — so the hand-off happens now and the enquiry
+      // is recorded in parallel.
       if (channel === 'email') {
         var subject = 'Project enquiry — ' + (fieldValue('service') || 'General') + ' — ' + fieldValue('name');
         window.location.href =
           'mailto:' + CONTACT_EMAIL +
           '?subject=' + encodeURIComponent(subject) +
           '&body=' + encodeURIComponent(body);
-        showStatus('ok', 'Opening your email app with the enquiry filled in. Press send there to reach us.');
       } else {
         window.open(
           'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(body),
           '_blank',
           'noopener'
         );
-        showStatus('ok', 'Opening WhatsApp with your enquiry filled in. Press send there to reach us.');
       }
+
+      recordLead(channel);
+    }
+
+    /**
+     * Send the enquiry to /api/lead so it is recorded whether or not the
+     * visitor actually presses send in WhatsApp. keepalive lets the request
+     * finish even though the page may be navigating away to a mail client.
+     */
+    function recordLead(channel) {
+      var payload = {
+        name: fieldValue('name'),
+        business: fieldValue('business'),
+        phone: fieldValue('phone'),
+        email: fieldValue('email'),
+        location: fieldValue('location'),
+        service: fieldValue('service'),
+        website: fieldValue('website'),
+        budget: fieldValue('budget'),
+        timeline: fieldValue('timeline'),
+        message: fieldValue('message'),
+        consent: true,
+        channel: channel,
+        page: window.location.pathname,
+        referrer: document.referrer || ''
+      };
+
+      try {
+        var params = new URL(window.location.href).searchParams;
+        ['utm_source', 'utm_medium', 'utm_campaign'].forEach(function (k) {
+          if (params.get(k)) payload[k] = params.get(k);
+        });
+      } catch (e) {
+        /* attribution is a bonus, never a blocker */
+      }
+
+      var handedOff =
+        channel === 'email'
+          ? 'Opening your email app with the enquiry filled in.'
+          : 'Opening WhatsApp with your enquiry filled in.';
+
+      if (!window.fetch) {
+        showStatus('ok', handedOff + ' Press send there to reach us.');
+        return;
+      }
+
+      showStatus('ok', handedOff + ' Sending it to us as well…');
+
+      window
+        .fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        })
+        .then(function (r) {
+          if (r.ok) {
+            showStatus(
+              'ok',
+              'Your enquiry has reached us — we will reply to you directly. ' +
+                'You can still press send in WhatsApp if you would like to talk there.'
+            );
+          } else {
+            // The WhatsApp window is already open, so the enquiry is not lost.
+            showStatus('ok', handedOff + ' Press send there so we receive it.');
+          }
+        })
+        .catch(function () {
+          showStatus('ok', handedOff + ' Press send there so we receive it.');
+        });
     }
 
     form.addEventListener('submit', function (e) {

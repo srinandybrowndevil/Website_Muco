@@ -1897,8 +1897,8 @@ def build_contact():
 
           <div class="form-card">
             <h2 style="font-size:20px;">Project enquiry</h2>
-            <p style="font-size:14px;margin:8px 0 22px;">Fill this in and it opens WhatsApp or your
-              email with everything already written out. Nothing is stored on this website.</p>
+            <p style="font-size:14px;margin:8px 0 22px;">Fill this in and it reaches us directly, and
+              opens WhatsApp with the same details already written out so you can talk there too.</p>
 
             <form id="enquiry-form" novalidate>
               <div class="form-row">
@@ -1980,9 +1980,9 @@ def build_contact():
               <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
 
               <p class="form-hint" style="margin-top:16px;">
-                This site is static and has no server, so your details are never stored or sent
-                anywhere by this page &mdash; the button simply opens WhatsApp or your email app
-                with the message written out for you to send.
+                Your enquiry is sent to us and also opened in WhatsApp, so it reaches us even if you
+                do not press send there. We use these details to reply and quote, nothing else &mdash;
+                see the <a href="privacy.html" style="color:var(--accent);">privacy policy</a>.
               </p>
             </form>
           </div>
@@ -2232,13 +2232,18 @@ def build_privacy():
         "WhatsApp, email or phone." % BRAND,
         [
             ("What this website itself collects", [
-                "This site is a set of static pages served by GitHub Pages. It has no database, no "
-                "user accounts and no server code of our own. Nothing you type into the enquiry "
-                "form is stored on this website or transmitted to us by the page.",
-                "The enquiry form works entirely in your browser: it assembles your answers into a "
-                "message and opens WhatsApp or your email application with that message ready to "
-                "send. You choose whether to send it. If you close the window instead, we never "
-                "see anything.",
+                "This site is a set of static pages with one piece of server code: the endpoint "
+                "that receives the enquiry form. There are no user accounts and no public database.",
+                "When you submit the enquiry form, what you typed is sent to us and recorded so we "
+                "can reply. The same details are also opened in WhatsApp or your email application "
+                "so you can continue the conversation there if you want to \u2014 but the enquiry "
+                "reaches us either way, which is the point: before this, an enquiry was lost if "
+                "WhatsApp failed to open. Browsing the site without submitting the form sends us "
+                "nothing.",
+                "Alongside your answers we record the page you submitted from, the site that "
+                "referred you and any campaign tags in the link, so we know which of our pages are "
+                "actually useful. Your IP address is recorded with the submission as a basic "
+                "anti-abuse measure.",
                 "Our hosting provider, GitHub, records standard technical request logs such as IP "
                 "address and browser type as part of serving the site. We do not control or have "
                 "access to those logs. Everything else this site loads \u2014 stylesheets, scripts, "
@@ -2755,7 +2760,7 @@ def build_readme():
 
 Official website for {brand}. {tagline}
 
-Static HTML with no server-side build. Deployed from `main`.
+Static HTML plus one serverless function (`api/lead.js`). Deployed from `main`.
 
 ## Contact
 
@@ -2791,6 +2796,20 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 
 Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
 Careers · Privacy · Terms · Refund · 404
+
+## Enquiry form
+
+The contact form posts to `api/lead.js`, a Vercel serverless function. It
+validates server-side, rate limits by IP, drops honeypot submissions, and
+writes every accepted lead to the function log before doing anything else — so
+a lead survives an email outage or a missing API key.
+
+Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
+enquiry to you. Without it nothing breaks; the leads are in
+Vercel → Deployments → Functions → Logs, filtered on `[lead]`.
+
+The browser opens WhatsApp *before* awaiting the request, because doing it
+afterwards loses the click gesture and pop-up blockers eat the window.
 
 ## Turning on analytics
 
