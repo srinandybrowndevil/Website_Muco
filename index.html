@@ -16,9 +16,11 @@
   <meta property="og:description" content="Custom software, AI solutions and web apps built from Erode. Honest builds, real outcomes." />
   <meta property="og:locale" content="en_IN" />
   <meta property="og:site_name" content="MUCO Labs" />
+  <meta property="og:image" content="https://mucolabs.in/assets/srinivash.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="MUCO Labs | Custom Software, AI & Web Engineering" />
   <meta name="twitter:description" content="Custom software, AI solutions and web apps built from Erode." />
+  <meta name="twitter:image" content="https://mucolabs.in/assets/srinivash.png" />
   <meta name="geo.region" content="IN-TN" />
   <meta name="geo.placename" content="Erode" />
   <meta name="geo.position" content="11.3410;77.7172" />
@@ -37,13 +39,15 @@
         "@id": "https://mucolabs.in/#organization",
         "name": "MUCO Labs",
         "url": "https://mucolabs.in/",
-        "logo": "https://mucolabs.in/logo.png",
+        "logo": "https://mucolabs.in/assets/srinivash.png",
+        "image": "https://mucolabs.in/assets/srinivash.png",
         "description": "Custom software, AI chatbots, web apps and automation built from Erode, India.",
         "foundingDate": "2026",
         "founder": {
           "@type": "Person",
           "name": "Srinivash",
-          "jobTitle": "Founder"
+          "jobTitle": "Founder",
+          "image": "https://mucolabs.in/assets/srinivash.png"
         },
         "address": {
           "@type": "PostalAddress",
@@ -242,6 +246,8 @@
     .faq-item h3 { font-size: 1.05rem; margin-bottom: 6px; }
     .faq-item p { color: var(--muted); font-size: 0.95rem; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .founder-photo { width: 100%; max-width: 320px; border-radius: 16px; border: 1px solid var(--border); display: block; }
+    .about-photo { display: flex; flex-direction: column; gap: 16px; }
   </style>
 </head>
 <body>
@@ -356,27 +362,29 @@
               <li><strong>Process:</strong> prototype fast, iterate with you, ship when it's ready.</li>
               <li><strong>Promise:</strong> honest timelines and honest pricing. No surprises.</li>
             </ul>
+            <div class="stat-row">
+              <div><strong>0</strong><span>Fake case studies</span></div>
+              <div><strong>2</strong><span>Real builds in progress</span></div>
+              <div><strong>1</strong><span>Founder, full-time</span></div>
+            </div>
           </div>
-          <div class="reveal">
+          <div class="about-photo reveal">
+            <img src="assets/srinivash.png" alt="Srinivash, founder of MUCO Labs" class="founder-photo" width="320" height="400" loading="lazy" />
             <div class="card">
-              <h3>Why work with us</h3>
-              <div class="stat-row">
-                <div><strong>1</strong><span>Founder, full ownership</span></div>
-                <div><strong>AI</strong><span>Assisted, not replaced</span></div>
-              </div>
-              <p style="margin-top:18px;color:var(--muted);font-size:0.95rem;">We're small on purpose. That means you talk to the person building your software, not a sales rep.</p>
+              <h3>Srinivash</h3>
+              <p style="margin-top:8px;">Founder &amp; builder. Based in Erode. Ships software and AI products with AI-assisted tooling.</p>
+              <p style="margin-top:12px;"><a href="#contact" style="color:var(--accent);">Get in touch &rarr;</a></p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="faq">
+    <section id="faq" style="background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
       <div class="wrap">
         <div class="section-head reveal">
-          <div class="eyebrow">Questions</div>
-          <h2>Frequently asked questions</h2>
-          <p class="lead">Direct answers, so search engines and AI tools can cite them cleanly.</p>
+          <div class="eyebrow">FAQ</div>
+          <h2>Straight answers</h2>
         </div>
         <div class="reveal">
           <div class="faq-item">
@@ -402,31 +410,39 @@
     <section class="contact" id="contact">
       <div class="wrap">
         <div class="contact-grid">
-          <div class="reveal">
-            <div class="eyebrow">Get in touch</div>
-            <h2>Have a project in mind?</h2>
-            <p class="lead" style="margin-top:14px;">Tell us what you're trying to build or fix. We'll reply within a day with a straight answer — even if it's "not a fit."</p>
-            <div class="contact-info">
-              <p>Email: <a href="mailto:contact@mucolabs.in">contact@mucolabs.in</a></p>
-              <p>Phone: <a href="tel:+916381809844">+91 6381809844</a></p>
-              <p>Location: Erode, Tamil Nadu</p>
-            </div>
+          <div class="contact-info reveal">
+            <div class="eyebrow">Contact</div>
+            <h2>Let's build something that ships</h2>
+            <p>Tell us what you're stuck on. We'll reply with a straight answer — no sales deck, no fluff.</p>
+            <p><strong>Email:</strong> <a href="mailto:contact@mucolabs.in">contact@mucolabs.in</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+916381809844">+91 6381809844</a></p>
+            <p><strong>Location:</strong> Erode, Tamil Nadu, India</p>
           </div>
           <form class="reveal" onsubmit="return false;">
             <div>
               <label for="name">Name</label>
-              <input id="name" type="text" placeholder="Your name" required />
+              <input id="name" name="name" type="text" placeholder="Your name" required />
             </div>
             <div>
               <label for="email">Email</label>
-              <input id="email" type="email" placeholder="you@example.com" required />
+              <input id="email" name="email" type="email" placeholder="you@example.com" required />
             </div>
             <div>
-              <label for="msg">What do you want to build?</label>
-              <textarea id="msg" placeholder="Briefly describe the problem or idea..." required></textarea>
+              <label for="service">What do you need?</label>
+              <select id="service" name="service">
+                <option>AI chatbot</option>
+                <option>Custom web app</option>
+                <option>Automation</option>
+                <option>Website + SEO</option>
+                <option>Mobile app</option>
+                <option>Not sure yet</option>
+              </select>
+            </div>
+            <div>
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Tell us about your project..."></textarea>
             </div>
             <button type="submit" class="btn" style="justify-content:center;">Send message</button>
-            <p style="font-size:0.82rem;color:var(--muted);">Or just email us directly — same inbox.</p>
           </form>
         </div>
       </div>
@@ -435,16 +451,15 @@
 
   <footer class="footer">
     <div class="wrap footer-inner">
-      <div>© <span id="y"></span> MUCO Labs. Built in Erode.</div>
+      <div>MUCO Labs &middot; Erode, Tamil Nadu</div>
       <div>
-        <a href="mailto:contact@mucolabs.in">contact@mucolabs.in</a> ·
+        <a href="mailto:contact@mucolabs.in">contact@mucolabs.in</a> &middot;
         <a href="tel:+916381809844">+91 6381809844</a>
       </div>
     </div>
   </footer>
 
   <script>
-    document.getElementById('y').textContent = new Date().getFullYear();
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
     }, { threshold: 0.12 });
