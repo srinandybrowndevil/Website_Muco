@@ -2681,6 +2681,75 @@ Sitemap: {domain}/sitemap.xml
     return len(txt)
 
 
+
+def build_vercel_json():
+    """Generated so the Content-Security-Policy can follow GA_MEASUREMENT_ID.
+
+    Widening the policy by hand was the obvious alternative, but then enabling
+    analytics would take two edits in two files and forgetting the second one
+    fails silently: the tag loads, the browser blocks it, and nothing is
+    measured. Generating it keeps the promise that the Measurement ID is the
+    only thing you have to set.
+    """
+    script_src = "'self'"
+    connect_src = "'self'"
+    if GA_MEASUREMENT_ID:
+        script_src += " https://www.googletagmanager.com"
+        connect_src += " https://*.google-analytics.com https://*.analytics.google.com"
+
+    csp = "; ".join([
+        "default-src 'self'",
+        "script-src " + script_src,
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data:",
+        "font-src 'self'",
+        "connect-src " + connect_src,
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "upgrade-insecure-requests",
+    ])
+
+    config = {
+        "$schema": "https://openapi.vercel.sh/vercel.json",
+        "cleanUrls": True,
+        "trailingSlash": False,
+        "headers": [
+            {
+                "source": "/(.*)",
+                "headers": [
+                    {"key": "Content-Security-Policy", "value": csp},
+                    {"key": "X-Content-Type-Options", "value": "nosniff"},
+                    {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"},
+                    {"key": "X-Frame-Options", "value": "DENY"},
+                    {"key": "Permissions-Policy",
+                     "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"},
+                    {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
+                ],
+            },
+            {
+                "source": "/assets/fonts/(.*)",
+                "headers": [{"key": "Cache-Control", "value": "public, max-age=31536000, immutable"}],
+            },
+            {
+                "source": "/assets/(.*).(jpg|png|webp|svg)",
+                "headers": [{"key": "Cache-Control", "value": "public, max-age=31536000, immutable"}],
+            },
+            {
+                "source": "/(favicon.svg|logo-mark.svg|logo-full.svg)",
+                "headers": [{"key": "Cache-Control", "value": "public, max-age=604800"}],
+            },
+        ],
+    }
+
+    import json as _json
+    txt = _json.dumps(config, indent=2) + "\n"
+    with open(os.path.join(ROOT, "vercel.json"), "w", encoding="utf-8") as f:
+        f.write(txt)
+    return len(txt)
+
+
 def build_readme():
     txt = """# {brand} — mucolabs.com
 
@@ -2706,6 +2775,10 @@ build will overwrite your changes. Edit the source and rebuild instead:
 | `content.py` | All page copy, the service list, and the project portfolio data |
 | `style.css` | Design system — edit directly |
 | `main.js` | Browser behaviour — edit directly |
+| `analytics.js` | GA4 event map — edit directly, only loaded when an ID is set |
+
+`vercel.json`, `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and
+the `.html` files are all generated. Edit the sources above, not the output.
 
 ```bash
 python3 build.py
@@ -2730,9 +2803,10 @@ describes what is being collected. While the value is empty the site loads no
 analytics, makes no third-party request, and the privacy policy says exactly
 that — so the page can never claim something untrue about itself.
 
-The Content-Security-Policy in `vercel.json` already allows
-`www.googletagmanager.com` and `*.google-analytics.com`. Any other third-party
-script needs its host adding there too, or the browser will block it.
+`vercel.json` is generated too, so the Content-Security-Policy widens to allow
+Google's hosts only while the ID is set and narrows again when it is cleared.
+Any *other* third-party script needs its host adding to `build_vercel_json()`
+in `content.py`, or the browser will block it.
 
 Events sent: `whatsapp_click`, `phone_click`, `email_click`,
 `instagram_click`, `cta_click`, `form_start`, `form_error`, `generate_lead`,
@@ -2794,6 +2868,7 @@ def build_all():
         ("robots.txt", build_robots),
         ("llms.txt", build_llms_txt),
         ("site.webmanifest", build_manifest),
+        ("vercel.json", build_vercel_json),
         ("README.md", build_readme),
     ]
     jobs += [("services-%s.html" % sv["slug"], (lambda v: lambda: build_service_page(v))(sv))

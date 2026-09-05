@@ -22,6 +22,10 @@ build will overwrite your changes. Edit the source and rebuild instead:
 | `content.py` | All page copy, the service list, and the project portfolio data |
 | `style.css` | Design system — edit directly |
 | `main.js` | Browser behaviour — edit directly |
+| `analytics.js` | GA4 event map — edit directly, only loaded when an ID is set |
+
+`vercel.json`, `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and
+the `.html` files are all generated. Edit the sources above, not the output.
 
 ```bash
 python3 build.py
@@ -46,9 +50,10 @@ describes what is being collected. While the value is empty the site loads no
 analytics, makes no third-party request, and the privacy policy says exactly
 that — so the page can never claim something untrue about itself.
 
-The Content-Security-Policy in `vercel.json` already allows
-`www.googletagmanager.com` and `*.google-analytics.com`. Any other third-party
-script needs its host adding there too, or the browser will block it.
+`vercel.json` is generated too, so the Content-Security-Policy widens to allow
+Google's hosts only while the ID is set and narrows again when it is cleared.
+Any *other* third-party script needs its host adding to `build_vercel_json()`
+in `content.py`, or the browser will block it.
 
 Events sent: `whatsapp_click`, `phone_click`, `email_click`,
 `instagram_click`, `cta_click`, `form_start`, `form_error`, `generate_lead`,
