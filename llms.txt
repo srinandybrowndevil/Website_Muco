@@ -1,20 +1,84 @@
-# MUCO Labs
+# MUCO LABS
 
-> Custom software, AI chatbots, web apps and automation built from Erode, Tamil Nadu, India.
+> MUCO LABS is a founder-led software studio in Erode, Tamil Nadu. It builds websites, mobile apps, custom software and SaaS, business systems such as CRM, ERP, HRMS, LMS and billing, digital marketing and SEO, and AI and business automation for businesses across Tamil Nadu. Every project is quoted from a written scope, and the client owns the source code and accounts on final payment.
 
-## About
-MUCO Labs is a founder-built software agency based in Erode. Founder: Srinivash Mahalingam. Builds with AI-assisted tooling plus hands-on code.
+MUCO LABS is led by Srinivash Mahalingam (Founder & Chairman) and is based in Erode, Tamil Nadu, India.
+Contact: +91 6381809844 (phone and WhatsApp), mucolabs2026@gmail.com. Working hours: Monday to Saturday, 9 AM to 7 PM.
+Primary service area: Erode, Pallipalayam, Namakkal, Coimbatore, Tiruppur, Karur, and the rest of Tamil Nadu. Remote work worldwide.
+
+## How MUCO LABS works
+
+- Every project is quoted from a **written scope** that states inclusions, exclusions,
+  milestones and price before any work begins. No package price is published, because
+  two similar-looking projects can differ several times over in build time.
+- Payment terms are **50% in advance and 50% on completion**, or milestone payments on
+  larger projects.
+- On final payment the client **owns the source code, the design and the accounts**.
+  There is no proprietary builder, licence or hosting lock-in.
+- The founder reads every enquiry personally. There is no account-manager layer.
+- MUCO LABS does not guarantee search rankings, traffic, lead counts or revenue, and does
+  not publish testimonials, client logos or metrics it cannot verify.
 
 ## Services
-- AI Chatbots & Assistants: 24/7 support bots, RAG, lead qualification.
-- Custom Web Apps: dashboards, portals, internal tools.
-- Automation: connect tools, kill repetitive work.
-- Websites & SEO: fast, mobile-first, rankable.
-- Mobile Apps: cross-platform.
-- Consulting: problem mapping and stack selection.
 
-## Contact
-- Email: mucolabs2026@gmail.com
-- Phone: +91 6381809844
-- Location: Erode, Tamil Nadu, India
-- Website: https://mucolabs.com
+- **Website design & development** — A fast, findable website that turns visitors into enquiries. Business websites, landing pages, e-commerce and customer portals — built responsive from 320px up, with a technical SEO baseline, analytics readiness, deployment and a maintenance path.
+- **Mobile app development** — Apps your customers actually keep on their phone. Android and iOS applications with real backend integration — location, listings, bookings, accounts and payments — taken through store submission.
+- **UI/UX and product design** — Interfaces people can use without being trained. Flows, wireframes, interface design and a reusable design system, tested against real screen sizes and accessibility requirements rather than a designer's monitor.
+- **Custom software & SaaS** — Software shaped around how your business actually works. Discovery through MVP and beyond: multi-tenant systems, role-based access, customer and admin portals, reporting, payments and integrations on an architecture that can grow.
+- **CRM, ERP, HRMS, LMS & billing** — One system instead of six spreadsheets. Practical business systems for shops and organisations — bookings, inventory, CRM, ERP, HRMS, LMS, billing and GST workflows, sales, attendance, support and dashboards.
+- **Digital marketing & SEO** — Be found by the people already searching for you. Organic growth, local SEO, technical SEO, conversion optimisation, content and analytics — with honest reporting. We do not guarantee rankings or lead counts, because nobody credible can.
+- **AI & business automation** — Give the repetitive half of the working day to software. Lead routing, CRM updates, form handling, customer communication, dashboards, research and data operations, internal assistants and business process automation — with every third-party dependency named up front.
+- **Branding, IT & cloud support** — Someone who answers when something breaks. Brand identity and graphic design, plus ongoing IT and cloud management: uptime monitoring, security updates, backups, small content changes and performance review.
+
+## Work
+
+MUCO LABS publishes six projects, each labelled with its real stage. A written
+specification is never presented as a shipped product.
+
+- **Meyra** (active build) — A local-first desktop AI system that takes a goal from research and requirements through design, code and QA, keeping project memory across sessions instead of starting from scratch every time.
+- **Ooruva** (active build) — A hyperlocal discovery platform for real neighbourhood businesses — a customer app, a vendor app and an admin console that share one verified business directory.
+- **InkNexis** (active build) — Multi-tenant SaaS covering the whole tattoo studio lifecycle: customer history, design and placement preview, quote, booking, consent, session, aftercare, artist commission and analytics.
+- **Natural beauty brand website** (client project) — A mobile-first product storytelling website for a natural and organic beauty brand, built to convert search and social visitors into WhatsApp enquiries rather than force early e-commerce. Client named on request.
+- **MUCO LABS platform** (active build) — The company's own lead-generation and credibility platform, designed to grow into a secure customer, freelancer and admin portal without giving up SEO or conversion.
+- **Lead generation & outreach automation** (active build) — A recurring workflow that finds evidence-backed prospects from public sources, de-duplicates and qualifies them, maps each to a service, and produces traceable personalised outreach.
+
+Thirteen further systems are specified or at concept stage and are deliberately not
+presented as available products.
+
+## Common questions
+
+- **What does a website actually cost?** We do not publish a package price, and here is the honest reason: two websites that look similar from the outside can differ by four times in build time. A number posted on a page would either be so low it means nothing, or so high it puts off work we would have enjoyed doing.  What we do instead is quote from a writte
+- **How do payments work?** Standard terms are  50% advance and 50% on completion . Larger projects are split into milestones instead, each with its own deliverable and payment. Refund and cancellation terms are on the  refund policy  page.
+- **How long does a project take?** It depends entirely on scope, and we would rather give you a real date than a comfortable one. A straightforward business website is usually a matter of weeks; a custom platform with accounts, roles and payments is months. You get a milestone plan with dates in the proposal, and we tell you as soon as anything threaten
+- **Do I own the code and the design?** Yes. On final payment you own the deliverables, the source code and the accounts. We do not lock you into hosting, a proprietary builder or a licence you have to keep paying for.
+- **Do you work with businesses outside Erode?** Yes. We are based in Erode and work in person across Erode, Pallipalayam, Namakkal, Coimbatore, Tiruppur, Karur and the rest of Tamil Nadu, and remotely beyond that. Most project work happens over calls and shared documents regardless of where you are.
+- **Do you guarantee first page on Google?** No, and you should be careful with anyone who does. Rankings depend on competition, domain history and Google's own changes — none of which any agency controls. What we do commit to is the technical work that makes ranking possible: site speed, crawlability, structured data, local search setup, content and honest month
+
+## Pages
+
+- [Home](https://mucolabs.com/): positioning, services, selected work
+- [Services](https://mucolabs.com/services.html): all eight service lines and what each includes
+  - [Website design & development](https://mucolabs.com/services-websites.html)
+  - [Mobile app development](https://mucolabs.com/services-mobile.html)
+  - [UI/UX and product design](https://mucolabs.com/services-product-design.html)
+  - [Custom software & SaaS](https://mucolabs.com/services-software.html)
+  - [CRM, ERP, HRMS, LMS & billing](https://mucolabs.com/services-business-systems.html)
+  - [Digital marketing & SEO](https://mucolabs.com/services-marketing.html)
+  - [AI & business automation](https://mucolabs.com/services-ai-automation.html)
+  - [Branding, IT & cloud support](https://mucolabs.com/services-support.html)
+- [Website development in Erode](https://mucolabs.com/website-development-erode.html): local page for Erode businesses
+- [Work](https://mucolabs.com/work.html): projects with problem, scope and current status
+- [Pricing](https://mucolabs.com/pricing.html): how quotes are made and what changes the number
+- [Maintenance](https://mucolabs.com/maintenance.html): support plan inclusions and exclusions
+- [About](https://mucolabs.com/about.html): the studio, the founder, the operating model
+- [FAQ](https://mucolabs.com/faq.html): cost, timelines, ownership, SEO guarantees
+- [Careers](https://mucolabs.com/careers.html): contract roles and freelancer collaboration
+- [Contact](https://mucolabs.com/contact.html): project enquiry form, WhatsApp, phone, email
+
+## Legal
+
+- [Privacy policy](https://mucolabs.com/privacy.html)
+- [Terms and conditions](https://mucolabs.com/terms.html)
+- [Refund and cancellation policy](https://mucolabs.com/refund.html)
+
+Last updated: 2026-09-05
