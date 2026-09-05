@@ -260,7 +260,7 @@
    * anywhere else. Server-side validation arrives with the backend.
    */
   var WHATSAPP_NUMBER = '916381809844';
-  var CONTACT_EMAIL = 'contact@mucolabs.com';
+  var CONTACT_EMAIL = 'founder@mucolabs.com';
 
   function initEnquiryForm() {
     var form = document.getElementById('enquiry-form');

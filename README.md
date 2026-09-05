@@ -8,7 +8,7 @@ Static HTML plus one serverless function (`api/lead.js`). Deployed from `main`.
 
 - **Founder:** Srinivash Mahalingam
 - **Website:** <https://mucolabs.com>
-- **Email:** contact@mucolabs.com
+- **Email:** founder@mucolabs.com
 - **Phone:** +91 6381809844
 
 ## How this repo works

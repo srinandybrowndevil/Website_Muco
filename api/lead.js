@@ -14,7 +14,7 @@
  *   RESEND_API_KEY   send the notification email. Without it the lead is still
  *                    accepted and written to the function log, so nothing is
  *                    lost while the key is being set up.
- *   LEAD_TO_EMAIL    where notifications go (default contact@mucolabs.com)
+ *   LEAD_TO_EMAIL    where notifications go (default founder@mucolabs.com)
  *   LEAD_FROM_EMAIL  verified sender on your Resend domain
  */
 
@@ -163,7 +163,7 @@ export default async function handler(req, res) {
         headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: process.env.LEAD_FROM_EMAIL || 'MUCO LABS <onboarding@resend.dev>',
-          to: [process.env.LEAD_TO_EMAIL || 'contact@mucolabs.com'],
+          to: [process.env.LEAD_TO_EMAIL || 'founder@mucolabs.com'],
           reply_to: lead.email || undefined,
           subject: `Enquiry — ${lead.service || 'General'} — ${lead.name}`,
           html
