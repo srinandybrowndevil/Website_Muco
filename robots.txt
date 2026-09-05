@@ -1,5 +1,5 @@
-# https://mucolabs.in
+# https://mucolabs.com
 User-agent: *
 Allow: /
 
-Sitemap: https://mucolabs.in/sitemap.xml
+Sitemap: https://mucolabs.com/sitemap.xml
