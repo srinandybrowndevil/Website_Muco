@@ -1,12 +1,9 @@
-# MUCO Labs Website
+# MUCO Labs
 
-Official site for MUCO Labs — custom software, AI, web, and automation.
+Custom software, AI, web and automation — built from Erode.
 
-Live at: https://mucolabs.in
+- Website: https://mucolabs.in
+- Contact: contact@mucolabs.in | +91 6381809844
+- Founder: Srinivash
 
-## Stack
-- Static HTML/CSS (GitHub Pages)
-- No build step
-
-## Deploy
-Push to `main` → GitHub Pages serves it automatically.
+This repo powers the public site via GitHub Pages.
