@@ -948,7 +948,7 @@ def build_home():
 
     <section class="section-divider">
       <div class="container">
-        <div class="card card-lg reveal-on-scroll" style="border-color:var(--border-accent);background:linear-gradient(180deg,#0e1422 0%,#080b12 100%);">
+        <div class="card card-lg border-beam-card reveal-on-scroll">
           <div class="split" style="gap:32px;">
             <div>
               <span class="eyebrow">Free website review</span>

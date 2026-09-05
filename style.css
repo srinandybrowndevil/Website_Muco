@@ -419,20 +419,57 @@ section {
 }
 
 /* Ambient breathing aura behind the top of every page */
+/* Three glows on separate compositor layers so each can drift on its own long
+   cycle. Only transform and opacity are animated — both run on the GPU without
+   forcing layout or paint, which is what keeps this off the main thread on a
+   mid-range Android. The element itself is layer one; its two pseudo-elements
+   are layers two and three, so the markup stays a single empty div. */
 .ambient-glow {
   position: fixed;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
   width: 1100px;
   max-width: 100vw;
   height: 520px;
-  background:
-    radial-gradient(ellipse 58% 42% at 50% -2%, rgba(56, 189, 248, 0.13), transparent 72%),
-    radial-gradient(ellipse 40% 38% at 22% 8%, rgba(99, 102, 241, 0.10), transparent 70%),
-    radial-gradient(ellipse 44% 40% at 80% 4%, rgba(14, 165, 233, 0.09), transparent 72%);
   pointer-events: none;
   z-index: 0;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse 58% 42% at 50% -2%, rgba(56, 189, 248, 0.13), transparent 72%);
+  animation: aurora-a 34s ease-in-out infinite;
+}
+
+.ambient-glow::before,
+.ambient-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.ambient-glow::before {
+  background: radial-gradient(ellipse 40% 38% at 22% 8%, rgba(99, 102, 241, 0.11), transparent 70%);
+  animation: aurora-b 47s ease-in-out infinite;
+}
+
+.ambient-glow::after {
+  background: radial-gradient(ellipse 44% 40% at 80% 4%, rgba(14, 165, 233, 0.10), transparent 72%);
+  animation: aurora-c 41s ease-in-out infinite;
+}
+
+/* Deliberately mismatched durations (34s / 47s / 41s) so the three never fall
+   into step — a visible loop is what makes an effect look cheap. */
+@keyframes aurora-a {
+  0%, 100% { transform: translateX(-50%) translate3d(0, 0, 0) scale(1); opacity: 1; }
+  50%      { transform: translateX(-50%) translate3d(-2%, 1.5%, 0) scale(1.08); opacity: 0.85; }
+}
+
+@keyframes aurora-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.9; }
+  50%      { transform: translate3d(5%, -2%, 0) scale(1.14); opacity: 1; }
+}
+
+@keyframes aurora-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); opacity: 1; }
+  50%      { transform: translate3d(-4%, 2%, 0) scale(0.94); opacity: 0.8; }
 }
 
 /* --------------------------------------------------------------------------
@@ -797,6 +834,14 @@ header nav {
   background: linear-gradient(180deg, #0e1422 0%, #080b12 100%);
   border-color: var(--border-accent);
   border-radius: var(--radius-lg);
+}
+
+/* The card's own 1px solid border would paint on top of the beam, so it is made
+   transparent and the beam's ring becomes the border. background-clip keeps the
+   card's fill inside the padding box so the ring stays visible. */
+.border-beam-card {
+  background-clip: padding-box;
+  border-color: transparent;
 }
 
 .cta-box {
@@ -2572,4 +2617,105 @@ footer {
   font-size: 1.1em;
   letter-spacing: -0.005em;
   padding-right: 0.02em;
+}
+
+
+/* --------------------------------------------------------------------------
+   25. Surface texture and motion
+   -------------------------------------------------------------------------- */
+
+/* A very fine grain over the whole page. Flat dark backgrounds band visibly on
+   cheap panels, especially across a gradient; a little noise breaks the bands
+   up and gives the dark some tooth. Generated inline as SVG so it costs one
+   ~600-byte string rather than an image request. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27140%27%20height%3D%27140%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%273%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27saturate%27%20values%3D%270%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27140%27%20height%3D%27140%27%20filter%3D%27url%28%23n%29%27%20opacity%3D%270.55%27%2F%3E%3C%2Fsvg%3E");
+  background-size: 140px 140px;
+}
+
+/* A light sweep across the primary buttons on hover. The pseudo-element is
+   clipped by the button, so nothing paints outside it. */
+.btn-accent,
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn-accent::after,
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -140%;
+  width: 60%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.42),
+    transparent
+  );
+  transform: skewX(-18deg);
+  transition: left 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-accent:hover::after,
+.btn-primary:hover::after {
+  left: 160%;
+}
+
+/* A single point of light travelling the border of the featured card. The
+   conic gradient is masked to the border box only, so the card's own
+   background is untouched. */
+.border-beam-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.border-beam-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background:
+    conic-gradient(
+      from var(--beam-angle, 0deg),
+      transparent 0deg,
+      transparent 290deg,
+      rgba(56, 189, 248, 0.85) 335deg,
+      rgba(165, 180, 252, 0.95) 350deg,
+      transparent 360deg
+    ),
+    /* Base ring, so the border still reads as a border for the ~290deg the
+       travelling segment is elsewhere. */
+    linear-gradient(rgba(56, 189, 248, 0.32), rgba(56, 189, 248, 0.32));
+  /* Punch out the middle so only the 1px ring shows. */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: beam-rotate 6s linear infinite;
+}
+
+/* Animating a registered custom property keeps the rotation on the compositor.
+   Browsers without @property simply show a static ring, which still looks
+   intentional — the card does not depend on the animation to read correctly. */
+@property --beam-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes beam-rotate {
+  to { --beam-angle: 360deg; }
 }
