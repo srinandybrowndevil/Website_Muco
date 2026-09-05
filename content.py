@@ -2677,6 +2677,13 @@ Official website for {brand}. {tagline}
 
 Static HTML served by GitHub Pages at <https://mucolabs.com>.
 
+## Contact
+
+- **Founder:** {founder}
+- **Website:** <{domain}>
+- **Email:** {email}
+- **Phone:** {phone}
+
 ## How this repo works
 
 The `.html` files in the root are **generated**. Do not hand-edit them — the next
@@ -2723,7 +2730,8 @@ The enquiry form is client-side only: it opens WhatsApp or the visitor's email
 app with the message pre-filled. Nothing is stored or transmitted by the page.
 Server-side validation, spam protection, lead storage and transactional email
 need a backend, which this repository does not have yet.
-""".format(brand=BRAND, tagline=TAGLINE)
+""".format(brand=BRAND, tagline=TAGLINE, founder=FOUNDER,
+           domain=DOMAIN, email=EMAIL, phone=PHONE)
     with open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8") as f:
         f.write(txt)
     return len(txt)

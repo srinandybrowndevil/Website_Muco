@@ -4,6 +4,13 @@ Official website for MUCO LABS. Your Vision, Our Technology.
 
 Static HTML served by GitHub Pages at <https://mucolabs.com>.
 
+## Contact
+
+- **Founder:** Srinivash Mahalingam
+- **Website:** <https://mucolabs.com>
+- **Email:** mucolabs2026@gmail.com
+- **Phone:** +91 6381809844
+
 ## How this repo works
 
 The `.html` files in the root are **generated**. Do not hand-edit them — the next
