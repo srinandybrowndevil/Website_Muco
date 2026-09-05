@@ -445,7 +445,10 @@ header.is-scrolled {
   box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.9);
 }
 
-nav {
+/* Scoped to the header. As a bare `nav` this also hit the two footer column
+   navs and the breadcrumb nav, laying their label out beside their list and
+   forcing all of them to the header's 70px height. */
+header nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1353,9 +1356,9 @@ textarea.form-control {
 }
 
 .form-consent input[type='checkbox'] {
-  width: 17px;
-  height: 17px;
-  margin-top: 2px;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
   accent-color: var(--accent);
   flex-shrink: 0;
   cursor: pointer;
@@ -2016,7 +2019,7 @@ footer {
 }
 
 @media (max-width: 768px) {
-  nav .nav-links {
+  header nav .nav-links {
     display: none;
   }
 
@@ -2164,7 +2167,7 @@ footer {
     display: inline;
   }
 
-  nav {
+  header nav {
     gap: 8px;
   }
 
