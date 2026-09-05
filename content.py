@@ -2193,7 +2193,7 @@ def legal_page(slug, nav_title, h1, eyebrow, description, sections):
       </div>
       </div>
     </section>
-""".format(eyebrow=eyebrow, h1=h1, updated=BUILD_DATE, notice=LEGAL_NOTICE, blocks=blocks,
+""".format(eyebrow=eyebrow, h1=h1, updated=LEGAL_REVISED, notice=LEGAL_NOTICE, blocks=blocks,
            email=EMAIL, tel=PHONE_TEL, phone=PHONE, wa=wa("Hi MUCO LABS, a question about your %s." % nav_title.lower()))
 
     return render(
@@ -2546,7 +2546,7 @@ presented as available products.
 Last updated: {updated}
 """.format(brand=BRAND, description=DESCRIPTION, founder=FOUNDER, city=CITY, region=REGION,
            phone=PHONE, email=EMAIL, hours=HOURS, markets=", ".join(MARKETS),
-           services=services, projects=projects, faqs=faqs, domain=DOMAIN, updated=BUILD_DATE,
+           services=services, projects=projects, faqs=faqs, domain=DOMAIN, updated=SITE_REVISED,
            service_pages="\n".join(
                "  - [%s](%s/services-%s.html)" % (sv["title"], DOMAIN, sv["slug"])
                for sv in SERVICES))
@@ -2618,7 +2618,7 @@ def build_sitemap():
         urls += (
             "  <url>\n    <loc>%s/%s</loc>\n    <lastmod>%s</lastmod>\n"
             "    <changefreq>%s</changefreq>\n    <priority>%s</priority>\n  </url>\n"
-            % (DOMAIN, path, BUILD_DATE, freq, prio)
+            % (DOMAIN, path, PAGE_REVISED.get(path, SITE_REVISED), freq, prio)
         )
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s</urlset>\n' % urls)

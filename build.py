@@ -53,7 +53,14 @@ SERVICE_CATALOG = [
     ("AI and business automation", "Lead routing, internal assistants, data operations and process automation."),
     ("Branding, IT and cloud support", "Identity design, uptime monitoring, backups, security updates and hosting."),
 ]
-BUILD_DATE = date.today().isoformat()
+# Real revision dates, not build timestamps. A sitemap <lastmod> and a legal
+# "last updated" both claim the content changed on that day, so stamping
+# date.today() on every build told crawlers every page changed today and put a
+# false revision date on the legal pages. Bump these by hand when the content
+# actually changes; PAGE_REVISED overrides SITE_REVISED for a single page.
+SITE_REVISED = "2026-09-05"   # last substantive content change anywhere on the site
+LEGAL_REVISED = "2026-09-05"  # privacy, terms and refund wording
+PAGE_REVISED = {}             # e.g. {"work.html": "2026-10-02"} — key "" is the home page
 
 
 def wa(text):
