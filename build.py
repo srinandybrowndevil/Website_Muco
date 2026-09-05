@@ -63,6 +63,35 @@ LEGAL_REVISED = "2026-09-05"  # privacy, terms and refund wording
 PAGE_REVISED = {}             # e.g. {"work.html": "2026-10-02"} — key "" is the home page
 
 
+# ---------------------------------------------------------------------------
+# Clean URLs
+# ---------------------------------------------------------------------------
+# The site is hosted on Vercel with "cleanUrls": true (see vercel.json), which
+# serves about.html at /about and 308-redirects /about.html to /about. The files
+# on disk keep their .html names; only the URLs we publish change. Emitting
+# .html links under that setting would put a redirect hop in front of every
+# internal link, canonical tag and sitemap entry, so every URL is rewritten
+# once here, at the point each file is written.
+_REL_HTML = re.compile(
+    r'href="(?!https?:|//|mailto:|tel:|#)([^"#?]+)\.html([?#][^"]*)?"')
+_ABS_HTML = re.compile(re.escape(DOMAIN) + r'/([A-Za-z0-9_-]+)\.html(?![A-Za-z0-9._-])')
+
+
+def _rel(m):
+    """m: (path without .html, optional ?query or #fragment)."""
+    path, tail = m.group(1), m.group(2) or ""
+    root = "/" if path == "index" else "/" + path
+    return 'href="%s%s"' % (root, tail)
+
+
+def clean_urls(text):
+    """Rewrite internal .html URLs to their extensionless form."""
+    text = _REL_HTML.sub(_rel, text)
+    text = _ABS_HTML.sub(
+        lambda m: DOMAIN + ("/" if m.group(1) == "index" else "/" + m.group(1)), text)
+    return text
+
+
 def wa(text):
     """WhatsApp deep link with a prefilled, context-carrying message."""
     from urllib.parse import quote
@@ -483,7 +512,7 @@ SHELL = """<!DOCTYPE html>
 def render(slug, title, description, body, current=None, og_type="website",
            schema_blocks=None, noindex=False):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
-    canonical = "" if slug == "index.html" else slug
+    canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
     schema = ""
     for block in schema_blocks or []:
         schema += '<script type="application/ld+json">\n%s\n</script>\n' % block
@@ -503,6 +532,8 @@ def render(slug, title, description, body, current=None, og_type="website",
         body=body,
         footer=footer_html(),
     )
+
+    html = clean_urls(html)
 
     with open(os.path.join(ROOT, slug), "w", encoding="utf-8") as f:
         f.write(html)

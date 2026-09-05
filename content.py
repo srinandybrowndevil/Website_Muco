@@ -2551,6 +2551,8 @@ Last updated: {updated}
                "  - [%s](%s/services-%s.html)" % (sv["title"], DOMAIN, sv["slug"])
                for sv in SERVICES))
 
+    txt = clean_urls(txt)
+
     with open(os.path.join(ROOT, "llms.txt"), "w", encoding="utf-8") as f:
         f.write(txt)
     return len(txt)
@@ -2582,15 +2584,6 @@ def build_manifest():
     return len(txt)
 
 
-def build_nojekyll():
-    """GitHub Pages runs Jekyll by default, which skips files starting with an
-    underscore and adds build time for nothing. This turns it off."""
-    path = os.path.join(ROOT, ".nojekyll")
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("")
-    return 0
-
-
 SITEMAP_PAGES = [
     ("", "1.0", "monthly"),
     ("services.html", "0.9", "monthly"),
@@ -2620,8 +2613,9 @@ def build_sitemap():
             "    <changefreq>%s</changefreq>\n    <priority>%s</priority>\n  </url>\n"
             % (DOMAIN, path, PAGE_REVISED.get(path, SITE_REVISED), freq, prio)
         )
-    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
-           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s</urlset>\n' % urls)
+    xml = clean_urls(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s</urlset>\n' % urls)
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(xml)
     return len(xml)
@@ -2764,7 +2758,6 @@ def build_all():
         ("robots.txt", build_robots),
         ("llms.txt", build_llms_txt),
         ("site.webmanifest", build_manifest),
-        (".nojekyll", build_nojekyll),
         ("README.md", build_readme),
     ]
     jobs += [("services-%s.html" % sv["slug"], (lambda v: lambda: build_service_page(v))(sv))

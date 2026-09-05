@@ -269,7 +269,7 @@
     var status = document.getElementById('form-status');
 
     // Links elsewhere on the site carry the service they came from
-    // (e.g. contact.html?service=Digital+marketing+%26+SEO) so the visitor
+    // (e.g. /contact?service=Digital+marketing+%26+SEO) so the visitor
     // doesn't have to re-state what they already clicked.
     (function prefillService() {
       var select = form.elements.service;

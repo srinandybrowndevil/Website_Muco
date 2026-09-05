@@ -57,28 +57,28 @@ presented as available products.
 ## Pages
 
 - [Home](https://mucolabs.com/): positioning, services, selected work
-- [Services](https://mucolabs.com/services.html): all eight service lines and what each includes
-  - [Website design & development](https://mucolabs.com/services-websites.html)
-  - [Mobile app development](https://mucolabs.com/services-mobile.html)
-  - [UI/UX and product design](https://mucolabs.com/services-product-design.html)
-  - [Custom software & SaaS](https://mucolabs.com/services-software.html)
-  - [CRM, ERP, HRMS, LMS & billing](https://mucolabs.com/services-business-systems.html)
-  - [Digital marketing & SEO](https://mucolabs.com/services-marketing.html)
-  - [AI & business automation](https://mucolabs.com/services-ai-automation.html)
-  - [Branding, IT & cloud support](https://mucolabs.com/services-support.html)
-- [Website development in Erode](https://mucolabs.com/website-development-erode.html): local page for Erode businesses
-- [Work](https://mucolabs.com/work.html): projects with problem, scope and current status
-- [Pricing](https://mucolabs.com/pricing.html): how quotes are made and what changes the number
-- [Maintenance](https://mucolabs.com/maintenance.html): support plan inclusions and exclusions
-- [About](https://mucolabs.com/about.html): the studio, the founder, the operating model
-- [FAQ](https://mucolabs.com/faq.html): cost, timelines, ownership, SEO guarantees
-- [Careers](https://mucolabs.com/careers.html): contract roles and freelancer collaboration
-- [Contact](https://mucolabs.com/contact.html): project enquiry form, WhatsApp, phone, email
+- [Services](https://mucolabs.com/services): all eight service lines and what each includes
+  - [Website design & development](https://mucolabs.com/services-websites)
+  - [Mobile app development](https://mucolabs.com/services-mobile)
+  - [UI/UX and product design](https://mucolabs.com/services-product-design)
+  - [Custom software & SaaS](https://mucolabs.com/services-software)
+  - [CRM, ERP, HRMS, LMS & billing](https://mucolabs.com/services-business-systems)
+  - [Digital marketing & SEO](https://mucolabs.com/services-marketing)
+  - [AI & business automation](https://mucolabs.com/services-ai-automation)
+  - [Branding, IT & cloud support](https://mucolabs.com/services-support)
+- [Website development in Erode](https://mucolabs.com/website-development-erode): local page for Erode businesses
+- [Work](https://mucolabs.com/work): projects with problem, scope and current status
+- [Pricing](https://mucolabs.com/pricing): how quotes are made and what changes the number
+- [Maintenance](https://mucolabs.com/maintenance): support plan inclusions and exclusions
+- [About](https://mucolabs.com/about): the studio, the founder, the operating model
+- [FAQ](https://mucolabs.com/faq): cost, timelines, ownership, SEO guarantees
+- [Careers](https://mucolabs.com/careers): contract roles and freelancer collaboration
+- [Contact](https://mucolabs.com/contact): project enquiry form, WhatsApp, phone, email
 
 ## Legal
 
-- [Privacy policy](https://mucolabs.com/privacy.html)
-- [Terms and conditions](https://mucolabs.com/terms.html)
-- [Refund and cancellation policy](https://mucolabs.com/refund.html)
+- [Privacy policy](https://mucolabs.com/privacy)
+- [Terms and conditions](https://mucolabs.com/terms)
+- [Refund and cancellation policy](https://mucolabs.com/refund)
 
 Last updated: 2026-09-05
