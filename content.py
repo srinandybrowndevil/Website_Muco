@@ -2675,7 +2675,7 @@ def build_readme():
 
 Official website for {brand}. {tagline}
 
-Static HTML served by GitHub Pages at <https://mucolabs.com>.
+Static HTML with no server-side build. Deployed from `main`.
 
 ## Contact
 
@@ -2722,7 +2722,14 @@ These are enforced by convention, not by code, so please keep to them:
 
 ## Deploy
 
-Push to `main`. GitHub Pages serves it. `CNAME` points the custom domain.
+Push to `main`; Vercel builds from it and serves the result at
+<https://mucolabs-in.vercel.app>.
+
+No custom domain is attached yet: `mucolabs.com` and `mucolabs.in` have no DNS
+records pointing anywhere, so neither resolves. There is no `CNAME` file — that
+is a GitHub Pages mechanism and GitHub Pages is not serving this repository.
+To go live on the real domain, add it in the Vercel project settings and point
+DNS at the records Vercel gives you.
 
 ## Known limitations
 
