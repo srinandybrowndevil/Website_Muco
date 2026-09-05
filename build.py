@@ -62,6 +62,17 @@ SITE_REVISED = "2026-09-05"   # last substantive content change anywhere on the 
 LEGAL_REVISED = "2026-09-05"  # privacy, terms and refund wording
 PAGE_REVISED = {}             # e.g. {"work.html": "2026-10-02"} — key "" is the home page
 
+# ---------------------------------------------------------------------------
+# Analytics
+# ---------------------------------------------------------------------------
+# Paste the GA4 Measurement ID here (it looks like "G-XXXXXXXXXX") and run
+# `python3 build.py`. While this is empty, no analytics tag is emitted, the
+# page makes no third-party request, and the privacy policy says so — all of
+# that flips automatically when you fill it in. The event map lives in
+# analytics.js, which is a separate file because our own CSP blocks the inline
+# gtag snippet.
+GA_MEASUREMENT_ID = ""
+
 
 # ---------------------------------------------------------------------------
 # Clean URLs
@@ -499,7 +510,7 @@ SHELL = """<!DOCTYPE html>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
 <link rel="stylesheet" href="style.css" />
-{schema}</head>
+{schema}{analytics}</head>
 <body>
 {header}
   <main id="main">
@@ -513,6 +524,14 @@ def render(slug, title, description, body, current=None, og_type="website",
            schema_blocks=None, noindex=False):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
     canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
+    analytics = ""
+    if GA_MEASUREMENT_ID:
+        analytics = (
+            '<script async src="https://www.googletagmanager.com/gtag/js?id=%s"></script>\n'
+            '<script src="analytics.js" data-ga-id="%s" defer></script>\n'
+            % (GA_MEASUREMENT_ID, GA_MEASUREMENT_ID)
+        )
+
     schema = ""
     for block in schema_blocks or []:
         schema += '<script type="application/ld+json">\n%s\n</script>\n' % block
@@ -528,6 +547,7 @@ def render(slug, title, description, body, current=None, og_type="website",
         brand=BRAND,
         tagline=TAGLINE,
         schema=schema,
+        analytics=analytics,
         header=header_html(current or slug, key),
         body=body,
         footer=footer_html(),

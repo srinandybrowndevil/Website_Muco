@@ -1,14 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    {
-      "name": "mucolabs",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "serve.py",
-        "8123"
-      ],
-      "port": 8123
-    }
+    { "name": "muco-ga", "runtimeExecutable": "python3", "runtimeArgs": ["serve.py", "8141"], "port": 8141 }
   ]
 }

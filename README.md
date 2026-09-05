@@ -35,6 +35,25 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
 Careers · Privacy · Terms · Refund · 404
 
+## Turning on analytics
+
+Open `build.py`, put the GA4 Measurement ID in `GA_MEASUREMENT_ID`, and run
+`python3 build.py`.
+
+That one line switches on three things at once: the gtag tag on every page,
+the event map in `analytics.js`, and the paragraph in the privacy policy that
+describes what is being collected. While the value is empty the site loads no
+analytics, makes no third-party request, and the privacy policy says exactly
+that — so the page can never claim something untrue about itself.
+
+The Content-Security-Policy in `vercel.json` already allows
+`www.googletagmanager.com` and `*.google-analytics.com`. Any other third-party
+script needs its host adding there too, or the browser will block it.
+
+Events sent: `whatsapp_click`, `phone_click`, `email_click`,
+`instagram_click`, `cta_click`, `form_start`, `form_error`, `generate_lead`,
+`faq_open`, `project_detail_open` — see the header of `analytics.js`.
+
 ## Content rules
 
 These are enforced by convention, not by code, so please keep to them:

@@ -2163,6 +2163,25 @@ def build_careers():
     )
 
 
+# The privacy page has to describe what the site actually does, so this text
+# follows GA_MEASUREMENT_ID rather than being written by hand and going stale.
+if GA_MEASUREMENT_ID:
+    ANALYTICS_PRIVACY_TEXT = (
+        "This site uses Google Analytics to count visits and see which pages are useful. It "
+        "records the pages you view, roughly where you are (country or region level, not your "
+        "address), your device and browser type, and how you arrived here. Advertising features "
+        "and ad personalisation are switched off, so this data is not used to target you with "
+        "advertising. We use it to decide what to write and fix, nothing else. You can block it "
+        "with any ad blocker or your browser's Do Not Track setting, and the site works exactly "
+        "the same either way."
+    )
+else:
+    ANALYTICS_PRIVACY_TEXT = (
+        "We do not currently run analytics, advertising trackers or third-party cookies on this "
+        "website. If that changes, this page will be updated first and consent will be requested "
+        "where the law requires it."
+    )
+
 LEGAL_NOTICE = """      <div class="callout callout-warn" style="margin-bottom:32px;">
         <p><strong>Please read.</strong> This page describes how {brand} actually operates today and
         is written in plain language. It has not been reviewed by a lawyer and is not a substitute
@@ -2225,9 +2244,7 @@ def build_privacy():
                 "access to those logs. Everything else this site loads \u2014 stylesheets, scripts, "
                 "typefaces and images \u2014 is served from this domain, so loading a page makes no "
                 "request to any third party.",
-                "We do not currently run analytics, advertising trackers or third-party cookies on "
-                "this website. If that changes, this page will be updated first and consent will "
-                "be requested where the law requires it.",
+                ANALYTICS_PRIVACY_TEXT,
             ]),
             ("What we collect when you contact us", [
                 "When you message us on WhatsApp, email us, call us or send an enquiry, we receive "
@@ -2701,6 +2718,25 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 
 Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
 Careers · Privacy · Terms · Refund · 404
+
+## Turning on analytics
+
+Open `build.py`, put the GA4 Measurement ID in `GA_MEASUREMENT_ID`, and run
+`python3 build.py`.
+
+That one line switches on three things at once: the gtag tag on every page,
+the event map in `analytics.js`, and the paragraph in the privacy policy that
+describes what is being collected. While the value is empty the site loads no
+analytics, makes no third-party request, and the privacy policy says exactly
+that — so the page can never claim something untrue about itself.
+
+The Content-Security-Policy in `vercel.json` already allows
+`www.googletagmanager.com` and `*.google-analytics.com`. Any other third-party
+script needs its host adding there too, or the browser will block it.
+
+Events sent: `whatsapp_click`, `phone_click`, `email_click`,
+`instagram_click`, `cta_click`, `form_start`, `form_error`, `generate_lead`,
+`faq_open`, `project_detail_open` — see the header of `analytics.js`.
 
 ## Content rules
 
