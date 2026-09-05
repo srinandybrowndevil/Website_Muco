@@ -3,7 +3,7 @@
 > Custom software, AI chatbots, web apps and automation built from Erode, Tamil Nadu, India.
 
 ## About
-MUCO Labs is a founder-built, AI-assisted software agency based in Erode. Founder: Srinivash.
+MUCO Labs is a founder-built software agency based in Erode. Founder: Srinivash Mahalingam. Builds with AI-assisted tooling plus hands-on code.
 
 ## Services
 - AI Chatbots & Assistants: 24/7 support bots, RAG, lead qualification.
@@ -17,4 +17,4 @@ MUCO Labs is a founder-built, AI-assisted software agency based in Erode. Founde
 - Email: contact@mucolabs.in
 - Phone: +91 6381809844
 - Location: Erode, Tamil Nadu, India
-- Website: https://mucolabs.in
+- Website: https://mucolabs.com
