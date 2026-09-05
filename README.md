@@ -2,8 +2,8 @@
 
 Custom software, AI chatbots, web apps and automation built from Erode, Tamil Nadu, India.
 
-Founder: Srinivash
-Website: https://mucolabs.in
+Founder: Srinivash Mahalingam
+Website: https://mucolabs.com
 Email: contact@mucolabs.in
 Phone: +91 6381809844
 
