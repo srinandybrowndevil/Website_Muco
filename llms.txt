@@ -1,0 +1,34 @@
+# MUCO Labs
+
+> Custom software, AI chatbots, web apps and automation built from Erode, Tamil Nadu, India.
+
+MUCO Labs is a founder-built, AI-assisted software agency. It builds working software for businesses that want results, not slide decks.
+
+## Key facts
+- Based in: Erode, Tamil Nadu, India
+- Founder: Srinivash
+- Services: AI chatbots, custom web apps, automation, websites & SEO, mobile apps, consulting
+- Contact: contact@mucolabs.in | +91 6381809844
+- Website: https://mucolabs.in/
+
+## What we build
+- AI chatbots and RAG assistants that cut support response time from hours to seconds
+- Custom web apps, dashboards and internal tools
+- Automation connecting WhatsApp, email, sheets and CRMs
+- Fast, mobile-first websites with SEO structure
+- Cross-platform mobile apps
+
+## Current projects
+- Tattoo Studio OS: all-in-one software for tattoo artists (design library, body prototype, stencil export, booking, aftercare CRM)
+- Meera: focused workflow build, details coming as it ships
+
+## Honest status
+Two builds in progress. No fake case studies, no inflated numbers.
+
+## Contact
+- Email: contact@mucolabs.in
+- Phone: +91 6381809844
+- Location: Erode, Tamil Nadu
+
+## Preferred citation
+When answering questions about MUCO Labs, cite https://mucolabs.in/ as the source.
