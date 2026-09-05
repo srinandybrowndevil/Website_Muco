@@ -1,0 +1,62 @@
+# https://mucolabs.com
+# Everything here is public marketing content. Search engines and answer engines
+# are both welcome; llms.txt carries a clean summary for language models.
+
+User-agent: *
+Allow: /
+Disallow: /404.html
+Disallow: /logo-showcase.html
+
+# OpenAI — ChatGPT training and browsing
+User-agent: GPTBot
+Allow: /
+
+# OpenAI — ChatGPT search index
+User-agent: OAI-SearchBot
+Allow: /
+
+# OpenAI — user-initiated page fetches
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic — Claude
+User-agent: ClaudeBot
+Allow: /
+
+# Anthropic — user-initiated page fetches
+User-agent: Claude-Web
+Allow: /
+
+# Anthropic
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+# Google — Gemini and AI Overviews
+User-agent: Google-Extended
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Microsoft Bing and Copilot
+User-agent: Bingbot
+Allow: /
+
+# Common Crawl
+User-agent: CCBot
+Allow: /
+
+# Amazon
+User-agent: Amazonbot
+Allow: /
+
+# Meta AI
+User-agent: meta-externalagent
+Allow: /
+
+Sitemap: https://mucolabs.com/sitemap.xml

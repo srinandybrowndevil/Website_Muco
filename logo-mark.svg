@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <linearGradient id="muco_primary" x1="20" y1="140" x2="140" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+    <linearGradient id="muco_arrow" x1="60" y1="120" x2="140" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <filter id="subtle_glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Left Foundation Pillar (Software Creation & IT Services) -->
+  <path d="M36 126V46C36 41.58 39.58 38 44 38H54C58.42 38 62 41.58 62 46V126C62 130.42 58.42 134 54 134H44C39.58 134 36 130.42 36 126Z" fill="url(#muco_primary)" />
+
+  <!-- Code Chevron / Bridge -->
+  <path d="M54 48L80 84L106 48" stroke="url(#muco_primary)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Ascending Growth Vector (SaaS & Digital Marketing Scalability) -->
+  <path d="M98 126V58C98 54 100 50 104 46L130 20C132.5 17.5 137 19 137 23V126C137 130.42 133.42 134 129 134H119C114.58 134 111 130.42 111 126V72L101 82C99 84 98 88 98 92V126Z" fill="url(#muco_arrow)" />
+
+  <!-- The Rocket Arrowhead Apex -->
+  <path d="M116 20H140V44" stroke="#c084fc" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- The Core Spark (Labs Innovation Hook) -->
+  <circle cx="80" cy="84" r="6.5" fill="#ffffff" />
+</svg>

@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""
+Re-download the self-hosted webfonts.
+
+The site serves its typefaces from assets/fonts/ rather than Google Fonts, so a
+page load makes no third-party request and the files cache with the rest of the
+site. Run this only when you want to change or update the typefaces:
+
+    python3 build_fonts.py
+
+It downloads the latin and latin-ext subsets as woff2 and prints the @font-face
+rules to paste at the top of style.css. It does NOT edit style.css for you —
+the weight ranges there are hand-corrected (see the note below) and should not
+be clobbered by a regeneration.
+
+Note on weight ranges: Google's CSS emits one @font-face per requested weight,
+all pointing at the same variable font file. Collapsing those into a single rule
+means declaring the real variable axis range ('font-weight: 200 800'), otherwise
+the browser synthesises the heavier weights instead of using the actual axis.
+"""
+
+import os
+import re
+import urllib.request
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(ROOT, "assets", "fonts")
+
+# Requesting the weights we use; both families are variable, so each subset
+# resolves to one file regardless of how many weights are listed.
+CSS_URL = (
+    "https://fonts.googleapis.com/css2"
+    "?family=Plus+Jakarta+Sans:wght@400;500;600;700;800"
+    "&family=JetBrains+Mono:wght@400;500;600"
+    "&display=swap"
+)
+
+# A modern browser UA is required, or Google serves legacy ttf instead of woff2.
+UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+KEEP_SUBSETS = {"latin", "latin-ext"}
+
+# The variable weight axis each family actually supports.
+AXIS = {
+    "Plus Jakarta Sans": "200 800",
+    "JetBrains Mono": "100 800",
+}
+
+
+def fetch(url):
+    return urllib.request.urlopen(
+        urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30
+    ).read()
+
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    css = fetch(CSS_URL).decode("utf-8")
+
+    blocks = re.findall(r"/\*\s*([a-z-]+)\s*\*/\s*(@font-face\s*\{.*?\})", css, re.S)
+    print("Found %d @font-face blocks across %d subsets."
+          % (len(blocks), len({n for n, _ in blocks})))
+
+    seen, faces, total = set(), [], 0
+    for subset, block in blocks:
+        if subset not in KEEP_SUBSETS:
+            continue
+        family = re.search(r"font-family:\s*'([^']+)'", block).group(1)
+        url = re.search(r"url\((https://[^)]+)\)", block).group(1)
+        urange = re.search(r"unicode-range:\s*([^;]+);", block).group(1).strip()
+
+        slug = "%s-%s.woff2" % (family.lower().replace(" ", "-"), subset)
+        path = os.path.join(OUT, slug)
+        if slug not in seen:
+            open(path, "wb").write(fetch(url))
+            size = os.path.getsize(path)
+            total += size
+            print("  %-40s %6.1f KB" % (slug, size / 1024.0))
+            seen.add(slug)
+            faces.append(
+                "@font-face {\n"
+                "  font-family: '%s';\n"
+                "  font-style: normal;\n"
+                "  font-weight: %s;\n"
+                "  font-display: swap;\n"
+                "  src: url('assets/fonts/%s') format('woff2');\n"
+                "  unicode-range: %s;\n"
+                "}" % (family, AXIS.get(family, "400"), slug, urange)
+            )
+
+    print("\nTotal: %.1f KB across %d files.\n" % (total / 1024.0, len(seen)))
+    print("Paste these at the top of style.css, replacing the existing block:\n")
+    print("\n\n".join(faces))
+    print("\nAlso check the preload tags in build.py point at the latin files.")
+
+
+if __name__ == "__main__":
+    main()
