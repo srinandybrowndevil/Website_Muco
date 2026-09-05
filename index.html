@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUCO Labs | Custom Software, AI & Web Engineering</title>
+  <meta name="description" content="MUCO Labs builds custom software, AI solutions, web apps, mobile apps, and automation for businesses in Erode and beyond." />
+  <meta name="keywords" content="MUCO Labs, custom software, AI engineering, web development, mobile apps, automation, SEO, Erode" />
+  <meta property="og:title" content="MUCO Labs | Custom Software, AI & Web Engineering" />
+  <meta property="og:description" content="We build technology that ships. AI, software, web, and automation for growing businesses." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mucolabs.in" />
+  <link rel="canonical" href="https://mucolabs.in" />
+  <style>
+    :root {
+      --bg: #030712;
+      --bg-soft: #0a0f1a;
+      --card: #0f172a;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #818cf8;
+      --border: #1e293b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(3,7,18,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+    .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+    .logo span { color: var(--accent); }
+    nav ul { display: flex; gap: 28px; list-style: none; }
+    nav a { color: var(--muted); font-size: 15px; transition: color .2s; }
+    nav a:hover { color: var(--text); }
+    .btn {
+      display: inline-block; padding: 12px 24px; border-radius: 8px;
+      background: var(--accent); color: #030712; font-weight: 600; font-size: 15px;
+      transition: transform .15s, box-shadow .2s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(56,189,248,0.3); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--accent); }
+    section { padding: 80px 0; }
+    .hero { padding: 100px 0 80px; text-align: center; }
+    .hero h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 20px; }
+    .hero h1 .grad { background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0 auto 32px; }
+    .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .eyebrow { color: var(--accent); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+    h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; }
+    .section-sub { color: var(--muted); font-size: 17px; max-width: 600px; margin-bottom: 48px; }
+    .grid { display: grid; gap: 24px; }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 32px; transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .card h3 { font-size: 20px; margin-bottom: 12px; }
+    .card p { color: var(--muted); font-size: 15px; }
+    .card .icon { font-size: 28px; margin-bottom: 16px; }
+    .portfolio-item { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .portfolio-item .thumb { height: 180px; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .portfolio-item .body { padding: 24px; }
+    .portfolio-item h3 { font-size: 18px; margin-bottom: 8px; }
+    .portfolio-item p { color: var(--muted); font-size: 14px; }
+    .tag { display: inline-block; font-size: 12px; padding: 4px 10px; border-radius: 20px; background: rgba(56,189,248,0.1); color: var(--accent); margin-right: 6px; }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .about-grid ul { list-style: none; margin-top: 24px; }
+    .about-grid li { padding: 8px 0; color: var(--muted); }
+    .about-grid li::before { content: "✓ "; color: var(--accent); }
+    .stats { display: flex; gap: 48px; flex-wrap: wrap; margin-top: 32px; }
+    .stat .num { font-size: 32px; font-weight: 800; color: var(--accent); }
+    .stat .lbl { font-size: 14px; color: var(--muted); }
+    .cta-band { text-align: center; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 24px; padding: 64px 32px; }
+    .cta-band h2 { margin-bottom: 16px; }
+    .cta-band p { color: var(--muted); margin-bottom: 32px; }
+    footer { border-top: 1px solid var(--border); padding: 48px 0 32px; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; }
+    .footer-grid h4 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 16px; }
+    .footer-grid ul { list-style: none; }
+    .footer-grid li { padding: 6px 0; }
+    .footer-grid a { color: var(--text); font-size: 15px; }
+    .footer-grid a:hover { color: var(--accent); }
+    .footer-bottom { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    @media (max-width: 768px) {
+      nav ul { display: none; }
+      .about-grid, .footer-grid { grid-template-columns: 1fr; }
+      section { padding: 56px 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="logo">MUCO<span>Labs</span></div>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#portfolio">Work</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#contact" class="btn">Start a project</a>
+      </nav>
+    </div>
+  </header>
+
+  <section id="home" class="hero">
+    <div class="container">
+      <div class="eyebrow">Erode, India · Remote-first</div>
+      <h1>Software &amp; AI that <span class="grad">actually ships</span></h1>
+      <p>We build custom software, AI solutions, web apps, and automation for businesses ready to grow. From idea to production — fast, clean, and built to last.</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn">Start a project</a>
+        <a href="#services" class="btn btn-ghost">See what we build</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="services">
+    <div class="container">
+      <div class="eyebrow">What we do</div>
+      <h2>Services built around your goals</h2>
+      <p class="section-sub">No bloated retainers. No jargon. Just the right tech, delivered on time.</p>
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="icon">🧠</div>
+          <h3>AI Solutions</h3>
+          <p>Chatbots, RAG systems, automation workflows, and AI integrations that cut support time and unlock new revenue.</p>
+        </div>
+        <div class="card">
+          <div class="icon">💻</div>
+          <h3>Custom Software</h3>
+          <p>Web apps, dashboards, and internal tools tailored to your process — not a template you have to fight.</p>
+        </div>
+        <div class="card">
+          <div class="icon">📱</div>
+          <h3>Web &amp; Mobile</h3>
+          <p>Fast, responsive websites and mobile apps that convert visitors into customers.</p>
+        </div>
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3>Automation</h3>
+          <p>Connect your tools, kill repetitive work, and let your team focus on what matters.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🚀</div>
+          <h3>SEO &amp; Growth</h3>
+          <p>Technical SEO, content strategy, and performance tuning so the right people find you.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🛡️</div>
+          <h3>Maintenance &amp; Support</h3>
+          <p>Monthly retainers for updates, monitoring, and small improvements — so nothing breaks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio" style="background: var(--bg-soft);">
+    <div class="container">
+      <div class="eyebrow">Selected work</div>
+      <h2>Projects we've shipped</h2>
+      <p class="section-sub">Real builds, real problems solved. More coming as we grow.</p>
+      <div class="grid grid-3">
+        <div class="portfolio-item">
+          <div class="thumb">💈</div>
+          <div class="body">
+            <span class="tag">SaaS</span><span class="tag">AI</span>
+            <h3>Tattoo Studio Platform</h3>
+            <p>All-in-one design library, font browser, body prototype, and print-ready stencil export for tattoo artists.</p>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <div class="thumb">🎯</div>
+          <div class="body">
+            <span class="tag">Web App</span>
+            <h3>Meera</h3>
+            <p>A focused web application built to streamline a specific business workflow end to end.</p>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <div class="thumb">💡</div>
+          <div class="body">
+            <span class="tag">AI</span><span class="tag">Automation</span>
+            <h3>Coming soon</h3>
+            <p>We're actively building the next case study. Want to be featured? Let's talk.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div>
+          <div class="eyebrow">Who we are</div>
+          <h2>A small team, serious about shipping</h2>
+          <p class="section-sub" style="margin-bottom:0">MUCO Labs is based in Erode, Tamil Nadu. We work with startups and local businesses to turn ideas into production software — without the enterprise price tag or the agency runaround.</p>
+          <ul>
+            <li>Founder-led, hands-on delivery</li>
+            <li>AI-first approach to every build</li>
+            <li>Transparent pricing, no surprises</li>
+            <li>Remote-friendly, fast turnaround</li>
+          </ul>
+        </div>
+        <div>
+          <div class="stats">
+            <div class="stat"><div class="num">2+</div><div class="lbl">Projects shipped</div></div>
+            <div class="stat"><div class="num">5+</div><div class="lbl">Services offered</div></div>
+            <div class="stat"><div class="num">100%</div><div class="lbl">Remote-ready</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <div class="cta-band">
+        <div class="eyebrow">Let's build</div>
+        <h2>Have a project in mind?</h2>
+        <p>Tell us what you're building. We'll reply within 24 hours with a clear next step.</p>
+        <div class="hero-cta">
+          <a href="mailto:contact@mucolabs.in" class="btn">Email us</a>
+          <a href="tel:+916381809844" class="btn btn-ghost">Call +91 6381809844</a>
+        </div>
+        <p style="margin-top:24px;font-size:14px;color:var(--muted)">contact@mucolabs.in · Erode, Tamil Nadu</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="logo" style="margin-bottom:12px">MUCO<span>Labs</span></div>
+          <p style="color:var(--muted);font-size:15px;max-width:320px">Custom software, AI, and web engineering for businesses that want to move fast.</p>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#portfolio">Work</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:contact@mucolabs.in">contact@mucolabs.in</a></li>
+            <li><a href="tel:+916381809844">+91 6381809844</a></li>
+            <li><a href="https://www.instagram.com/muco_labs" target="_blank" rel="noopener">Instagram</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 MUCO Labs. All rights reserved.</span>
+        <span>Built in Erode · Powered by AI</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
