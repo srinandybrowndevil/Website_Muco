@@ -499,7 +499,11 @@ SHELL = """<!DOCTYPE html>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/plus-jakarta-sans-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
 <link rel="stylesheet" href="style.css" />
-{schema}</head>
+{schema}<script>
+  window.va = window.va || function () {{ (window.vaq = window.vaq || []).push(arguments); }};
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
 <body>
 {header}
   <main id="main">
