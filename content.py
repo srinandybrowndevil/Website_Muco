@@ -522,54 +522,65 @@ INDUSTRY_DETAIL = [
     ("Retail & e-commerce",
      "Stock lives in one place, sales happen in another, and the two only meet when someone "
      "reconciles them by hand at the end of the week.",
+         "One catalogue that stock and sales both read from. Ordering and delivery come after the numbers stop disagreeing.",
      ["Catalogue and inventory", "Online ordering", "GST invoicing", "Delivery tracking",
       "WhatsApp order updates", "Sales dashboard"]),
     ("Education & coaching",
      "Admissions in a register, fees in a notebook, attendance on a sheet, and parents calling to "
      "ask questions all three could have answered.",
+         "Admissions and fees first, because that is where money goes missing. Attendance and the parent portal follow.",
      ["Admissions and enquiry pipeline", "Batch and timetable", "Fee collection and receipts",
       "Attendance", "Parent portal", "Results and reporting"]),
     ("Healthcare & clinics",
      "Appointments over the phone, records on paper, and no reliable way to tell who is due for "
      "a follow-up.",
+         "Appointments and patient records first. Reminders and billing once the records are trustworthy enough to bill from.",
      ["Appointment booking", "Patient records", "Prescription history", "Reminders",
       "Billing", "Role-based staff access"]),
     ("Manufacturing",
      "Production is planned in one spreadsheet, materials in another, and dispatch in a book that "
      "only one person can read.",
+         "Job cards and stock first, so a floor supervisor can answer “where is that order” without walking the floor.",
      ["Job cards and production tracking", "Raw material and stock", "Quality checkpoints",
       "Dispatch and invoicing", "Vendor records", "Floor dashboards"]),
     ("Textile & garment",
      "Orders come in samples and phone calls, jobwork moves between units, and margin only becomes "
      "visible once the order is finished.",
+         "Order and jobwork tracking first. Costing becomes possible the moment transfers between units are actually recorded.",
      ["Order and sample tracking", "Jobwork and unit transfers", "Yarn and fabric stock",
       "Costing per order", "GST and e-way documents", "Buyer portal"]),
     ("Hospitality & restaurants",
      "Tables, takeaway, delivery apps and phone orders all arriving on different screens, with no "
      "single view of the day.",
+         "One order screen for every channel first. Reservations and reporting once the day has a single source of truth.",
      ["Menu and pricing", "Table and takeaway orders", "Kitchen display", "Billing and GST",
       "Reservations", "Daily sales reporting"]),
     ("Professional services",
      "Client work tracked in email threads, documents scattered across drives, and invoices raised "
      "from memory.",
+         "Client and matter records first, with the documents attached to them. Time and billing sit on top of that.",
      ["Client and matter records", "Document store", "Task and deadline tracking",
       "Time and billing", "Client portal", "Compliance calendar"]),
     ("Salons & studios",
      "Bookings in a diary, artists managed by memory, and no record of what a repeat customer had "
      "done last time.",
+         "Booking and artist scheduling first. Customer history and follow-ups once there is a record worth following up on.",
      ["Appointment and artist scheduling", "Customer history", "Consent and aftercare",
       "Deposits and billing", "Commission tracking", "Follow-up messaging"]),
     ("Real estate",
      "Enquiries from four channels, listings that go stale, and site visits nobody logged.",
+         "Listings and one enquiry pipeline first, so nothing arrives on WhatsApp and dies there.",
      ["Listing management", "Enquiry pipeline", "Site visit scheduling", "Document handling",
       "Agent and commission records", "Buyer portal"]),
     ("Logistics",
      "Trips booked on WhatsApp, vehicles tracked in a group chat, and payments chased weeks later.",
+         "Trip and consignment records first. Proof of delivery and billing once every trip is actually written down.",
      ["Trip and consignment records", "Vehicle and driver management", "Proof of delivery",
       "Freight billing", "Customer tracking link", "Fuel and expense records"]),
     ("Local shops & services",
      "A business that runs perfectly in person and is invisible the moment somebody searches for "
      "it online.",
+         "A findable website and a Google Business Profile first. That is usually the whole job, and we will say so if it is.",
      ["Findable website", "Google Business Profile", "WhatsApp enquiry flow",
       "Service and price listing", "Reviews and photos", "Local SEO for Tamil Nadu search"]),
 ]
@@ -833,7 +844,7 @@ def industry_matrix():
     """Spec 14 HOME 06. A two-pane selector: sectors on the left, what we
     actually build for that sector on the right."""
     tabs, panels = "", ""
-    for i, (name, reality, modules) in enumerate(INDUSTRY_DETAIL):
+    for i, (name, reality, start, modules) in enumerate(INDUSTRY_DETAIL):
         sel = "true" if i == 0 else "false"
         tabs += ('<button type="button" role="tab" id="ind-t{i}" aria-controls="ind-p{i}" '
                  'aria-selected="{sel}" tabindex="{ti}">{name}</button>').format(
@@ -843,10 +854,12 @@ def industry_matrix():
                    '<h3>{name}</h3><p>{reality}</p>'
                    '<p class="matrix-lead">What we typically build</p>'
                    '<div class="matrix-modules">{mods}</div>'
+                   '<p class="matrix-lead">Where it usually starts</p>'
+                   '<p class="matrix-start">{start}</p>'
                    '<a class="card-cta matrix-cta" href="contact.html?industry={q}">'
                    'Talk about {name} &rarr;</a></div>').format(
                        i=i, hid="" if i == 0 else " hidden", name=name, reality=reality,
-                       q=quote(name),
+                       start=start, q=quote(name),
                        mods="".join("<span>%s</span>" % mo for mo in modules))
     return ('<div class="matrix reveal-on-scroll">'
             '<div class="matrix-list" role="tablist" aria-label="Industries">%s</div>'
@@ -1084,7 +1097,7 @@ def build_home():
 
     <section class="section-divider">
       <div class="container">
-        <div class="split">
+        <div class="split split-sticky">
           <div class="reveal-on-scroll">
             <span class="eyebrow">How we work</span>
             <h2>Five stages, and you see the end of each one</h2>
