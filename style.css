@@ -1996,37 +1996,6 @@ textarea.form-control {
   border-color: var(--accent-line);
 }
 
-.preview-pipe {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.preview-step {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 12px;
-  color: var(--text-2);
-  background: var(--surface);
-}
-
-.preview-step::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-.preview-step + .preview-step::before {
-  background: var(--line-strong);
-}
-
 .preview-notch {
   display: flex;
   justify-content: space-between;
