@@ -19,6 +19,13 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 class CleanUrlHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # Without this the browser applies its own freshness heuristic and keeps
+        # serving the previous style.css after a rebuild, which looks exactly
+        # like a CSS bug.
+        self.send_header("Cache-Control", "no-store, must-revalidate")
+        super().end_headers()
+
     def translate_path(self, path):
         local = super().translate_path(path)
         if os.path.isdir(local) or os.path.exists(local):

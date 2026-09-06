@@ -14,3 +14,4 @@ __pycache__/
 .playwright-mcp/
 *-mobile.png
 page-*.yml
+_audit.js

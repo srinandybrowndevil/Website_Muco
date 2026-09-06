@@ -31,7 +31,7 @@
 <link rel="manifest" href="site.webmanifest" />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css?v=0873277661" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -202,8 +202,8 @@
                   <span id="mockup-meyra-body">Two priority items today: the InkNexis architecture review at 11:30 and the Ooruva vendor pilot check-in at 15:30. One proposal is waiting on your sign-off.</span>
                 </p>
 
-                <div style="margin-top:4px;">
-                  <span class="text-mono" style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px;">TRY A COMMAND</span>
+                <div class="mt-1">
+                  <span class="text-mono note fs-xs block mb-2">TRY A COMMAND</span>
                   <div class="mockup-badge-row">
                     <button type="button" class="btn btn-primary btn-sm" data-meyra-scenario="briefing" aria-pressed="true">Morning briefing</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="followup" aria-pressed="false">Client follow-ups</button>
@@ -213,7 +213,7 @@
 
                 <p class="mockup-input-bar">
                   <span>Meyra is one of our own builds &mdash; not a product for sale yet.</span>
-                  <a href="/work#meyra" style="color:var(--accent);font-weight:600;">Read more</a>
+                  <a class="card-cta" href="/work#meyra">Read more</a>
                 </p>
               </div>
             </div>
@@ -222,7 +222,14 @@
       </div>
     </section>
 
-    <section class="section-divider">
+    <section class="section-tight band-surface section-grid">
+      <div class="container">
+        <p class="strip-label">What we work in</p>
+        <div class="cap-strip reveal-on-scroll"><span>Web applications</span><span>Native mobile</span><span>Custom SaaS</span><span>Business systems</span><span>AI automation</span><span>Payments & GST</span><span>Technical SEO</span><span>Cloud & hosting</span></div>
+      </div>
+    </section>
+
+    <section class="band-deep">
       <div class="container">
         <div class="section-head reveal-on-scroll">
           <span class="eyebrow">What we do</span>
@@ -232,74 +239,75 @@
         </div>
 
         <div class="ecosystem-grid">
-          <article class="spotlight-card reveal-on-scroll col-span-2" id="websites">
+          <article class="spotlight-card reveal-on-scroll " id="websites">
             <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20M6 6.5h.01M9 6.5h.01"/></svg></div>
             <h3>Website design & development</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">A fast, findable website that turns visitors into enquiries.</p>
-            <p style="margin-top:10px;">Business websites, landing pages, e-commerce and customer portals — built responsive from 320px up, with a technical SEO baseline, analytics readiness, deployment and a maintenance path.</p>
+            <p class="card-outcome">A fast, findable website that turns visitors into enquiries.</p>
+            <p class="card-body">Business websites, landing pages, e-commerce and customer portals — built responsive from 320px up, with a technical SEO baseline, analytics readiness, deployment and a maintenance path.</p>
             <ul class="feature-list"><li>Custom design, no template resale</li><li>Technical SEO and schema from day one</li><li>Analytics and conversion tracking ready</li><li>Hosting, deployment and handover</li></ul>
-            <p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;"><a href="/services-websites" style="color:var(--accent);font-weight:600;font-size:14px;">Read more about website design & development &rarr;</a><a href="/website-development-erode" style="color:var(--text-muted);font-size:13.5px;">Website development in Erode &rarr;</a></p>
+            <p class="card-links"><a href="/services-websites" class="card-cta">Read more about website design & development &rarr;</a><a href="/website-development-erode" class="card-cta card-cta-quiet">Website development in Erode &rarr;</a></p>
           </article>
           <article class="spotlight-card reveal-on-scroll " id="mobile">
             <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
             <h3>Mobile app development</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">Apps your customers actually keep on their phone.</p>
-            <p style="margin-top:10px;">Android and iOS applications with real backend integration — location, listings, bookings, accounts and payments — taken through store submission.</p>
+            <p class="card-outcome">Apps your customers actually keep on their phone.</p>
+            <p class="card-body">Android and iOS applications with real backend integration — location, listings, bookings, accounts and payments — taken through store submission.</p>
             <ul class="feature-list"><li>Play Store and App Store submission</li><li>Location, maps and offline handling</li><li>Backend, auth and role separation</li><li>Post-launch update cycle</li></ul>
-            <p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;"><a href="/services-mobile" style="color:var(--accent);font-weight:600;font-size:14px;">Read more about mobile app development &rarr;</a></p>
+            <p class="card-links"><a href="/services-mobile" class="card-cta">Read more about mobile app development &rarr;</a></p>
           </article>
           <article class="spotlight-card reveal-on-scroll " id="product-design">
             <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.6 7.6"/><circle cx="11" cy="11" r="2"/></svg></div>
             <h3>UI/UX and product design</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">Interfaces people can use without being trained.</p>
-            <p style="margin-top:10px;">Flows, wireframes, interface design and a reusable design system, tested against real screen sizes and accessibility requirements rather than a designer's monitor.</p>
+            <p class="card-outcome">Interfaces people can use without being trained.</p>
+            <p class="card-body">Flows, wireframes, interface design and a reusable design system, tested against real screen sizes and accessibility requirements rather than a designer's monitor.</p>
             <ul class="feature-list"><li>User flows and information architecture</li><li>Design system, not one-off screens</li><li>Accessibility and contrast built in</li><li>Developer-ready handoff</li></ul>
-            <p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;"><a href="/services-product-design" style="color:var(--accent);font-weight:600;font-size:14px;">Read more about ui/ux and product design &rarr;</a></p>
+            <p class="card-links"><a href="/services-product-design" class="card-cta">Read more about ui/ux and product design &rarr;</a></p>
           </article>
           <article class="spotlight-card reveal-on-scroll " id="software">
             <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 17.6A4.5 4.5 0 0017.5 9h-1.3A7 7 0 103 16.3"/><path d="M12 12v9M8.5 17.5L12 21l3.5-3.5"/></svg></div>
             <h3>Custom software & SaaS</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">Software shaped around how your business actually works.</p>
-            <p style="margin-top:10px;">Discovery through MVP and beyond: multi-tenant systems, role-based access, customer and admin portals, reporting, payments and integrations on an architecture that can grow.</p>
+            <p class="card-outcome">Software shaped around how your business actually works.</p>
+            <p class="card-body">Discovery through MVP and beyond: multi-tenant systems, role-based access, customer and admin portals, reporting, payments and integrations on an architecture that can grow.</p>
             <ul class="feature-list"><li>Multi-tenant and role-based from the start</li><li>Customer and admin portals</li><li>Payments and third-party integrations</li><li>Reporting and dashboards</li></ul>
-            <p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;"><a href="/services-software" style="color:var(--accent);font-weight:600;font-size:14px;">Read more about custom software & saas &rarr;</a></p>
+            <p class="card-links"><a href="/services-software" class="card-cta">Read more about custom software & saas &rarr;</a></p>
           </article>
           <article class="spotlight-card reveal-on-scroll " id="business-systems">
             <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
             <h3>CRM, ERP, HRMS, LMS & billing</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">One system instead of six spreadsheets.</p>
-            <p style="margin-top:10px;">Practical business systems for shops and organisations — bookings, inventory, CRM, ERP, HRMS, LMS, billing and GST workflows, sales, attendance, support and dashboards.</p>
+            <p class="card-outcome">One system instead of six spreadsheets.</p>
+            <p class="card-body">Practical business systems for shops and organisations — bookings, inventory, CRM, ERP, HRMS, LMS, billing and GST workflows, sales, attendance, support and dashboards.</p>
             <ul class="feature-list"><li>Bookings, inventory and billing</li><li>GST-aware invoicing workflows</li><li>Attendance, payroll inputs and HR records</li><li>Dashboards for the people who decide</li></ul>
-            <p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;"><a href="/services-business-systems" style="color:var(--accent);font-weight:600;font-size:14px;">Read more about crm, erp, hrms, lms & billing &rarr;</a></p>
+            <p class="card-links"><a href="/services-business-systems" class="card-cta">Read more about crm, erp, hrms, lms & billing &rarr;</a></p>
           </article>
           <article class="spotlight-card reveal-on-scroll " id="marketing">
             <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/><path d="M8 12l2.2 2.2L14.5 9"/></svg></div>
             <h3>Digital marketing & SEO</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">Be found by the people already searching for you.</p>
-            <p style="margin-top:10px;">Organic growth, local SEO, technical SEO, conversion optimisation, content and analytics — with honest reporting. We do not guarantee rankings or lead counts, because nobody credible can.</p>
+            <p class="card-outcome">Be found by the people already searching for you.</p>
+            <p class="card-body">Organic growth, local SEO, technical SEO, conversion optimisation, content and analytics — with honest reporting. We do not guarantee rankings or lead counts, because nobody credible can.</p>
             <ul class="feature-list"><li>Local SEO for Tamil Nadu search</li><li>Technical SEO and Core Web Vitals</li><li>Conversion rate optimisation</li><li>Transparent monthly reporting</li></ul>
-            <p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;"><a href="/services-marketing" style="color:var(--accent);font-weight:600;font-size:14px;">Read more about digital marketing & seo &rarr;</a></p>
+            <p class="card-links"><a href="/services-marketing" class="card-cta">Read more about digital marketing & seo &rarr;</a></p>
           </article>
         </div>
 
-        <div style="text-align:center;margin-top:32px;">
+        <div class="center mt-7">
           <a href="/services" class="btn btn-secondary">See all services and what is included &rarr;</a>
         </div>
       </div>
     </section>
 
-    <section class="section-divider section-tight">
+    <section class="band-surface section-grid">
       <div class="container">
         <div class="section-head reveal-on-scroll">
           <span class="eyebrow">Industries</span>
           <h2>Built for whatever your business actually does</h2>
-          <p class="section-sub">The workflow changes; the engineering discipline does not.</p>
+          <p class="section-sub">The workflow changes; the engineering discipline does not. Pick a
+            sector to see what the work usually turns out to be.</p>
         </div>
-        <div class="chip-cloud" style="justify-content:center;"><span class="chip">Retail & e-commerce</span><span class="chip">Education & coaching</span><span class="chip">Healthcare & clinics</span><span class="chip">Manufacturing</span><span class="chip">Textile & garment</span><span class="chip">Hospitality & restaurants</span><span class="chip">Professional services</span><span class="chip">Salons & studios</span><span class="chip">Real estate</span><span class="chip">Logistics</span><span class="chip">Local shops & services</span></div>
+        <div class="matrix reveal-on-scroll"><div class="matrix-list" role="tablist" aria-label="Industries"><button type="button" role="tab" id="ind-t0" aria-controls="ind-p0" aria-selected="true" tabindex="0">Retail & e-commerce</button><button type="button" role="tab" id="ind-t1" aria-controls="ind-p1" aria-selected="false" tabindex="-1">Education & coaching</button><button type="button" role="tab" id="ind-t2" aria-controls="ind-p2" aria-selected="false" tabindex="-1">Healthcare & clinics</button><button type="button" role="tab" id="ind-t3" aria-controls="ind-p3" aria-selected="false" tabindex="-1">Manufacturing</button><button type="button" role="tab" id="ind-t4" aria-controls="ind-p4" aria-selected="false" tabindex="-1">Textile & garment</button><button type="button" role="tab" id="ind-t5" aria-controls="ind-p5" aria-selected="false" tabindex="-1">Hospitality & restaurants</button><button type="button" role="tab" id="ind-t6" aria-controls="ind-p6" aria-selected="false" tabindex="-1">Professional services</button><button type="button" role="tab" id="ind-t7" aria-controls="ind-p7" aria-selected="false" tabindex="-1">Salons & studios</button><button type="button" role="tab" id="ind-t8" aria-controls="ind-p8" aria-selected="false" tabindex="-1">Real estate</button><button type="button" role="tab" id="ind-t9" aria-controls="ind-p9" aria-selected="false" tabindex="-1">Logistics</button><button type="button" role="tab" id="ind-t10" aria-controls="ind-p10" aria-selected="false" tabindex="-1">Local shops & services</button></div><div class="matrix-panels"><div class="matrix-panel" role="tabpanel" id="ind-p0" aria-labelledby="ind-t0"><h3>Retail & e-commerce</h3><p>Stock lives in one place, sales happen in another, and the two only meet when someone reconciles them by hand at the end of the week.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Catalogue and inventory</span><span>Online ordering</span><span>GST invoicing</span><span>Delivery tracking</span><span>WhatsApp order updates</span><span>Sales dashboard</span></div><a class="card-cta matrix-cta" href="/contact?industry=Retail%20%26%20e-commerce">Talk about Retail & e-commerce &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p1" aria-labelledby="ind-t1" hidden><h3>Education & coaching</h3><p>Admissions in a register, fees in a notebook, attendance on a sheet, and parents calling to ask questions all three could have answered.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Admissions and enquiry pipeline</span><span>Batch and timetable</span><span>Fee collection and receipts</span><span>Attendance</span><span>Parent portal</span><span>Results and reporting</span></div><a class="card-cta matrix-cta" href="/contact?industry=Education%20%26%20coaching">Talk about Education & coaching &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p2" aria-labelledby="ind-t2" hidden><h3>Healthcare & clinics</h3><p>Appointments over the phone, records on paper, and no reliable way to tell who is due for a follow-up.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Appointment booking</span><span>Patient records</span><span>Prescription history</span><span>Reminders</span><span>Billing</span><span>Role-based staff access</span></div><a class="card-cta matrix-cta" href="/contact?industry=Healthcare%20%26%20clinics">Talk about Healthcare & clinics &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p3" aria-labelledby="ind-t3" hidden><h3>Manufacturing</h3><p>Production is planned in one spreadsheet, materials in another, and dispatch in a book that only one person can read.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Job cards and production tracking</span><span>Raw material and stock</span><span>Quality checkpoints</span><span>Dispatch and invoicing</span><span>Vendor records</span><span>Floor dashboards</span></div><a class="card-cta matrix-cta" href="/contact?industry=Manufacturing">Talk about Manufacturing &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p4" aria-labelledby="ind-t4" hidden><h3>Textile & garment</h3><p>Orders come in samples and phone calls, jobwork moves between units, and margin only becomes visible once the order is finished.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Order and sample tracking</span><span>Jobwork and unit transfers</span><span>Yarn and fabric stock</span><span>Costing per order</span><span>GST and e-way documents</span><span>Buyer portal</span></div><a class="card-cta matrix-cta" href="/contact?industry=Textile%20%26%20garment">Talk about Textile & garment &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p5" aria-labelledby="ind-t5" hidden><h3>Hospitality & restaurants</h3><p>Tables, takeaway, delivery apps and phone orders all arriving on different screens, with no single view of the day.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Menu and pricing</span><span>Table and takeaway orders</span><span>Kitchen display</span><span>Billing and GST</span><span>Reservations</span><span>Daily sales reporting</span></div><a class="card-cta matrix-cta" href="/contact?industry=Hospitality%20%26%20restaurants">Talk about Hospitality & restaurants &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p6" aria-labelledby="ind-t6" hidden><h3>Professional services</h3><p>Client work tracked in email threads, documents scattered across drives, and invoices raised from memory.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Client and matter records</span><span>Document store</span><span>Task and deadline tracking</span><span>Time and billing</span><span>Client portal</span><span>Compliance calendar</span></div><a class="card-cta matrix-cta" href="/contact?industry=Professional%20services">Talk about Professional services &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p7" aria-labelledby="ind-t7" hidden><h3>Salons & studios</h3><p>Bookings in a diary, artists managed by memory, and no record of what a repeat customer had done last time.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Appointment and artist scheduling</span><span>Customer history</span><span>Consent and aftercare</span><span>Deposits and billing</span><span>Commission tracking</span><span>Follow-up messaging</span></div><a class="card-cta matrix-cta" href="/contact?industry=Salons%20%26%20studios">Talk about Salons & studios &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p8" aria-labelledby="ind-t8" hidden><h3>Real estate</h3><p>Enquiries from four channels, listings that go stale, and site visits nobody logged.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Listing management</span><span>Enquiry pipeline</span><span>Site visit scheduling</span><span>Document handling</span><span>Agent and commission records</span><span>Buyer portal</span></div><a class="card-cta matrix-cta" href="/contact?industry=Real%20estate">Talk about Real estate &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p9" aria-labelledby="ind-t9" hidden><h3>Logistics</h3><p>Trips booked on WhatsApp, vehicles tracked in a group chat, and payments chased weeks later.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Trip and consignment records</span><span>Vehicle and driver management</span><span>Proof of delivery</span><span>Freight billing</span><span>Customer tracking link</span><span>Fuel and expense records</span></div><a class="card-cta matrix-cta" href="/contact?industry=Logistics">Talk about Logistics &rarr;</a></div><div class="matrix-panel" role="tabpanel" id="ind-p10" aria-labelledby="ind-t10" hidden><h3>Local shops & services</h3><p>A business that runs perfectly in person and is invisible the moment somebody searches for it online.</p><p class="matrix-lead">What we typically build</p><div class="matrix-modules"><span>Findable website</span><span>Google Business Profile</span><span>WhatsApp enquiry flow</span><span>Service and price listing</span><span>Reviews and photos</span><span>Local SEO for Tamil Nadu search</span></div><a class="card-cta matrix-cta" href="/contact?industry=Local%20shops%20%26%20services">Talk about Local shops & services &rarr;</a></div></div></div>
       </div>
     </section>
 
-    <section class="section-divider">
+    <section class="band-deep">
       <div class="container">
         <div class="row-between reveal-on-scroll">
           <div>
@@ -309,20 +317,21 @@
           <a href="/work" class="btn btn-secondary">See all our work &rarr;</a>
         </div>
 
-        <div class="callout" style="margin-bottom:24px;">
-          <p style="font-size:14.5px;"><strong>How to read this page.</strong> Every project below is
+        <div class="callout mb-5">
+          <p class="fs-sm"><strong>How to read this page.</strong> Every project below is
           labelled with its real stage &mdash; client project, active build, specified, or concept.
           We do not present an idea as a shipped product or an internal tool as a client engagement.</p>
         </div>
 
         <div class="work-grid">
           <article class="work-card reveal-on-scroll" id="meyra">
-            <div class="preview" aria-hidden="true">
+            <div class="preview">
               <div class="preview-bar">
-                <div class="preview-dots"><span></span><span></span><span></span></div>
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="preview-url">meyra &mdash; mission graph</span>
+                <span class="preview-kind">Concept</span>
               </div>
-              <div class="preview-body">
+              <div class="preview-body" aria-hidden="true">
                 <div class="preview-chat q">Take the billing module from requirements to a tested build.</div>
                 <div class="preview-chat a"><b>MEYRA</b>Requirements locked and research saved with sources. Moving to blueprint. Nothing runs on your machine without asking first.</div>
                 <div class="preview-pipe">
@@ -331,7 +340,7 @@
                   <div class="preview-step">Blueprint &middot; awaiting approval</div>
                 </div></div>
             </div>
-            <p class="preview-note">Interface mockup, not a screenshot</p>
+            
             <div class="work-card-head">
               <div>
                 <h3>Meyra</h3>
@@ -354,12 +363,14 @@
             <div class="work-card-meta tag-row"><span class="tag tag-subtle">Electron</span><span class="tag tag-subtle">TypeScript</span><span class="tag tag-subtle">Local-first</span><span class="tag tag-subtle">Multi-provider AI</span></div>
           </article>
           <article class="work-card reveal-on-scroll" id="ooruva">
-            <div class="preview preview-phone" aria-hidden="true">
-              <div class="preview-notch"><span>Ooruva &middot; nearby</span><span>&#9679;&#9679;&#9679;</span></div>
-              <div class="preview-body">
+            <div class="preview preview-phone">
+              <div class="preview-notch">
+                <span>Ooruva &middot; nearby</span><span class="preview-kind">Concept</span>
+              </div>
+              <div class="preview-body" aria-hidden="true">
                 <div class="preview-row"><div><strong>Tailoring &amp; alterations</strong><span class="sub">Open now &middot; Erode</span></div><span class="preview-flag on">300 m</span></div><div class="preview-row"><div><strong>Tiffin centre</strong><span class="sub">Menu &amp; hours listed</span></div><span class="preview-flag on">600 m</span></div><div class="preview-row"><div><strong>Two-wheeler service</strong><span class="sub">Verified vendor</span></div><span class="preview-flag acc">1.2 km</span></div><div class="preview-row"><div><strong>Provision store</strong><span class="sub">Offers this week</span></div><span class="preview-flag ">1.8 km</span></div></div>
             </div>
-            <p class="preview-note">Interface mockup, not a screenshot</p>
+            
             <div class="work-card-head">
               <div>
                 <h3>Ooruva</h3>
@@ -382,15 +393,16 @@
             <div class="work-card-meta tag-row"><span class="tag tag-subtle">Android</span><span class="tag tag-subtle">Supabase</span><span class="tag tag-subtle">Maps & location</span><span class="tag tag-subtle">Tamil + English</span></div>
           </article>
           <article class="work-card reveal-on-scroll" id="inknexis">
-            <div class="preview" aria-hidden="true">
+            <div class="preview">
               <div class="preview-bar">
-                <div class="preview-dots"><span></span><span></span><span></span></div>
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="preview-url">inknexis &mdash; studio</span>
+                <span class="preview-kind">Concept</span>
               </div>
-              <div class="preview-body">
+              <div class="preview-body" aria-hidden="true">
                 <div class="preview-row"><div><strong>Today&rsquo;s chair</strong><span class="sub">Placement and size confirmed</span></div><span class="preview-flag acc">Booked</span></div><div class="preview-row"><div><strong>Consent form</strong><span class="sub">Signed before session starts</span></div><span class="preview-flag on">Signed</span></div><div class="preview-row"><div><strong>Deposit</strong><span class="sub">Optional &middot; owner verifies</span></div><span class="preview-flag ">Recorded</span></div><div class="preview-row"><div><strong>Aftercare</strong><span class="sub">Scheduled follow-up messages</span></div><span class="preview-flag acc">Queued</span></div></div>
             </div>
-            <p class="preview-note">Interface mockup, not a screenshot</p>
+            
             <div class="work-card-head">
               <div>
                 <h3>InkNexis</h3>
@@ -413,12 +425,13 @@
             <div class="work-card-meta tag-row"><span class="tag tag-subtle">Multi-tenant SaaS</span><span class="tag tag-subtle">PostgreSQL + RLS</span><span class="tag tag-subtle">PWA</span><span class="tag tag-subtle">AI concepts</span></div>
           </article>
           <article class="work-card reveal-on-scroll" id="beauty-brand">
-            <div class="preview" aria-hidden="true">
+            <div class="preview">
               <div class="preview-bar">
-                <div class="preview-dots"><span></span><span></span><span></span></div>
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="preview-url">client website &mdash; products</span>
+                <span class="preview-kind">Concept</span>
               </div>
-              <div class="preview-body">
+              <div class="preview-body" aria-hidden="true">
                 <div class="preview-tiles">
                   <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
                   <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
@@ -426,13 +439,13 @@
                 </div>
                 <div class="preview-row"><div><strong>Ingredients &amp; usage</strong><span class="sub">Verified copy only &middot; no invented claims</span></div><span class="preview-flag on">Published</span></div><div class="preview-row"><div><strong>Enquire on WhatsApp</strong><span class="sub">Product name prefilled in the message</span></div><span class="preview-flag acc">One tap</span></div></div>
             </div>
-            <p class="preview-note">Interface mockup, not a screenshot</p>
+            
             <div class="work-card-head">
               <div>
                 <h3>Natural beauty brand website</h3>
                 <span class="work-card-kicker">Client project — retail, named on request</span>
               </div>
-              <span class="badge badge-live">Client project</span>
+              <span class="badge badge-client">Client project</span>
             </div>
             <p>A mobile-first product storytelling website for a natural and organic beauty brand, built to convert search and social visitors into WhatsApp enquiries rather than force early e-commerce. Client named on request.</p>
             <details class="work-details">
@@ -452,17 +465,17 @@
       </div>
     </section>
 
-    <section class="section-divider">
+    <section class="band-surface section-grid">
       <div class="container">
         <div class="split">
           <div class="reveal-on-scroll">
             <span class="eyebrow">How we work</span>
             <h2>Five stages, and you see the end of each one</h2>
-            <p style="margin-bottom:20px;">No project disappears into a black box for two months.
+            <p class="mb-5">No project disappears into a black box for two months.
               Each stage produces something you can look at, and the next one does not start until
               you have signed off on the last.</p>
             <div class="callout">
-              <p style="font-size:14.5px;"><strong>Payment terms:</strong> 50% advance and 50% on
+              <p class="fs-sm"><strong>Payment terms:</strong> 50% advance and 50% on
               completion, or milestone-by-milestone on larger projects. Domain registration and
               renewal are charged separately.</p>
             </div>
@@ -478,22 +491,22 @@
       </div>
     </section>
 
-    <section class="section-divider">
+    <section class="band-deep">
       <div class="container">
         <div class="card card-lg border-beam-card reveal-on-scroll">
-          <div class="split" style="gap:32px;">
+          <div class="split gap-7">
             <div>
               <span class="eyebrow">Free website review</span>
-              <h2 style="font-size:26px;">Already have a website that is not bringing you anything?</h2>
-              <p style="margin-top:10px;">Send us the address and we will go through it properly &mdash;
+              <h2 class="fs-xl">Already have a website that is not bringing you anything?</h2>
+              <p class="mt-3">Send us the address and we will go through it properly &mdash;
                 loading speed, how it behaves on a phone, technical SEO, broken links, metadata and
                 the path a visitor takes to contacting you &mdash; then tell you what is worth fixing
                 and what is not. If your site is fine, we will say so.</p>
             </div>
-            <div class="stack" style="justify-content:center;">
+            <div class="stack center">
               <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS%2C%20please%20review%20my%20website%3A%20" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg btn-block"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg> Send your website on WhatsApp</a>
               <a href="/contact?service=Website%20review%20%2F%20audit" class="btn btn-secondary btn-block">Request it by form</a>
-              <p style="font-size:13px;color:var(--text-dim);">Reviewed by a person, not an automated
+              <p class="note">Reviewed by a person, not an automated
                 score generator. We will tell you when we can get to it.</p>
             </div>
           </div>
@@ -501,12 +514,40 @@
       </div>
     </section>
 
-    <section class="section-divider">
+    <section class="band-surface section-grid">
+      <div class="container container-narrow">
+        <div class="section-head reveal-on-scroll">
+          <span class="eyebrow">Before you ask</span>
+          <h2>The questions we get first</h2>
+          <p class="section-sub">Straight answers, including the ones about money.</p>
+        </div>
+        <details class="faq-item">
+          <summary><h2>What does a website actually cost?</h2></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>We do not publish a package price, and here is the honest reason: two websites that look similar from the outside can differ by four times in build time. A number posted on a page would either be so low it means nothing, or so high it puts off work we would have enjoyed doing.</p><p>What we do instead is quote from a written scope. Tell us what the business needs, we ask the questions that actually change the number — page count, functionality, content, integrations, who maintains it afterwards — and you get inclusions, exclusions, milestones and a price in writing before you commit to anything. That costs you nothing.</p><p>Domain registration and renewal are charged separately, and third-party subscriptions, paid plugins, payment gateway charges and ongoing marketing are not included unless the scope says so. See <a href='pricing.html'>pricing</a> for the full list.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h2>How long does a project take?</h2></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>It depends entirely on scope, and we would rather give you a real date than a comfortable one. A straightforward business website is usually a matter of weeks; a custom platform with accounts, roles and payments is months. You get a milestone plan with dates in the proposal, and we tell you as soon as anything threatens one.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h2>Do I own the code and the design?</h2></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>Yes. On final payment you own the deliverables, the source code and the accounts. We do not lock you into hosting, a proprietary builder or a licence you have to keep paying for.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h2>Do you work with businesses outside Erode?</h2></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>Yes. We are based in Erode and work in person across Erode, Pallipalayam, Namakkal, Coimbatore, Tiruppur, Karur and the rest of Tamil Nadu, and remotely beyond that. Most project work happens over calls and shared documents regardless of where you are.</p></div></div></div>
+        </details>
+        <p class="section-sub mt-5">Seven more in the
+          <a href="/faq" class="text-link">full FAQ</a>.</p>
+      </div>
+    </section>
+
+    <section class="band-deep">
       <div class="container">
         <div class="cta-box reveal-on-scroll">
           <span class="eyebrow">Next step</span>
           <h2>Tell us what you want to build</h2>
-          <p style="margin-bottom:28px;">Send a short description and we will come back with questions, an approach and a written scope. No obligation, and no pressure to decide on the call.</p>
+          <p class="mb-6">Send a short description and we will come back with questions, an approach and a written scope. No obligation, and no pressure to decide on the call.</p>
           <div class="btn-group btn-group-center">
             <a href="/contact" class="btn btn-accent btn-lg">Start a Project</a>
             <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS%2C%20I%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg> WhatsApp +91 6381809844</a>
@@ -522,9 +563,9 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-col footer-brand">
-          <strong style="font-size:16px;color:var(--text);">MUCO LABS</strong>
+          <strong class="lede">MUCO LABS</strong>
           <p>Your Vision, Our Technology. Software, AI systems and automation built for businesses in Erode and across Tamil Nadu.</p>
-          <div class="btn-group" style="margin-top:18px;">
+          <div class="btn-group mt-5">
             <a href="https://www.instagram.com/muco_labs/" target="_blank" rel="noopener noreferrer" class="btn btn-instagram btn-sm"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg> @muco_labs</a>
             <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-sm">WhatsApp</a>
           </div>
@@ -558,8 +599,8 @@
           <ul>
             <li><a href="tel:+916381809844">+91 6381809844</a></li>
             <li><a href="mailto:founder@mucolabs.com">founder@mucolabs.com</a></li>
-            <li><span style="font-size:14px;color:var(--text-muted);">Erode, Tamil Nadu, India</span></li>
-            <li><span style="font-size:14px;color:var(--text-muted);">Monday to Saturday, 9 AM to 7 PM</span></li>
+            <li><span class="note">Erode, Tamil Nadu, India</span></li>
+            <li><span class="note">Monday to Saturday, 9 AM to 7 PM</span></li>
           </ul>
         </div>
       </div>
@@ -571,6 +612,6 @@
     </div>
   </footer>
 
-  <script src="main.js" defer></script>
+  <script src="main.js?v=111f8de318" defer></script>
 </body>
 </html>

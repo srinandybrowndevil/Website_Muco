@@ -12,9 +12,11 @@ No dependencies. Writes the .html files, robots.txt and sitemap.xml into the
 repository root. Edit this file, re-run it, commit the generated HTML.
 """
 
+import hashlib
 import os
 import re
 from datetime import date
+from urllib.parse import quote
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -103,16 +105,67 @@ def clean_urls(text):
     return text
 
 
+_SECTION_TAG = re.compile(r'<section\b([^>]*)>')
+
+
+def band_sections(body):
+    """Alternate section backgrounds so no two consecutive bands look alike.
+
+    Spec 4.3. Applied here rather than in every page body so the rhythm stays
+    consistent across the whole site and can be retuned in one place. The hero
+    keeps the base background (it already carries the ambient glow), and a
+    section that deliberately runs flush with the one above it -- anything
+    marked `section-flush` -- is left alone so the seam stays invisible.
+    """
+    state = {"first": True, "n": 0}
+
+    def swap(m):
+        attrs = m.group(1)
+        if state["first"]:
+            state["first"] = False
+            return m.group(0)
+        if "section-flush" in attrs:
+            return m.group(0)
+
+        state["n"] += 1
+        band = "band-surface section-grid" if state["n"] % 2 else "band-deep"
+
+        cm = re.search(r'class="([^"]*)"', attrs)
+        if cm:
+            # A band draws its own top edge, so the plain divider rule would
+            # double up on it.
+            classes = [c for c in cm.group(1).split() if c != "section-divider"]
+            classes.append(band)
+            attrs = attrs[:cm.start()] + 'class="%s"' % " ".join(classes) + attrs[cm.end():]
+        else:
+            attrs = ' class="%s"' % band + attrs
+        return "<section%s>" % attrs
+
+    return _SECTION_TAG.sub(swap, body)
+
+
 def wa(text):
     """WhatsApp deep link with a prefilled, context-carrying message."""
-    from urllib.parse import quote
-
     return "https://wa.me/%s?text=%s" % (WHATSAPP, quote(text))
 
 
 # ---------------------------------------------------------------------------
 # Icons (inline, tree-shaken by hand — no icon library ships to the browser)
 # ---------------------------------------------------------------------------
+def asset_v(name):
+    """`name?v=<hash>` so a changed file gets a new URL.
+
+    Without this a returning visitor can keep an old style.css against new
+    markup, which looks like a layout bug and is impossible to reproduce.
+    """
+    path = os.path.join(ROOT, name)
+    try:
+        digest = hashlib.sha256(open(path, "rb").read()).hexdigest()[:10]
+    except OSError:
+        return name
+    return "%s?v=%s" % (name, digest)
+
+
 def icon(paths, size=20):
     return (
         '<svg width="%d" height="%d" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
@@ -295,9 +348,9 @@ def footer_html():
     <div class="container">
       <div class="footer-grid">
         <div class="footer-col footer-brand">
-          <strong style="font-size:16px;color:var(--text);">{brand}</strong>
+          <strong class="lede">{brand}</strong>
           <p>{tagline} Software, AI systems and automation built for businesses in {city} and across {region}.</p>
-          <div class="btn-group" style="margin-top:18px;">
+          <div class="btn-group mt-5">
             <a href="{ig}" target="_blank" rel="noopener noreferrer" class="btn btn-instagram btn-sm">{ig_svg} @muco_labs</a>
             <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-sm">WhatsApp</a>
           </div>
@@ -310,8 +363,8 @@ def footer_html():
           <ul>
             <li><a href="tel:{tel}">{phone}</a></li>
             <li><a href="mailto:{email}">{email}</a></li>
-            <li><span style="font-size:14px;color:var(--text-muted);">{city}, {region}, India</span></li>
-            <li><span style="font-size:14px;color:var(--text-muted);">{hours}</span></li>
+            <li><span class="note">{city}, {region}, India</span></li>
+            <li><span class="note">{hours}</span></li>
           </ul>
         </div>
       </div>
@@ -323,10 +376,11 @@ def footer_html():
     </div>
   </footer>
 
-  <script src="main.js" defer></script>
+  <script src="{js}" defer></script>
 </body>
 </html>
 """.format(
+        js=asset_v("main.js"),
         brand=BRAND,
         tagline=TAGLINE,
         city=CITY,
@@ -509,7 +563,7 @@ SHELL = """<!DOCTYPE html>
 <link rel="manifest" href="site.webmanifest" />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="{css}" />
 {schema}{analytics}</head>
 <body>
 {header}
@@ -532,11 +586,14 @@ def render(slug, title, description, body, current=None, og_type="website",
             % (GA_MEASUREMENT_ID, GA_MEASUREMENT_ID)
         )
 
+    body = band_sections(body)
+
     schema = ""
     for block in schema_blocks or []:
         schema += '<script type="application/ld+json">\n%s\n</script>\n' % block
 
     html = SHELL.format(
+        css=asset_v("style.css"),
         title=title,
         description=description,
         robots='<meta name="robots" content="noindex, follow" />\n' if noindex else "",
@@ -569,7 +626,7 @@ def final_cta(heading, sub, wa_text, primary_label="Start a Project", primary="c
         <div class="cta-box reveal-on-scroll">
           <span class="eyebrow">Next step</span>
           <h2>{heading}</h2>
-          <p style="margin-bottom:28px;">{sub}</p>
+          <p class="mb-6">{sub}</p>
           <div class="btn-group btn-group-center">
             <a href="{primary}" class="btn btn-accent btn-lg">{primary_label}</a>
             <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp {phone}</a>

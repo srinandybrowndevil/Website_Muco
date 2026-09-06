@@ -19,7 +19,8 @@ from build import *  # noqa: F401,F403 — shared shell, tokens and helpers
 #         concept = idea or pitch stage, deliberately not presented as a product
 # ===========================================================================
 STAGE_LABEL = {
-    "client": ("Client project", "badge-live"),
+    "client": ("Client project", "badge-client"),
+    "live": ("Live", "badge-live"),
     "build": ("Active build", "badge-build"),
     "spec": ("Specified", "badge-spec"),
     "concept": ("Concept", "badge-concept"),
@@ -108,7 +109,7 @@ PROJECTS = [
         "featured": True,
         "name": "MUCO LABS platform",
         "kicker": "This website and the business portal behind it",
-        "stage": "build",
+        "stage": "live",
         "tags": ["web", "internal", "saas"],
         "summary": "The company's own lead-generation and credibility platform, designed to grow "
                    "into a secure customer, freelancer and admin portal without giving up SEO or "
@@ -118,8 +119,8 @@ PROJECTS = [
         "scope": "Public marketing site, service and pricing architecture, enquiry capture with "
                  "source attribution, portfolio with honest project stages, and a roadmap to "
                  "authenticated customer and admin areas.",
-        "state": "Public site live. Authenticated portal, server-side forms and the internal "
-                 "website-audit tool are the next phase.",
+        "state": "Live at mucolabs.com, with server-side lead capture running. The "
+                 "authenticated customer and admin portal is the next phase.",
         "chips": ["Static-first", "SEO & schema", "Accessibility", "Portal roadmap"],
     },
     {
@@ -127,7 +128,7 @@ PROJECTS = [
         "featured": True,
         "name": "Lead generation & outreach automation",
         "kicker": "Internal sales engine",
-        "stage": "build",
+        "stage": "live",
         "tags": ["automation", "internal", "ai"],
         "summary": "A recurring workflow that finds evidence-backed prospects from public "
                    "sources, de-duplicates and qualifies them, maps each to a service, and "
@@ -136,7 +137,8 @@ PROJECTS = [
                    "messages that get ignored.",
         "scope": "Public-source research, deduplication, need and evidence identification, "
                  "service mapping, personalised outreach drafts, and a delivered report per run.",
-        "state": "In operational use inside MUCO LABS. Not sold as a product yet.",
+        "state": "Live and running inside MUCO LABS on a recurring schedule. Not sold as a "
+                 "product yet.",
         "chips": ["Research automation", "Deduplication", "Evidence-backed", "Reporting"],
     },
     {
@@ -513,6 +515,65 @@ INDUSTRIES = [
     "Salons & studios", "Real estate", "Logistics", "Local shops & services",
 ]
 
+# Spec 14 HOME 06. The chip cloud said "we work with everyone", which proves
+# nothing. This says what the work actually looks like in each sector, which is
+# the only version a business owner can check against their own day.
+INDUSTRY_DETAIL = [
+    ("Retail & e-commerce",
+     "Stock lives in one place, sales happen in another, and the two only meet when someone "
+     "reconciles them by hand at the end of the week.",
+     ["Catalogue and inventory", "Online ordering", "GST invoicing", "Delivery tracking",
+      "WhatsApp order updates", "Sales dashboard"]),
+    ("Education & coaching",
+     "Admissions in a register, fees in a notebook, attendance on a sheet, and parents calling to "
+     "ask questions all three could have answered.",
+     ["Admissions and enquiry pipeline", "Batch and timetable", "Fee collection and receipts",
+      "Attendance", "Parent portal", "Results and reporting"]),
+    ("Healthcare & clinics",
+     "Appointments over the phone, records on paper, and no reliable way to tell who is due for "
+     "a follow-up.",
+     ["Appointment booking", "Patient records", "Prescription history", "Reminders",
+      "Billing", "Role-based staff access"]),
+    ("Manufacturing",
+     "Production is planned in one spreadsheet, materials in another, and dispatch in a book that "
+     "only one person can read.",
+     ["Job cards and production tracking", "Raw material and stock", "Quality checkpoints",
+      "Dispatch and invoicing", "Vendor records", "Floor dashboards"]),
+    ("Textile & garment",
+     "Orders come in samples and phone calls, jobwork moves between units, and margin only becomes "
+     "visible once the order is finished.",
+     ["Order and sample tracking", "Jobwork and unit transfers", "Yarn and fabric stock",
+      "Costing per order", "GST and e-way documents", "Buyer portal"]),
+    ("Hospitality & restaurants",
+     "Tables, takeaway, delivery apps and phone orders all arriving on different screens, with no "
+     "single view of the day.",
+     ["Menu and pricing", "Table and takeaway orders", "Kitchen display", "Billing and GST",
+      "Reservations", "Daily sales reporting"]),
+    ("Professional services",
+     "Client work tracked in email threads, documents scattered across drives, and invoices raised "
+     "from memory.",
+     ["Client and matter records", "Document store", "Task and deadline tracking",
+      "Time and billing", "Client portal", "Compliance calendar"]),
+    ("Salons & studios",
+     "Bookings in a diary, artists managed by memory, and no record of what a repeat customer had "
+     "done last time.",
+     ["Appointment and artist scheduling", "Customer history", "Consent and aftercare",
+      "Deposits and billing", "Commission tracking", "Follow-up messaging"]),
+    ("Real estate",
+     "Enquiries from four channels, listings that go stale, and site visits nobody logged.",
+     ["Listing management", "Enquiry pipeline", "Site visit scheduling", "Document handling",
+      "Agent and commission records", "Buyer portal"]),
+    ("Logistics",
+     "Trips booked on WhatsApp, vehicles tracked in a group chat, and payments chased weeks later.",
+     ["Trip and consignment records", "Vehicle and driver management", "Proof of delivery",
+      "Freight billing", "Customer tracking link", "Fuel and expense records"]),
+    ("Local shops & services",
+     "A business that runs perfectly in person and is invisible the moment somebody searches for "
+     "it online.",
+     ["Findable website", "Google Business Profile", "WhatsApp enquiry flow",
+      "Service and price listing", "Reviews and photos", "Local SEO for Tamil Nadu search"]),
+]
+
 PROCESS = [
     ("Discovery and goals",
      "We start with what the business needs to happen, not with a feature list. "
@@ -631,19 +692,26 @@ LOCAL_FAQS = [
 # behaviour. No mockup contains an invented metric, rating or count.
 # ===========================================================================
 def _win(url, body, phone=False):
-    return '''<div class="preview%s" aria-hidden="true">
+    """The "concept" tag is not decoration. These are drawings of how each
+    product works, and a visitor must be able to tell that at a glance without
+    reading a caption — so it lives in the window chrome, where a build label
+    belongs, rather than as a sentence apologising underneath."""
+    return '''<div class="preview%s">
               <div class="preview-bar">
-                <div class="preview-dots"><span></span><span></span><span></span></div>
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="preview-url">%s</span>
+                <span class="preview-kind">Concept</span>
               </div>
-              <div class="preview-body">%s</div>
+              <div class="preview-body" aria-hidden="true">%s</div>
             </div>''' % (" preview-phone" if phone else "", url, body)
 
 
 def _phone(status, body):
-    return '''<div class="preview preview-phone" aria-hidden="true">
-              <div class="preview-notch"><span>%s</span><span>&#9679;&#9679;&#9679;</span></div>
-              <div class="preview-body">%s</div>
+    return '''<div class="preview preview-phone">
+              <div class="preview-notch">
+                <span>%s</span><span class="preview-kind">Concept</span>
+              </div>
+              <div class="preview-body" aria-hidden="true">%s</div>
             </div>''' % (status, body)
 
 
@@ -705,7 +773,7 @@ PREVIEWS = {
                 ''' + _row("Every lead traceable", "Kept with the source it came from", "Logged", "acc") + ''''''),
 }
 
-PREVIEW_NOTE = '<p class="preview-note">Interface mockup, not a screenshot</p>'
+PREVIEW_NOTE = ''
 
 
 # ===========================================================================
@@ -760,20 +828,43 @@ def project_card(p):
     )
 
 
+
+def industry_matrix():
+    """Spec 14 HOME 06. A two-pane selector: sectors on the left, what we
+    actually build for that sector on the right."""
+    tabs, panels = "", ""
+    for i, (name, reality, modules) in enumerate(INDUSTRY_DETAIL):
+        sel = "true" if i == 0 else "false"
+        tabs += ('<button type="button" role="tab" id="ind-t{i}" aria-controls="ind-p{i}" '
+                 'aria-selected="{sel}" tabindex="{ti}">{name}</button>').format(
+                     i=i, sel=sel, ti="0" if i == 0 else "-1", name=name)
+        panels += ('<div class="matrix-panel" role="tabpanel" id="ind-p{i}" '
+                   'aria-labelledby="ind-t{i}"{hid}>'
+                   '<h3>{name}</h3><p>{reality}</p>'
+                   '<p class="matrix-lead">What we typically build</p>'
+                   '<div class="matrix-modules">{mods}</div>'
+                   '<a class="card-cta matrix-cta" href="contact.html?industry={q}">'
+                   'Talk about {name} &rarr;</a></div>').format(
+                       i=i, hid="" if i == 0 else " hidden", name=name, reality=reality,
+                       q=quote(name),
+                       mods="".join("<span>%s</span>" % mo for mo in modules))
+    return ('<div class="matrix reveal-on-scroll">'
+            '<div class="matrix-list" role="tablist" aria-label="Industries">%s</div>'
+            '<div class="matrix-panels">%s</div></div>' % (tabs, panels))
+
+
 def service_card(s, span=""):
     points = "".join("<li>%s</li>" % pt for pt in s["points"])
-    links = ['<a href="services-%s.html" style="color:var(--accent);font-weight:600;'
-             'font-size:14px;">Read more about %s &rarr;</a>' % (s["slug"], s["title"].lower())]
+    links = ['<a href="services-%s.html" class="card-cta">Read more about %s &rarr;</a>'
+             % (s["slug"], s["title"].lower())]
     if s.get("link"):
-        links.append('<a href="%s" style="color:var(--text-muted);font-size:13.5px;">%s &rarr;</a>'
-                     % s["link"])
-    price = ('<p style="margin-top:14px;display:flex;flex-direction:column;gap:6px;'
-             'align-items:flex-start;">%s</p>' % "".join(links))
+        links.append('<a href="%s" class="card-cta card-cta-quiet">%s &rarr;</a>' % s["link"])
+    price = '<p class="card-links">%s</p>' % "".join(links)
     return """          <article class="spotlight-card reveal-on-scroll {span}" id="{slug}">
             <div class="icon-tile">{icon}</div>
             <h3>{title}</h3>
-            <p style="color:var(--text);font-weight:600;margin-top:6px;">{outcome}</p>
-            <p style="margin-top:10px;">{body}</p>
+            <p class="card-outcome">{outcome}</p>
+            <p class="card-body">{body}</p>
             <ul class="feature-list">{points}</ul>
             {price}
           </article>
@@ -804,9 +895,37 @@ def trust_row():
 # ===========================================================================
 # Pages
 # ===========================================================================
+# Spec 14 HOME 03. A capability strip, not a logo wall: we have no permission
+# to publish client marks, so the proof on offer is what we actually work in.
+CAPABILITIES = [
+    "Web applications", "Native mobile", "Custom SaaS", "Business systems",
+    "AI automation", "Payments & GST", "Technical SEO", "Cloud & hosting",
+]
+
+# Spec 14 HOME 14. Four questions chosen for the ones asked before a first
+# enquiry, not the ones asked halfway through a build.
+HOME_FAQ_KEYS = [
+    "What does a website actually cost?",
+    "How long does a project take?",
+    "Do I own the code and the design?",
+    "Do you work with businesses outside Erode?",
+]
+
+
 def build_home():
     services_html = "".join(
-        service_card(s, "col-span-2" if i == 0 else "") for i, s in enumerate(SERVICES[:6])
+        service_card(s) for s in SERVICES[:6]
+    )
+    cap_strip = "".join("<span>%s</span>" % c for c in CAPABILITIES)
+
+    lookup = dict(FAQS)
+    home_faqs = [(q, lookup[q]) for q in HOME_FAQ_KEYS if q in lookup]
+    home_faq_html = "".join(
+        """        <details class="faq-item">
+          <summary><h2>%s</h2></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
+        </details>
+""" % (q, a) for q, a in home_faqs
     )
     industries = "".join('<span class="chip">%s</span>' % i for i in INDUSTRIES)
     process = "".join(
@@ -857,8 +976,8 @@ def build_home():
                   <span id="mockup-meyra-body">Two priority items today: the InkNexis architecture review at 11:30 and the Ooruva vendor pilot check-in at 15:30. One proposal is waiting on your sign-off.</span>
                 </p>
 
-                <div style="margin-top:4px;">
-                  <span class="text-mono" style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px;">TRY A COMMAND</span>
+                <div class="mt-1">
+                  <span class="text-mono note fs-xs block mb-2">TRY A COMMAND</span>
                   <div class="mockup-badge-row">
                     <button type="button" class="btn btn-primary btn-sm" data-meyra-scenario="briefing" aria-pressed="true">Morning briefing</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="followup" aria-pressed="false">Client follow-ups</button>
@@ -868,12 +987,19 @@ def build_home():
 
                 <p class="mockup-input-bar">
                   <span>Meyra is one of our own builds &mdash; not a product for sale yet.</span>
-                  <a href="work.html#meyra" style="color:var(--accent);font-weight:600;">Read more</a>
+                  <a class="card-cta" href="work.html#meyra">Read more</a>
                 </p>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section-tight">
+      <div class="container">
+        <p class="strip-label">What we work in</p>
+        <div class="cap-strip reveal-on-scroll">{cap_strip}</div>
       </div>
     </section>
 
@@ -889,20 +1015,21 @@ def build_home():
         <div class="ecosystem-grid">
 {services}        </div>
 
-        <div style="text-align:center;margin-top:32px;">
+        <div class="center mt-7">
           <a href="services.html" class="btn btn-secondary">See all services and what is included &rarr;</a>
         </div>
       </div>
     </section>
 
-    <section class="section-divider section-tight">
+    <section class="section-divider">
       <div class="container">
         <div class="section-head reveal-on-scroll">
           <span class="eyebrow">Industries</span>
           <h2>Built for whatever your business actually does</h2>
-          <p class="section-sub">The workflow changes; the engineering discipline does not.</p>
+          <p class="section-sub">The workflow changes; the engineering discipline does not. Pick a
+            sector to see what the work usually turns out to be.</p>
         </div>
-        <div class="chip-cloud" style="justify-content:center;">{industries}</div>
+        {industry_matrix}
       </div>
     </section>
 
@@ -916,8 +1043,8 @@ def build_home():
           <a href="work.html" class="btn btn-secondary">See all our work &rarr;</a>
         </div>
 
-        <div class="callout" style="margin-bottom:24px;">
-          <p style="font-size:14.5px;"><strong>How to read this page.</strong> Every project below is
+        <div class="callout mb-5">
+          <p class="fs-sm"><strong>How to read this page.</strong> Every project below is
           labelled with its real stage &mdash; client project, active build, specified, or concept.
           We do not present an idea as a shipped product or an internal tool as a client engagement.</p>
         </div>
@@ -933,11 +1060,11 @@ def build_home():
           <div class="reveal-on-scroll">
             <span class="eyebrow">How we work</span>
             <h2>Five stages, and you see the end of each one</h2>
-            <p style="margin-bottom:20px;">No project disappears into a black box for two months.
+            <p class="mb-5">No project disappears into a black box for two months.
               Each stage produces something you can look at, and the next one does not start until
               you have signed off on the last.</p>
             <div class="callout">
-              <p style="font-size:14.5px;"><strong>Payment terms:</strong> 50% advance and 50% on
+              <p class="fs-sm"><strong>Payment terms:</strong> 50% advance and 50% on
               completion, or milestone-by-milestone on larger projects. Domain registration and
               renewal are charged separately.</p>
             </div>
@@ -951,19 +1078,19 @@ def build_home():
     <section class="section-divider">
       <div class="container">
         <div class="card card-lg border-beam-card reveal-on-scroll">
-          <div class="split" style="gap:32px;">
+          <div class="split gap-7">
             <div>
               <span class="eyebrow">Free website review</span>
-              <h2 style="font-size:26px;">Already have a website that is not bringing you anything?</h2>
-              <p style="margin-top:10px;">Send us the address and we will go through it properly &mdash;
+              <h2 class="fs-xl">Already have a website that is not bringing you anything?</h2>
+              <p class="mt-3">Send us the address and we will go through it properly &mdash;
                 loading speed, how it behaves on a phone, technical SEO, broken links, metadata and
                 the path a visitor takes to contacting you &mdash; then tell you what is worth fixing
                 and what is not. If your site is fine, we will say so.</p>
             </div>
-            <div class="stack" style="justify-content:center;">
+            <div class="stack center">
               <a href="{wa_audit}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg btn-block">{wa_svg} Send your website on WhatsApp</a>
               <a href="contact.html?service=Website%20review%20%2F%20audit" class="btn btn-secondary btn-block">Request it by form</a>
-              <p style="font-size:13px;color:var(--text-dim);">Reviewed by a person, not an automated
+              <p class="note">Reviewed by a person, not an automated
                 score generator. We will tell you when we can get to it.</p>
             </div>
           </div>
@@ -971,7 +1098,22 @@ def build_home():
       </div>
     </section>
 
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="section-head reveal-on-scroll">
+          <span class="eyebrow">Before you ask</span>
+          <h2>The questions we get first</h2>
+          <p class="section-sub">Straight answers, including the ones about money.</p>
+        </div>
+{home_faq_html}        <p class="section-sub mt-5">Seven more in the
+          <a href="faq.html" class="text-link">full FAQ</a>.</p>
+      </div>
+    </section>
+
 {cta}""".format(
+        cap_strip=cap_strip,
+        industry_matrix=industry_matrix(),
+        home_faq_html=home_faq_html,
         city=CITY,
         region=REGION,
         wa=wa("Hi MUCO LABS, I would like to discuss a project."),
@@ -1010,7 +1152,7 @@ def build_services():
         "What we build, and what you get",
         "Eight service lines, each written in terms of the business outcome rather than the "
         "technology. Everything is scoped in writing before it starts.",
-    ) + """    <section style="padding-top:0;">
+    ) + """    <section class="section-flush">
       <div class="container">
         <h2 class="visually-hidden">Service lines</h2>
         <div class="ecosystem-grid">
@@ -1026,7 +1168,7 @@ def build_services():
           <p class="section-sub">We ask how your business runs before we propose anything. That
             matters more than whether we have built for your industry before.</p>
         </div>
-        <div class="chip-cloud" style="justify-content:center;">{industries}</div>
+        <div class="chip-cloud center">{industries}</div>
       </div>
     </section>
 
@@ -1119,8 +1261,8 @@ def build_service_page(sv):
             '''          <a class="card card-interactive" href="work.html#%s">
             <div class="tag-row">%s</div>
             <h3>%s</h3>
-            <p style="font-size:14.3px;">%s</p>
-            <span style="margin-top:14px;color:var(--accent);font-weight:600;font-size:14px;">See the project &rarr;</span>
+            <p class="fs-sm">%s</p>
+            <span class="card-cta mt-4">See the project &rarr;</span>
           </a>
 ''' % (p["id"], stage_badge(p["stage"]), p["name"], p["summary"]) for p in related
         )
@@ -1145,21 +1287,21 @@ def build_service_page(sv):
     body = """    <section>
       <div class="container">
         {crumbs}
-        <div class="split" style="align-items:start;">
+        <div class="split">
           <div>
             <span class="eyebrow">Service</span>
             <h1>{title}</h1>
             <p class="lead">{outcome}</p>
             <p>{bodytext}</p>
-            <div class="btn-group" style="margin-top:28px;">
+            <div class="btn-group mt-6">
               <a href="contact.html?service={q}" class="btn btn-accent btn-lg">Start a project</a>
               <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Ask a question</a>
             </div>
           </div>
           <div class="card card-lg">
             <div class="icon-tile">{icon}</div>
-            <h2 style="font-size:19px;">Who this is for</h2>
-            <ul class="feature-list" style="margin-top:14px;">{who}</ul>
+            <h2 class="fs-lg">Who this is for</h2>
+            <ul class="feature-list mt-4">{who}</ul>
           </div>
         </div>
       </div>
@@ -1167,17 +1309,17 @@ def build_service_page(sv):
 
     <section class="section-divider">
       <div class="container">
-        <div class="split" style="align-items:start;">
+        <div class="split">
           <div>
             <h2>What you get</h2>
-            <p style="margin-top:12px;">Everything below is stated explicitly in your scope, with
+            <p class="mt-3">Everything below is stated explicitly in your scope, with
               anything excluded named just as clearly. Nothing here is implied and then invoiced.</p>
-            <ul class="feature-list" style="margin-top:18px;">{deliver}</ul>
-            <p style="margin-top:18px;font-size:14px;color:var(--text-dim);">
-              Quoted per scope. See <a href="pricing.html" style="color:var(--accent);">how we quote</a>.</p>
+            <ul class="feature-list mt-5">{deliver}</ul>
+            <p class="note mt-5">
+              Quoted per scope. See <a class="accent" href="pricing.html">how we quote</a>.</p>
           </div>
           <div>
-            <h2 style="margin-bottom:20px;">How it runs</h2>
+            <h2 class="mb-5">How it runs</h2>
             <div class="process-list">
 {process}            </div>
           </div>
@@ -1196,11 +1338,11 @@ def build_service_page(sv):
 
     <section class="section-divider section-tight">
       <div class="container">
-        <div class="section-head" style="margin-bottom:24px;">
+        <div class="section-head mb-5">
           <span class="eyebrow">Other services</span>
-          <h2 style="font-size:22px;">We also do</h2>
+          <h2 class="fs-xl">We also do</h2>
         </div>
-        <div class="chip-cloud" style="justify-content:center;">{others}</div>
+        <div class="chip-cloud center">{others}</div>
       </div>
     </section>
 
@@ -1246,13 +1388,14 @@ def build_work():
     for p in shown:
         if p["stage"] not in stages_used:
             stages_used.append(p["stage"])
-    stages_used.sort(key=lambda k: ["client", "build", "spec", "concept"].index(k))
+    stages_used.sort(key=lambda k: ["client", "live", "build", "spec", "concept"].index(k))
 
     legend = "".join(
         '            <div class="def-row"><dt>%s</dt><dd>%s</dd></div>\n' % (
             stage_badge(k),
             {
                 "client": "Paid client engagement, delivered or in delivery.",
+                "live": "Running in production or in daily operational use right now.",
                 "build": "Our own product. Code exists and the build is actively progressing.",
                 "spec": "Requirements are locked and written. The build has not been completed.",
                 "concept": "An idea or a pitch. Deliberately not presented as a product.",
@@ -1267,23 +1410,22 @@ def build_work():
         "One client project and five of our own products. Each one says plainly what stage it is "
         "at, because a specification is not a shipped product and we are not going to pretend "
         "otherwise.",
-        extra="""        <div class="card card-quiet" style="margin-top:28px;">
-          <h2 style="font-size:19px;">How to read the labels</h2>
-          <dl class="def-list" style="margin-bottom:0;">
+        extra="""        <div class="card card-quiet mt-6">
+          <h2 class="fs-lg">How to read the labels</h2>
+          <dl class="def-list mb-0">
 {legend}          </dl>
         </div>
 """.format(legend=legend),
-    ) + """    <section style="padding-top:0;">
+    ) + """    <section class="section-flush">
       <div class="container">
         <h2 class="visually-hidden">Projects</h2>
         <div class="work-grid">
 {cards}        </div>
 
-        <div class="callout" style="margin-top:32px;">
-          <p style="font-size:14.5px;"><strong>Why there are no screenshots yet.</strong> These are
-          working systems, not finished consumer products, and we would rather show you a real one
-          on a call than dress up a mockup here. Ask and we will walk you through whichever is
-          closest to what you need.</p>
+        <div class="callout mt-7">
+          <p class="fs-sm">Panels marked <strong>Concept</strong> are drawings of how a
+          product works, not captures of a running screen. Ask and we will walk you through the real
+          thing on a call.</p>
         </div>
       </div>
     </section>
@@ -1335,7 +1477,7 @@ def build_pricing():
     for name, sub, points, q, featured in tiers:
         cards += """          <article class="price-card {cls}">
             <h3>{name}</h3>
-            <p style="font-size:14.5px;margin-top:4px;">{sub}</p>
+            <p class="fs-sm mt-1">{sub}</p>
             <p class="price-tagline">Quoted per scope</p>
             <ul class="feature-list">{points}</ul>
             <a href="contact.html?service={q}" class="btn {btn} btn-block">Request a quote</a>
@@ -1377,16 +1519,16 @@ def build_pricing():
         "websites that look similar can differ by four times in build time. A number posted here "
         "would be either so low it is meaningless or so high it scares off work we would have "
         "enjoyed. So here is exactly how the number gets made instead.",
-    ) + """    <section style="padding-top:0;">
+    ) + """    <section class="section-flush">
       <div class="container">
         <h2 class="visually-hidden">What we quote for</h2>
         <div class="grid grid-3">
 {cards}        </div>
 
-        <div class="callout" style="margin-top:28px;">
+        <div class="callout mt-6">
           <p><strong>Payment terms.</strong> 50% advance and 50% on completion, or milestone
           payments on larger projects. Domain registration and renewal are charged separately.
-          Refund and cancellation terms are on the <a href="refund.html" style="color:var(--accent);">refund policy</a> page.</p>
+          Refund and cancellation terms are on the <a class="accent" href="refund.html">refund policy</a> page.</p>
         </div>
       </div>
     </section>
@@ -1423,9 +1565,9 @@ def build_pricing():
     <section class="section-divider">
       <div class="container container-narrow">
         <div class="card card-lg">
-          <h2 style="font-size:24px;">Not included unless the scope says so</h2>
-          <ul class="feature-list" style="margin-top:18px;">{excl}</ul>
-          <p style="margin-top:16px;font-size:14px;color:var(--text-dim);">
+          <h2 class="fs-xl">Not included unless the scope says so</h2>
+          <ul class="feature-list mt-5">{excl}</ul>
+          <p class="note mt-4">
             Every quote lists inclusions and exclusions explicitly, so there is nothing to discover later.</p>
         </div>
       </div>
@@ -1511,17 +1653,17 @@ def build_local_erode():
         <div class="split">
           <div>
             <h2>Why a local studio makes a difference</h2>
-            <p style="margin-top:14px;">Plenty of businesses in {city} have been sold a website by
+            <p class="mt-4">Plenty of businesses in {city} have been sold a website by
               someone three states away, paid for it, and never been able to reach them again to
               change a phone number. Being in the same district is not a marketing line &mdash; it
               is the difference between a supplier you can meet and one who stops replying.</p>
-            <p style="margin-top:14px;">It also means we know the conditions your site has to work
+            <p class="mt-4">It also means we know the conditions your site has to work
               in: customers on mid-range Android phones and mobile data, Tamil and English side by
               side, and WhatsApp as the place where business actually gets done.</p>
           </div>
           <div class="card card-lg">
             <h3>What that looks like in practice</h3>
-            <ul class="feature-list" style="margin-top:14px;">
+            <ul class="feature-list mt-4">
               <li>We meet you in person in {city} and nearby towns</li>
               <li>Tamil, English or both &mdash; written, not machine-translated</li>
               <li>Tested on real mid-range Android phones, not just a laptop</li>
@@ -1555,7 +1697,7 @@ def build_local_erode():
           <h2>Asked by businesses in {city}</h2>
         </div>
 {faqs}
-        <p style="margin-top:24px;text-align:center;">
+        <p class="center mt-5">
           <a href="faq.html" class="btn btn-secondary">All questions and answers &rarr;</a>
         </p>
       </div>
@@ -1564,11 +1706,11 @@ def build_local_erode():
     <section class="section-divider">
       <div class="container container-narrow">
         <div class="card card-lg">
-          <h2 style="font-size:22px;">Also serving</h2>
-          <p style="margin-top:10px;">We work in person across <strong>{markets}</strong>, and
+          <h2 class="fs-xl">Also serving</h2>
+          <p class="mt-3">We work in person across <strong>{markets}</strong>, and
             remotely anywhere. If you are further away in {region}, the process is the same &mdash;
             calls and shared documents instead of meetings.</p>
-          <div class="btn-group" style="margin-top:20px;">
+          <div class="btn-group mt-5">
             <a href="services.html" class="btn btn-secondary">All services</a>
             <a href="work.html" class="btn btn-secondary">See our work</a>
             <a href="pricing.html" class="btn btn-secondary">How we quote</a>
@@ -1626,24 +1768,24 @@ def build_maintenance():
         "Someone who answers when something breaks",
         "A website is not finished at launch. Plans are quote-based so you pay for the level of "
         "cover you actually need, and we only commit to response times we can honour.",
-    ) + """    <section style="padding-top:0;">
+    ) + """    <section class="section-flush">
       <div class="container">
         <div class="grid grid-2">
           <div class="card card-lg">
             <div class="icon-tile">{ok}</div>
-            <h2 style="font-size:22px;">What a plan includes</h2>
-            <ul class="feature-list" style="margin-top:14px;">{incl}</ul>
+            <h2 class="fs-xl">What a plan includes</h2>
+            <ul class="feature-list mt-4">{incl}</ul>
           </div>
           <div class="card card-lg">
             <div class="icon-tile icon-tile-alt">{code}</div>
-            <h2 style="font-size:22px;">What it does not include</h2>
-            <ul class="feature-list" style="margin-top:14px;">{excl}</ul>
-            <p style="margin-top:14px;font-size:14px;color:var(--text-dim);">Anything on this list can
+            <h2 class="fs-xl">What it does not include</h2>
+            <ul class="feature-list mt-4">{excl}</ul>
+            <p class="note mt-4">Anything on this list can
               still be done &mdash; it is quoted separately rather than absorbed silently.</p>
           </div>
         </div>
 
-        <div class="callout callout-warn" style="margin-top:28px;">
+        <div class="callout callout-warn mt-6">
           <p><strong>On response times.</strong> We do not publish an SLA we cannot guarantee.
           Your agreement states the response window we have actually committed to, and how to
           escalate if it is missed.</p>
@@ -1654,7 +1796,7 @@ def build_maintenance():
     <section class="section-divider">
       <div class="container container-narrow">
         <h2>How support works</h2>
-        <div class="process-list" style="margin-top:24px;">
+        <div class="process-list mt-5">
           <div class="process-step"><div><h3>Report</h3><p>You raise an issue on the agreed channel with what happened and when.</p></div></div>
           <div class="process-step"><div><h3>Acknowledge and assess</h3><p>We confirm receipt, reproduce the issue and tell you whether it is covered by your plan.</p></div></div>
           <div class="process-step"><div><h3>Fix and verify</h3><p>The fix is applied and verified, and you get a short note on what changed.</p></div></div>
@@ -1721,7 +1863,7 @@ def build_about():
 
     body = """    <section>
       <div class="container">
-        <div class="split" style="align-items:start;">
+        <div class="split">
           <div>
             <span class="eyebrow">About</span>
             <h1>A <span class="accent-serif">founder-led</span> software studio in {city}.</h1>
@@ -1734,12 +1876,12 @@ def build_about():
               is deliberate &mdash; the internal builds are where we make our mistakes, and the
               client work is where the lessons get applied.</p>
 
-            <p style="margin-top:16px;">We do not have an office full of stock photography, a
+            <p class="mt-4">We do not have an office full of stock photography, a
               wall of client logos or a page of five-star testimonials, because we have not
               earned those yet. What we have is written specifications, working code and a
               portfolio labelled honestly enough that you can check it yourself.</p>
 
-            <div class="btn-group" style="margin-top:28px;">
+            <div class="btn-group mt-6">
               <a href="work.html" class="btn btn-secondary">See the work &rarr;</a>
               <a href="contact.html" class="btn btn-accent">Start a project</a>
             </div>
@@ -1760,9 +1902,9 @@ def build_about():
                    alt="{founder}, founder of {brand}" />
             </picture>
             <p class="portrait-caption">
-              <strong style="color:var(--text);">{founder}</strong><br />
+              <strong class="ink">{founder}</strong><br />
               Founder &amp; Chairman, {brand}<br />
-              <span class="text-mono" style="font-size:12px;">{city}, {region}</span>
+              <span class="text-mono fs-xs">{city}, {region}</span>
             </p>
           </div>
         </div>
@@ -1783,7 +1925,7 @@ def build_about():
     <section class="section-divider">
       <div class="container container-narrow">
         <h2>The working arrangement</h2>
-        <div class="table-wrap" style="margin-top:22px;">
+        <div class="table-wrap mt-5">
           <table>
             <caption class="visually-hidden">How MUCO LABS works with clients</caption>
             <tbody>
@@ -1853,6 +1995,84 @@ def build_contact():
         out = '<option value="">%s</option>' % empty
         return out + "".join('<option value="%s">%s</option>' % (i, i) for i in items)
 
+    # Spec 29 CONTACT 02. Each channel says what it is actually good for and what
+    # to expect back, so the choice is obvious before the tap.
+    channels = [
+        ("WhatsApp", wa("Hi MUCO LABS, I would like to discuss a project."),
+         PHONE, WA_SVG, "channel-whatsapp",
+         "Quick questions, sharing screenshots, and everything after we start.",
+         "Fastest during working hours", "_blank"),
+        ("Phone", "tel:" + PHONE_TEL, PHONE,
+         icon('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>', 20),
+         "", "When it is easier to explain than to type.",
+         HOURS, ""),
+        ("Email", "mailto:" + EMAIL, EMAIL,
+         icon('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5L12 13l9.5-6.5"/>', 20),
+         "", "Detailed briefs, documents, quotes and anything you want on record.",
+         "Usually the same working day", ""),
+        ("Instagram", INSTAGRAM, "@muco_labs", IG_SVG, "channel-instagram",
+         "Recent work and what we are building. Not the place for a scope.",
+         "Checked less often", "_blank"),
+    ]
+
+    channel_cards = ""
+    for name, href, label, svg, extra, best, expect, target in channels:
+        tgt = ' target="_blank" rel="noopener noreferrer"' if target else ""
+        channel_cards += """
+            <a class="channel-card spotlight-card reveal-on-scroll {extra}" href="{href}"{tgt}>
+              <span class="channel-icon">{svg}</span>
+              <h3>{name}</h3>
+              <span class="channel-value">{label}</span>
+              <p>{best}</p>
+              <span class="channel-expect">{expect}</span>
+            </a>""".format(extra=extra, href=href, tgt=tgt, svg=svg, name=name,
+                           label=label, best=best, expect=expect)
+
+    # Spec 29 CONTACT 04. Removing the guesswork from "what should I even send?"
+    send_items = [
+        ("What the business does", "One or two lines. Industry, who buys from you, roughly how big."),
+        ("The problem, not the solution", "“Orders come by phone and we lose them” tells us more than “we need an app”."),
+        ("Anything that already exists", "A current website, a spreadsheet you run on, screenshots, a competitor you like."),
+        ("Budget and timeline, honestly", "Even a rough range. It changes what we propose, and it stops us wasting your time."),
+    ]
+    send_rows = "".join(
+        '<div class="def-row"><dt>%s</dt><dd>%s</dd></div>' % (t, d) for t, d in send_items)
+
+    steps = [
+        ("You send the enquiry",
+         "Form, WhatsApp, phone or email &mdash; all of them reach the same person. "
+         "Nothing sits in a shared inbox waiting for someone to claim it."),
+        ("We read it and come back with questions",
+         "Usually the same working day. The questions are the point: they are how a vague "
+         "idea turns into something that can actually be priced."),
+        ("You get a written scope and a price",
+         "Inclusions, exclusions, milestones, what we need from you and what it costs. "
+         "You decide with that in front of you, not from a sales call."),
+    ]
+    step_html = "".join(
+        '<div class="process-step reveal-on-scroll"><div><h3>%s</h3><p>%s</p></div></div>' % (t, d)
+        for t, d in steps)
+
+    contact_faqs = [
+        ("Do I have to pay for the first conversation?",
+         "No. The first conversation, the questions that follow and the written scope are free. "
+         "You only pay once you accept the scope and we start work."),
+        ("What if I do not know what I need yet?",
+         "That is normal and it is fine. Describe the problem in plain words &mdash; what is slow, "
+         "what gets lost, what you are doing by hand. Working out the right solution is part of "
+         "the job, not something you have to arrive with."),
+        ("Can we meet in person?",
+         "Yes, in %s and around %s. Everywhere else we work over calls and shared documents, "
+         "which for most projects is faster anyway." % (CITY, ", ".join(MARKETS[:4]))),
+        ("Will I be handed to someone else after I sign?",
+         "No. %s replies to the enquiry, writes the scope and builds the work. There is no "
+         "account manager in between." % FOUNDER),
+    ]
+    faq_html = "".join(
+        '<details class="faq-item"><summary><h2>%s</h2></summary>'
+        '<div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>%s</p></div></div></div>'
+        '</details>' % (q, a) for q, a in contact_faqs)
+
     body = """    <section>
       <div class="container">
         <span class="eyebrow">Contact</span>
@@ -1861,46 +2081,49 @@ def build_contact():
           approach and a written scope. If we are not the right people for it, we will tell you that
           instead of taking the project.</p>
 
-        <div class="split" style="align-items:start;margin-top:36px;">
+        <div class="grid grid-4 channel-grid">{channel_cards}
+        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container">
+        <div class="split">
           <div class="stack">
             <div class="card card-lg">
-              <h2 style="font-size:20px;margin-bottom:18px;">Reach us directly</h2>
-              <div class="stack" style="gap:12px;">
-                <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg" style="justify-content:flex-start;">
-                  {wa_svg}<span>WhatsApp &mdash; {phone}</span>
-                </a>
-                <a href="tel:{tel}" class="btn btn-secondary btn-lg" style="justify-content:flex-start;">
-                  {ic_phone}<span>Call &mdash; {phone}</span>
-                </a>
-                <a href="mailto:{email}" class="btn btn-secondary btn-lg" style="justify-content:flex-start;">
-                  {ic_mail}<span>{email}</span>
-                </a>
-                <a href="{ig}" target="_blank" rel="noopener noreferrer" class="btn btn-instagram btn-lg" style="justify-content:flex-start;">
-                  {ig_svg}<span>@muco_labs on Instagram</span>
-                </a>
-              </div>
+              <span class="eyebrow">Before you write</span>
+              <h2 class="h2-sm">What to send us</h2>
+              <p class="section-sub">You do not need a specification. Four things are enough for us
+                to give you a useful answer instead of a generic one.</p>
+              <dl class="def-list def-list-wide">{send_rows}</dl>
+            </div>
 
-              <dl class="def-list" style="margin-top:26px;padding-top:22px;border-top:1px solid var(--border);">
+            <div class="card card-lg">
+              <span class="eyebrow">Details</span>
+              <h2 class="h2-sm">Where we are</h2>
+              <dl class="def-list">
                 <div class="def-row"><dt>Based in</dt><dd>{city}, {region}, India</dd></div>
                 <div class="def-row"><dt>Hours</dt><dd>{hours}</dd></div>
                 <div class="def-row"><dt>In person</dt><dd>{markets} and across {region}</dd></div>
                 <div class="def-row"><dt>Remote</dt><dd>Anywhere &mdash; calls and shared documents</dd></div>
                 <div class="def-row"><dt>Languages</dt><dd>English and Tamil</dd></div>
+                <div class="def-row"><dt>You will talk to</dt><dd>{founder}, who also builds the work</dd></div>
               </dl>
             </div>
 
             <div class="callout">
-              <p style="font-size:14px;"><strong>What happens next.</strong> We read every enquiry
-              ourselves. You will usually get a reply with questions or a suggested time to talk.
-              We do not publish a guaranteed response time because we would rather meet a
-              commitment than advertise one.</p>
+              <p class="fs-sm"><strong>No response-time promise.</strong> We read every
+              enquiry ourselves and reply as fast as we honestly can &mdash; usually the same working
+              day. We do not advertise a guaranteed hour figure, because we would rather meet a
+              commitment than publish one.</p>
             </div>
           </div>
 
           <div class="form-card">
-            <h2 style="font-size:20px;">Project enquiry</h2>
-            <p style="font-size:14px;margin:8px 0 22px;">Fill this in and it reaches us directly, and
-              opens WhatsApp with the same details already written out so you can talk there too.</p>
+            <span class="eyebrow">Project enquiry</span>
+            <h2 class="h2-sm">Send the details</h2>
+            <p class="form-intro">This reaches us directly, and opens WhatsApp with the same details
+              already written out so you can carry on the conversation there.</p>
 
             <form id="enquiry-form" novalidate>
               <div class="form-row">
@@ -1970,34 +2193,57 @@ def build_contact():
               <div class="form-consent">
                 <input type="checkbox" id="consent" name="consent" required />
                 <label for="consent">I agree that {brand} may contact me about this enquiry.
-                  See the <a href="privacy.html" style="color:var(--accent);">privacy policy</a>.</label>
+                  See the <a href="privacy.html">privacy policy</a>.</label>
               </div>
               <p class="form-error" id="consent-error">Please confirm we may contact you.</p>
 
-              <div class="btn-group" style="margin-top:12px;">
-                <button type="submit" class="btn btn-whatsapp btn-lg" style="flex:1;">{wa_svg} Send on WhatsApp</button>
+              <div class="btn-group mt-3">
+                <button type="submit" class="btn btn-whatsapp btn-lg grow">{wa_svg} Send on WhatsApp</button>
                 <button type="button" id="send-email" class="btn btn-secondary btn-lg">Send by email</button>
               </div>
 
               <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
 
-              <p class="form-hint" style="margin-top:16px;">
+              <p class="form-hint mt-4">
                 Your enquiry is sent to us and also opened in WhatsApp, so it reaches us even if you
                 do not press send there. We use these details to reply and quote, nothing else &mdash;
-                see the <a href="privacy.html" style="color:var(--accent);">privacy policy</a>.
+                see the <a href="privacy.html">privacy policy</a>.
               </p>
             </form>
           </div>
         </div>
       </div>
     </section>
+
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="section-head">
+          <span class="eyebrow">After you send it</span>
+          <h2>What actually happens next</h2>
+          <p class="section-sub">Three steps, and you can stop after any of them at no cost.</p>
+        </div>
+        <div class="process-list">{step_html}</div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="section-head">
+          <span class="eyebrow">Before you ask</span>
+          <h2>Contact questions</h2>
+        </div>
+        {faq_html}
+        <p class="section-sub mt-5">More in the
+          <a href="faq.html" class="text-link">full FAQ</a>.</p>
+      </div>
+    </section>
 """.format(
-        wa=wa("Hi MUCO LABS, I would like to discuss a project."),
-        wa_svg=WA_SVG, ig_svg=IG_SVG, ig=INSTAGRAM,
-        phone=PHONE, tel=PHONE_TEL, email=EMAIL,
-        ic_phone=icon('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>', 18),
-        ic_mail=icon('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5L12 13l9.5-6.5"/>', 18),
-        city=CITY, region=REGION, hours=HOURS, brand=BRAND,
+        channel_cards=channel_cards,
+        send_rows=send_rows,
+        step_html=step_html,
+        faq_html=faq_html,
+        wa_svg=WA_SVG,
+        city=CITY, region=REGION, hours=HOURS, brand=BRAND, founder=FOUNDER,
         markets=", ".join(MARKETS),
         services=options(service_opts, "Select a service"),
         budgets=options(budgets, "Select a range"),
@@ -2018,10 +2264,10 @@ def build_contact():
         "scope, budget and timeline." % (BRAND, CITY, REGION, PHONE, EMAIL),
         body,
         schema_blocks=[ORG_JSONLD, contact_jsonld,
+                       faq_jsonld(contact_faqs),
                        breadcrumbs([("Home", ""), ("Contact", "contact.html")]),
                        speakable_jsonld(DOMAIN + "/contact.html", ["h1", ".def-list"])],
     )
-
 
 def build_faq():
     items = "".join(
@@ -2037,7 +2283,7 @@ def build_faq():
         "The questions we <span class='accent-serif'>actually</span> get asked",
         "Pricing, process, ownership and the things other agencies avoid answering. If your "
         "question is not here, ask it directly.",
-    ) + """    <section style="padding-top:0;">
+    ) + """    <section class="section-flush">
       <div class="container container-narrow">
 {items}      </div>
     </section>
@@ -2084,7 +2330,7 @@ def build_careers():
             <div class="tag-row"><span class="tag tag-subtle">%s</span></div>
             <h3>%s</h3>
             <p>%s</p>
-            <a href="%s" class="btn btn-secondary btn-sm" style="margin-top:16px;align-self:flex-start;">Apply for this role</a>
+            <a href="%s" class="btn btn-secondary btn-sm mt-4 self-start">Apply for this role</a>
           </article>
 """ % (kind, title, desc, wa("Hi MUCO LABS, I want to apply for the %s role." % title))
         for title, kind, desc in roles
@@ -2096,16 +2342,16 @@ def build_careers():
         "Most work here is project-based or contract, and we are honest that we are not a large "
         "company with a bench. If you are good and you want direct ownership of what you build, "
         "there is room.",
-    ) + """    <section style="padding-top:0;">
+    ) + """    <section class="section-flush">
       <div class="container">
-        <div class="callout" style="margin-bottom:28px;">
+        <div class="callout mb-6">
           <p><strong>Straight about the stage we are at.</strong> {brand} is founder-led. We do not
           currently advertise salaried full-time positions, employee counts or benefits packages,
           because publishing those before they exist would be dishonest. What we do have is real
           project work, and terms agreed per engagement.</p>
         </div>
 
-        <h2 style="margin-bottom:20px;">Where we usually need help</h2>
+        <h2 class="mb-5">Where we usually need help</h2>
         <div class="grid grid-3">
 {roles}        </div>
       </div>
@@ -2117,26 +2363,26 @@ def build_careers():
           <div>
             <span class="eyebrow">Freelancers &amp; studios</span>
             <h2>Collaboration, not subcontracting in the dark</h2>
-            <p style="margin-bottom:16px;">We work with independent developers, designers and small
+            <p class="mb-4">We work with independent developers, designers and small
               studios on projects that need more hands or a specific specialism. If you bring the
               client, you stay in the relationship &mdash; we do not go around you.</p>
             <p>Commercial terms, revenue split and ownership are agreed in writing per engagement.
               We are not publishing a fixed split here until it is confirmed in a form we can hold
               ourselves to.</p>
-            <div class="btn-group" style="margin-top:24px;">
+            <div class="btn-group mt-5">
               <a href="{wa_free}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">{wa_svg} Talk about collaborating</a>
               <a href="mailto:{email}?subject=Freelance%20collaboration" class="btn btn-secondary">Email us</a>
             </div>
           </div>
           <div class="card card-lg">
             <h3>How to apply</h3>
-            <ul class="feature-list" style="margin-top:14px;">
+            <ul class="feature-list mt-4">
               <li>Message us on WhatsApp or email with the role you want</li>
               <li>Send links to real work &mdash; repositories, live sites or apps</li>
               <li>Tell us what you actually built in each one</li>
               <li>Mention your availability and how you prefer to be paid</li>
             </ul>
-            <p style="margin-top:16px;font-size:14px;color:var(--text-dim);">A short honest message
+            <p class="note mt-4">A short honest message
               about two projects beats a long CV. We read everything ourselves.</p>
           </div>
         </div>
@@ -2184,7 +2430,7 @@ else:
         "where the law requires it."
     )
 
-LEGAL_NOTICE = """      <div class="callout callout-warn" style="margin-bottom:32px;">
+LEGAL_NOTICE = """      <div class="callout callout-warn mb-7">
         <p><strong>Please read.</strong> This page describes how {brand} actually operates today and
         is written in plain language. It has not been reviewed by a lawyer and is not a substitute
         for legal advice. If anything here matters to a decision you are making, ask us and we will
@@ -2455,14 +2701,14 @@ def build_404():
         '          <li><a href="%s">%s</a></li>\n' % (h, l)
         for h, l in NAV[1:] + [("faq.html", "FAQ"), ("careers.html", "Careers")]
     )
-    body = """    <section style="min-height:52vh;display:flex;align-items:center;">
-      <div class="container container-narrow" style="text-align:center;">
+    body = """    <section class="section-centered">
+      <div class="container container-narrow center">
         <span class="eyebrow">404</span>
         <h1>That page does not exist.</h1>
-        <p class="lead" style="margin-left:auto;margin-right:auto;">The link may be out of date, or
+        <p class="lead mx-auto">The link may be out of date, or
           the address may have a typo in it. Here is everything that does exist:</p>
 
-        <ul class="chip-cloud" style="justify-content:center;margin-bottom:32px;">
+        <ul class="chip-cloud center mb-7">
 {links}        </ul>
 
         <div class="btn-group btn-group-center">
@@ -2471,7 +2717,7 @@ def build_404():
         </div>
       </div>
     </section>
-""".format(links=links.replace("<li>", '<li class="chip" style="padding:0;background:none;border:none;">'),
+""".format(links=links.replace("<li>", '<li class="chip bare">'),
            wa=wa("Hi MUCO LABS, I hit a broken link on your website."), wa_svg=WA_SVG)
 
     return render(

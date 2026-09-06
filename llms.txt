@@ -39,8 +39,8 @@ specification is never presented as a shipped product.
 - **Ooruva** (active build) — A hyperlocal discovery platform for real neighbourhood businesses — a customer app, a vendor app and an admin console that share one verified business directory.
 - **InkNexis** (active build) — Multi-tenant SaaS covering the whole tattoo studio lifecycle: customer history, design and placement preview, quote, booking, consent, session, aftercare, artist commission and analytics.
 - **Natural beauty brand website** (client project) — A mobile-first product storytelling website for a natural and organic beauty brand, built to convert search and social visitors into WhatsApp enquiries rather than force early e-commerce. Client named on request.
-- **MUCO LABS platform** (active build) — The company's own lead-generation and credibility platform, designed to grow into a secure customer, freelancer and admin portal without giving up SEO or conversion.
-- **Lead generation & outreach automation** (active build) — A recurring workflow that finds evidence-backed prospects from public sources, de-duplicates and qualifies them, maps each to a service, and produces traceable personalised outreach.
+- **MUCO LABS platform** (live) — The company's own lead-generation and credibility platform, designed to grow into a secure customer, freelancer and admin portal without giving up SEO or conversion.
+- **Lead generation & outreach automation** (live) — A recurring workflow that finds evidence-backed prospects from public sources, de-duplicates and qualifies them, maps each to a service, and produces traceable personalised outreach.
 
 Thirteen further systems are specified or at concept stage and are deliberately not
 presented as available products.

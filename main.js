@@ -319,6 +319,24 @@
       }
     })();
 
+    // The industries matrix on the home page links here with the sector the
+    // visitor picked. There is no industry field, so it opens the message for
+    // them instead of quietly dropping what they told us.
+    (function prefillIndustry() {
+      var message = form.elements.message;
+      if (!message || message.value) return;
+      var wanted;
+      try {
+        wanted = new URL(window.location.href).searchParams.get('industry');
+      } catch (e) {
+        return;
+      }
+      if (!wanted) return;
+      wanted = wanted.replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, 80);
+      if (!wanted) return;
+      message.value = 'Industry: ' + wanted + '\n\n';
+    })();
+
     function showStatus(kind, message) {
       if (!status) return;
       status.className = 'form-status show form-status-' + kind;
@@ -330,20 +348,43 @@
       return el ? String(el.value || '').trim() : '';
     }
 
+    function fieldIsValid(el) {
+      return el.type === 'checkbox' ? el.checked : el.checkValidity() && el.value.trim();
+    }
+
+    function markField(el) {
+      var valid = fieldIsValid(el);
+      el.setAttribute('aria-invalid', valid ? 'false' : 'true');
+      var err = document.getElementById(el.id + '-error');
+      if (err) err.classList.toggle('show', !valid);
+      return valid;
+    }
+
     function validate() {
       var ok = true;
       Array.prototype.forEach.call(form.querySelectorAll('[required]'), function (el) {
-        var valid = el.type === 'checkbox' ? el.checked : el.checkValidity() && el.value.trim();
-        el.setAttribute('aria-invalid', valid ? 'false' : 'true');
-        var err = document.getElementById(el.id + '-error');
-        if (err) err.classList.toggle('show', !valid);
-        if (!valid && ok) {
+        if (!markField(el) && ok) {
           el.focus();
           ok = false;
         }
       });
       return ok;
     }
+
+    // Once a field has been flagged, clear the flag the moment it is fixed.
+    // Leaving an error visible under a field the visitor has already corrected
+    // reads as "this is still wrong" and it isn't.
+    Array.prototype.forEach.call(form.querySelectorAll('[required]'), function (el) {
+      var event = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(event, function () {
+        if (el.getAttribute('aria-invalid') === 'true' && fieldIsValid(el)) markField(el);
+      });
+      // Flag on blur only once the visitor has actually typed something, so an
+      // empty field they merely tabbed through is not accused of being wrong.
+      el.addEventListener('blur', function () {
+        if (el.type !== 'checkbox' && el.value.trim()) markField(el);
+      });
+    });
 
     function buildMessage() {
       var lines = [
