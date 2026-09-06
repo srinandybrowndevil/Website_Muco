@@ -9,3 +9,8 @@ __pycache__/
 !.env.example
 *.pem
 *.key
+
+# Playwright MCP scratch output
+.playwright-mcp/
+*-mobile.png
+page-*.yml
