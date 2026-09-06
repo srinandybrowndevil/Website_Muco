@@ -1,0 +1,12 @@
+{
+  "muco-platform": {
+    "height": 800,
+    "portrait": false,
+    "width": 1280,
+    "widths": [
+      640,
+      960,
+      1280
+    ]
+  }
+}

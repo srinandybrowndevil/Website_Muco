@@ -31,6 +31,32 @@ the `.html` files are all generated. Edit the sources above, not the output.
 python3 build.py
 ```
 
+## Adding a real screenshot of a project
+
+The portfolio labels every panel: **Screenshot** for a capture of the running
+product, **Concept** for a drawing of how it works. A project gets the honest
+label automatically -- put a real capture in and it switches.
+
+1. Capture the product at 1440x900 (or a phone at 390x844) with the browser
+   scrollbar hidden.
+2. Save it as `shots/<project id>.png`, using the id from `PROJECTS` in
+   `content.py`: `meyra`, `ooruva`, `inknexis`, `beauty-brand`,
+   `muco-platform`, `lead-automation`.
+3. Run both builds:
+
+```bash
+python3 build_shots.py && python3 build.py
+```
+
+`build_shots.py` writes WebP and JPEG at three widths into `assets/shots/` and
+records the real pixel dimensions in `index.json`, so every image ships with
+`width`/`height` and reserves its space before it loads. A project with no file
+keeps its drawn concept preview -- nothing breaks, and nothing claims to be a
+screenshot when it is not.
+
+Commit `assets/shots/` as well as `shots/`: Vercel serves the generated files
+and does not run the scripts.
+
 No dependencies, no npm, no build server. It writes the `.html` files plus
 `robots.txt` and `sitemap.xml`, and you commit the result.
 

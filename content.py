@@ -898,12 +898,61 @@ def stage_badge(stage):
     return '<span class="badge %s">%s</span>' % (cls, label)
 
 
+# Real screenshots, written by build_shots.py. A project with an entry here
+# shows the actual product; one without keeps its drawn concept preview. The
+# index carries true pixel dimensions so the markup can reserve the space.
+def _load_shots():
+    path = os.path.join(ROOT, "assets", "shots", "index.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+SHOTS = _load_shots()
+
+
+def screenshot(pid, alt):
+    """A real capture, served responsively.
+
+    This is the one thing on the page that is photographic evidence rather than
+    a drawing, so it says so: the chrome reads Screenshot, not Concept.
+    """
+    shot = SHOTS.get(pid)
+    if not shot:
+        return ""
+    widths = shot["widths"]
+    sizes = "(max-width: 768px) 100vw, 560px"
+    srcset = lambda ext: ", ".join(
+        "assets/shots/%s-%d.%s %dw" % (pid, w, ext, w) for w in widths)
+    return """<figure class="preview preview-real">
+              <div class="preview-bar">
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="preview-url">%s</span>
+                <span class="preview-kind is-real">Screenshot</span>
+              </div>
+              <picture>
+                <source type="image/webp" srcset="%s" sizes="%s" />
+                <img src="assets/shots/%s-%d.jpg" srcset="%s" sizes="%s"
+                     width="%d" height="%d" loading="lazy" decoding="async" alt="%s" />
+              </picture>
+            </figure>""" % (
+        DOMAIN.replace("https://", ""),
+        srcset("webp"), sizes,
+        pid, widths[-1], srcset("jpg"), sizes,
+        shot["width"], shot["height"], alt)
+
+
 def project_card(p):
     """Compact card: the headline facts are always visible, the detail is one
     click away, so a nineteen-project grid stays scannable."""
     chips = "".join('<span class="tag tag-subtle">%s</span>' % c for c in p["chips"])
     note = ('<p class="work-note">%s</p>' % p["note"]) if p.get("note") else ""
-    preview = (PREVIEWS[p["id"]] + "\n            " + PREVIEW_NOTE) if p["id"] in PREVIEWS else ""
+    # A real screenshot always beats a drawing of one.
+    preview = screenshot(p["id"], "Screenshot of %s" % p["name"])
+    if not preview and p["id"] in PREVIEWS:
+        preview = PREVIEWS[p["id"]] + "\n            " + PREVIEW_NOTE
     return """          <article class="work-card reveal-on-scroll" id="{id}">
             {preview}
             <div class="work-card-head">
@@ -1567,9 +1616,10 @@ def build_work():
 {cards}        </div>
 
         <div class="callout mt-7">
-          <p class="fs-sm">Panels marked <strong>Concept</strong> are drawings of how a
-          product works, not captures of a running screen. Ask and we will walk you through the real
-          thing on a call.</p>
+          <p class="fs-sm">Panels marked <strong>Screenshot</strong> are captures of the running
+          product. Panels marked <strong>Concept</strong> are drawings of how a product works, not
+          captures of a screen &mdash; we label the difference rather than letting you assume.
+          Ask and we will walk you through the real thing on a call.</p>
         </div>
       </div>
     </section>
@@ -3175,6 +3225,32 @@ the `.html` files are all generated. Edit the sources above, not the output.
 ```bash
 python3 build.py
 ```
+
+## Adding a real screenshot of a project
+
+The portfolio labels every panel: **Screenshot** for a capture of the running
+product, **Concept** for a drawing of how it works. A project gets the honest
+label automatically -- put a real capture in and it switches.
+
+1. Capture the product at 1440x900 (or a phone at 390x844) with the browser
+   scrollbar hidden.
+2. Save it as `shots/<project id>.png`, using the id from `PROJECTS` in
+   `content.py`: `meyra`, `ooruva`, `inknexis`, `beauty-brand`,
+   `muco-platform`, `lead-automation`.
+3. Run both builds:
+
+```bash
+python3 build_shots.py && python3 build.py
+```
+
+`build_shots.py` writes WebP and JPEG at three widths into `assets/shots/` and
+records the real pixel dimensions in `index.json`, so every image ships with
+`width`/`height` and reserves its space before it loads. A project with no file
+keeps its drawn concept preview -- nothing breaks, and nothing claims to be a
+screenshot when it is not.
+
+Commit `assets/shots/` as well as `shots/`: Vercel serves the generated files
+and does not run the scripts.
 
 No dependencies, no npm, no build server. It writes the `.html` files plus
 `robots.txt` and `sitemap.xml`, and you commit the result.

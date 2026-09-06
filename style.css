@@ -2037,6 +2037,34 @@ textarea.form-control {
   line-height: 1.3;
 }
 
+/* A real capture, not a drawing. It gets a copper chrome tag rather than the
+   grey Concept one, because the difference between evidence and illustration
+   is the most important thing this page communicates. */
+.preview-real {
+  margin: 0 0 var(--sp-3);
+}
+
+.preview-real picture,
+.preview-real img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.preview-real img {
+  /* Matches the capture ratio, so the row keeps its height before the file
+     lands and nothing below it jumps. */
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top center;
+  background: var(--surface-2);
+}
+
+.preview-kind.is-real {
+  color: var(--accent);
+  border-color: var(--accent-line);
+}
+
 /* Application shell. A bare list of rows reads as a wireframe; the furniture --
    a side rail, a toolbar, a table -- is what makes a drawing read as software.
    All of it is decorative and aria-hidden, so it stays out of the a11y tree. */

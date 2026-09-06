@@ -13,6 +13,7 @@ repository root. Edit this file, re-run it, commit the generated HTML.
 """
 
 import hashlib
+import json
 import os
 import re
 from datetime import date
