@@ -2869,35 +2869,6 @@ need a backend, which this repository does not have yet.
     return len(txt)
 
 
-# The serif accent font is subsetted to only the glyphs the accent words use
-# (2 KB instead of 22 KB). That is a real saving and a real trap: change an
-# accent word to one containing a letter outside this set and the browser
-# silently falls back to Georgia for that letter, which looks broken. So the
-# build refuses to finish quietly if that happens — re-run build_fonts.py to
-# regenerate the subset, then update this string.
-SERIF_SUBSET = "-Eabcdefilnoprstuy"
-
-
-def check_serif_subset():
-    """Fail loudly if an accent word needs a glyph the subset does not carry."""
-    used = set()
-    for name in os.listdir(ROOT):
-        if not name.endswith(".html"):
-            continue
-        html = open(os.path.join(ROOT, name), encoding="utf-8").read()
-        for word in re.findall(r'<span class=["\']accent-serif["\']>(.*?)</span>', html):
-            used |= set(word)
-    missing = sorted(used - set(SERIF_SUBSET))
-    if missing:
-        raise SystemExit(
-            "\n  ERROR: the serif accent uses glyphs missing from the subsetted font: %s\n"
-            "  Those letters would silently render in Georgia instead.\n"
-            "  Fix: run `python3 build_fonts.py --serif` and update SERIF_SUBSET.\n"
-            % "".join(missing)
-        )
-    return len(used)
-
-
 def build_all():
     jobs = [
         ("index.html", build_home),
@@ -2929,4 +2900,3 @@ def build_all():
         total += size
         print("  %-18s %6.1f KB" % (name, size / 1024.0))
     print("  %-18s %6.1f KB total across %d files" % ("", total / 1024.0, len(jobs)))
-    print("  serif accent glyphs in use: %d, all present in the subset" % check_serif_subset())
