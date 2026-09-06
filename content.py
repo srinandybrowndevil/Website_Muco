@@ -853,6 +853,34 @@ def industry_matrix():
             '<div class="matrix-panels">%s</div></div>' % (tabs, panels))
 
 
+def portfolio_counts():
+    """A sentence covering every project, generated from the data.
+
+    It used to name three stages and leave the rest out, so the numbers did not
+    add up to the total it quoted -- on a page whose whole argument is that we
+    tell you the truth. Reading it from PROJECTS means it cannot drift again
+    when a project changes stage.
+    """
+    order = [
+        ("client", "%d client engagement", "%d client engagements"),
+        ("live", "%d running in production", "%d running in production"),
+        ("build", "%d active build", "%d active builds"),
+        ("spec", "%d written specification", "%d written specifications"),
+        ("concept", "%d concept kept deliberately unbuilt", "%d concepts kept deliberately unbuilt"),
+    ]
+    counts = {}
+    for p in PROJECTS:
+        counts[p["stage"]] = counts.get(p["stage"], 0) + 1
+
+    parts = [(one if n == 1 else many) % n
+             for key, one, many in order
+             for n in [counts.get(key, 0)] if n]
+    if not parts:
+        return ""
+    listed = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+    return "Across %d recorded projects there are %s." % (len(PROJECTS), listed)
+
+
 def service_card(s, span=""):
     points = "".join("<li>%s</li>" % pt for pt in s["points"])
     links = ['<a href="services-%s.html" class="card-cta">Read more about %s &rarr;</a>'
@@ -1089,7 +1117,7 @@ def build_home():
             </div>
             <div class="stack center">
               <a href="{wa_audit}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg btn-block">{wa_svg} Send your website on WhatsApp</a>
-              <a href="contact.html?service=Website%20review%20%2F%20audit" class="btn btn-secondary btn-block">Request it by form</a>
+              <a href="website-audit.html" class="btn btn-secondary btn-block">See what we check &rarr;</a>
               <p class="note">Reviewed by a person, not an automated
                 score generator. We will tell you when we can get to it.</p>
             </div>
@@ -1857,10 +1885,6 @@ def build_about():
         for v in values
     )
 
-    stage_counts = {}
-    for p in PROJECTS:
-        stage_counts[p["stage"]] = stage_counts.get(p["stage"], 0) + 1
-
     body = """    <section>
       <div class="container">
         <div class="split">
@@ -1945,10 +1969,7 @@ def build_about():
 {cta}""".format(
         city=CITY, region=REGION, brand=BRAND, founder=FOUNDER, hours=HOURS,
         markets=", ".join(MARKETS),
-        counts="Across %d recorded projects there are %d active builds, %d written specifications "
-               "and %d concepts kept deliberately unbuilt." % (
-                   len(PROJECTS), stage_counts.get("build", 0),
-                   stage_counts.get("spec", 0), stage_counts.get("concept", 0)),
+        counts=portfolio_counts(),
         trust=trust_row(),
         values=vhtml,
         cta=final_cta(
@@ -2799,6 +2820,7 @@ presented as available products.
 - [Services]({domain}/services.html): all eight service lines and what each includes
 {service_pages}
 - [Website development in Erode]({domain}/website-development-erode.html): local page for Erode businesses
+- [Free website review]({domain}/website-audit.html): what a free manual audit of an existing site covers
 - [Work]({domain}/work.html): projects with problem, scope and current status
 - [Pricing]({domain}/pricing.html): how quotes are made and what changes the number
 - [Maintenance]({domain}/maintenance.html): support plan inclusions and exclusions
@@ -2864,6 +2886,7 @@ SITEMAP_PAGES = [
     ("faq.html", "0.6", "monthly"),
     ("maintenance.html", "0.6", "monthly"),
     ("website-development-erode.html", "0.8", "monthly"),
+    ("website-audit.html", "0.8", "monthly"),
     ("careers.html", "0.5", "monthly"),
     ("privacy.html", "0.3", "yearly"),
     ("terms.html", "0.3", "yearly"),
@@ -3043,7 +3066,7 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 ## Pages
 
 Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
-Careers · Privacy · Terms · Refund · 404
+Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
@@ -3115,6 +3138,188 @@ need a backend, which this repository does not have yet.
     return len(txt)
 
 
+def build_website_audit():
+    """A dedicated page for the free website review.
+
+    The offer already existed as a block on the home page, but with nowhere to
+    land it could not rank for anyone searching "website audit" and it had no
+    room to say what is actually checked -- which is the part that separates a
+    real review from an automated score generator.
+    """
+    checks = [
+        ("Speed and Core Web Vitals",
+         "What the page actually weighs, what blocks the first paint, and whether the numbers "
+         "Google measures for real visitors are passing or failing.",
+         ["Largest Contentful Paint", "Interaction to Next Paint", "Cumulative Layout Shift",
+          "Image weight and formats", "Render-blocking scripts"]),
+        ("How it behaves on a phone",
+         "Most of your visitors are on a mid-range Android on mobile data. We look at it the way "
+         "they do, not on a designer's monitor.",
+         ["Layout from 320px up", "Tap target sizes", "Text legibility", "Forms on a small keyboard",
+          "Load time on a throttled connection"]),
+        ("Technical SEO",
+         "Whether search engines can find, read and correctly attribute your pages. This is the "
+         "part most sites quietly fail.",
+         ["Titles and descriptions", "Heading structure", "Canonicals and duplicates",
+          "Sitemap and robots.txt", "Structured data", "Indexing status"]),
+        ("Local search",
+         "Whether a person in your town searching for what you sell has any chance of finding you.",
+         ["Google Business Profile", "NAP consistency", "Local landing pages",
+          "Reviews and photos", "Map pack visibility"]),
+        ("The path to contacting you",
+         "A site that loads fast and ranks well still fails if nobody can work out how to enquire.",
+         ["Where the calls to action are", "How many steps to enquire", "Form friction",
+          "WhatsApp and phone availability", "What happens after submit"]),
+        ("Things that are quietly broken",
+         "The ordinary faults that accumulate and that nobody notices until a customer does.",
+         ["Broken links and images", "Mixed content and certificate problems",
+          "404s from old URLs", "Analytics that stopped recording", "Forms that go nowhere"]),
+    ]
+
+    check_cards = "".join(
+        """          <article class="spotlight-card reveal-on-scroll">
+            <div class="icon-tile">{icon}</div>
+            <h3>{title}</h3>
+            <p class="card-body">{body}</p>
+            <ul class="feature-list">{points}</ul>
+          </article>
+""".format(icon=icon(ICONS[ic], 20), title=t, body=b,
+           points="".join("<li>%s</li>" % p for p in pts))
+        for (t, b, pts), ic in zip(checks, ["code", "mobile", "seo", "pin", "user", "shield"])
+    )
+
+    steps = [
+        ("Send us the address",
+         "WhatsApp or the form. If there are pages behind a login, tell us and we will work "
+         "around them."),
+        ("We go through it properly",
+         "By hand, with the tools where tools help. This takes real time, which is why we tell "
+         "you when we can get to it rather than promising a turnaround we might miss."),
+        ("You get a written list",
+         "What is worth fixing, what is not, and roughly what each one would take. In plain "
+         "language, ordered by what would actually change your enquiries."),
+    ]
+    step_html = "".join(
+        '<div class="process-step reveal-on-scroll"><div><h3>%s</h3><p>%s</p></div></div>' % (t, d)
+        for t, d in steps)
+
+    audit_faqs = [
+        ("Is it really free, or is it a sales call?",
+         "It is free and it is written down, not a call. We do it because a specific, honest list "
+         "of what is wrong with your site is the most useful thing we can hand someone who has "
+         "never worked with us. Sometimes that list ends with “nothing here needs us”, "
+         "and we send it anyway."),
+        ("How long does it take?",
+         "It depends on what else is running. We tell you when we can get to it when you ask, "
+         "rather than publishing a turnaround we would sometimes miss. A small site is usually "
+         "a couple of working days."),
+        ("Do I have to hire you afterwards?",
+         "No. The list is yours. You can hand it to whoever built your site, to another agency, "
+         "or to nobody. We would rather be the people who told you the truth than the people who "
+         "held the findings hostage."),
+        ("Will you just run a tool and send me the score?",
+         "No. Automated scores are easy to game and they miss the things that actually cost you "
+         "enquiries — a confusing contact path, a form nobody receives, a page that is fine "
+         "on a laptop and unusable on a phone. A person goes through it."),
+        ("What if my site was built by someone else?",
+         "That is the usual case. We are not going to spend the review criticising whoever built "
+         "it. The point is what to do next, not who to blame."),
+    ]
+    faq_html = "".join(
+        """        <details class="faq-item">
+          <summary><h2>%s</h2></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>%s</p></div></div></div>
+        </details>
+""" % (q, a) for q, a in audit_faqs)
+
+    wa_audit = wa("Hi MUCO LABS, please review my website: ")
+
+    body = page_header(
+        "Free website review",
+        "Find out what your website is <span class=\"accent-serif\">actually</span> doing.",
+        "Send us the address and a person goes through it &mdash; speed, phone behaviour, "
+        "technical SEO, local search, broken things and the path a visitor takes to contacting "
+        "you. You get a written list of what is worth fixing and what is not. No charge, no "
+        "obligation, and no automated score.",
+        extra="""        <div class="btn-group mt-5">
+          <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Send your website on WhatsApp</a>
+          <a href="contact.html?service=Website%20review%20%2F%20audit" class="btn btn-secondary btn-lg">Request it by form</a>
+        </div>
+        {trust}
+""".format(wa=wa_audit, wa_svg=WA_SVG, trust=trust_row())
+    ) + """    <section class="section-divider">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">What we look at</span>
+          <h2>Six things, checked by hand</h2>
+          <p class="section-sub">Not a score out of a hundred. A list of specific things, each one
+            with what it costs you and what it would take to fix.</p>
+        </div>
+        <div class="ecosystem-grid">
+{check_cards}        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="section-head">
+          <span class="eyebrow">How it works</span>
+          <h2>Three steps, and you can stop after any of them</h2>
+        </div>
+        <div class="process-list">{step_html}</div>
+        <div class="callout mt-6">
+          <p class="fs-sm"><strong>What we will not do.</strong> We will not send you a scary
+          automated report to frighten you into a rebuild, we will not invent problems, and we will
+          not tell you that you need a new website when what you need is three fixes to the one you
+          have.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="section-head">
+          <span class="eyebrow">Before you ask</span>
+          <h2>Questions about the review</h2>
+        </div>
+{faq_html}      </div>
+    </section>
+
+{cta}""".format(
+        check_cards=check_cards,
+        step_html=step_html,
+        faq_html=faq_html,
+        cta=final_cta(
+            "Send us your website",
+            "One message with the address is enough. We will come back with what we find and "
+            "what, if anything, we think you should do about it.",
+            "Hi MUCO LABS, please review my website: ",
+            primary_label="Request the review",
+            primary="contact.html?service=Website%20review%20%2F%20audit",
+        ),
+    )
+
+    return render(
+        "website-audit.html",
+        "Free Website Review & Audit | %s" % BRAND,
+        "Free website review from %s in %s. Speed, mobile behaviour, technical SEO, local search "
+        "and broken links, checked by a person and written up in plain language." % (BRAND, CITY),
+        body,
+        schema_blocks=[
+            ORG_JSONLD,
+            service_jsonld(
+                "Website review and audit",
+                "A free, manual review of an existing website covering speed and Core Web Vitals, "
+                "mobile behaviour, technical SEO, local search visibility, the enquiry path and "
+                "broken links, delivered as a written list of prioritised fixes.",
+                "website-audit"),
+            faq_jsonld(audit_faqs),
+            breadcrumbs([("Home", ""), ("Free website review", "website-audit.html")]),
+            speakable_jsonld(DOMAIN + "/website-audit.html", ["h1", ".lead"]),
+        ],
+    )
+
+
 def build_all():
     jobs = [
         ("index.html", build_home),
@@ -3127,6 +3332,7 @@ def build_all():
         ("contact.html", build_contact),
         ("faq.html", build_faq),
         ("careers.html", build_careers),
+        ("website-audit.html", build_website_audit),
         ("privacy.html", build_privacy),
         ("terms.html", build_terms),
         ("refund.html", build_refund),

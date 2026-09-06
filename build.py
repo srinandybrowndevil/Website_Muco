@@ -255,6 +255,7 @@ FOOTER_COLS = [
     ("Company", [("about.html", "About"), ("work.html", "Work"), ("careers.html", "Careers"),
                  ("contact.html", "Contact")]),
     ("Explore", [("services.html", "Services"), ("pricing.html", "Pricing"), ("faq.html", "FAQ"),
+                 ("website-audit.html", "Free website review"),
                  ("maintenance.html", "Maintenance"),
                  ("services-websites.html", "Website development"),
                  ("services-software.html", "Custom software"),

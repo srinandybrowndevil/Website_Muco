@@ -67,6 +67,7 @@ presented as available products.
   - [AI & business automation](https://mucolabs.com/services-ai-automation)
   - [Branding, IT & cloud support](https://mucolabs.com/services-support)
 - [Website development in Erode](https://mucolabs.com/website-development-erode): local page for Erode businesses
+- [Free website review](https://mucolabs.com/website-audit): what a free manual audit of an existing site covers
 - [Work](https://mucolabs.com/work): projects with problem, scope and current status
 - [Pricing](https://mucolabs.com/pricing): how quotes are made and what changes the number
 - [Maintenance](https://mucolabs.com/maintenance): support plan inclusions and exclusions
