@@ -1,2 +1,11 @@
 __pycache__/
 *.pyc
+
+# Secrets. This repository is public, so a committed key is a published key.
+# Real values belong in Vercel -> Settings -> Environment Variables.
+# .env.example is tracked deliberately: it documents the names, never the values.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
