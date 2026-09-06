@@ -31,7 +31,7 @@
 <link rel="manifest" href="site.webmanifest" />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css?v=4e37193387" />
+<link rel="stylesheet" href="style.css?v=f77879bf91" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -310,17 +310,28 @@
             <div class="work-card-meta tag-row"><span class="tag tag-subtle">Next.js</span><span class="tag tag-subtle">SSG/ISR</span><span class="tag tag-subtle">Structured product data</span><span class="tag tag-subtle">WhatsApp conversion</span></div>
           </article>
           <article class="work-card reveal-on-scroll" id="muco-platform">
-            <figure class="preview preview-real">
+            <figure class="preview preview-real preview-clip">
               <div class="preview-bar">
                 <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="preview-url">mucolabs.com</span>
-                <span class="preview-kind is-real">Screenshot</span>
+                <span class="preview-chrome-end">
+                  <span class="preview-kind is-clip">Screen recording</span>
+                  <button class="preview-toggle" type="button" data-clip-toggle
+                          aria-label="Pause the MUCO LABS platform screen recording">
+                    <span aria-hidden="true">
+                      <svg class="i-pause" viewBox="0 0 12 12" width="11" height="11"><rect x="2" y="1.5" width="3" height="9" rx="1"/><rect x="7" y="1.5" width="3" height="9" rx="1"/></svg>
+                      <svg class="i-play" viewBox="0 0 12 12" width="11" height="11"><path d="M3.2 1.6v8.8L10.2 6z"/></svg>
+                    </span>
+                  </button>
+                </span>
               </div>
-              <picture>
-                <source type="image/webp" srcset="assets/shots/muco-platform-640.webp 640w, assets/shots/muco-platform-960.webp 960w, assets/shots/muco-platform-1280.webp 1280w" sizes="(max-width: 768px) 100vw, 560px" />
-                <img src="assets/shots/muco-platform-1280.jpg" srcset="assets/shots/muco-platform-640.jpg 640w, assets/shots/muco-platform-960.jpg 960w, assets/shots/muco-platform-1280.jpg 1280w" sizes="(max-width: 768px) 100vw, 560px"
-                     width="1280" height="800" loading="lazy" decoding="async" alt="Screenshot of MUCO LABS platform" />
-              </picture>
+              <video data-clip muted loop playsinline preload="none"
+                     poster="assets/clips/muco-platform-poster.jpg"
+                     width="1280" height="800"
+                     aria-label="Screen recording of MUCO LABS platform running">
+                <source src="assets/clips/muco-platform.webm" type="video/webm" />
+                <source src="assets/clips/muco-platform.mp4" type="video/mp4" />
+              </video>
             </figure>
             <div class="work-card-head">
               <div>
@@ -462,6 +473,6 @@
     </div>
   </footer>
 
-  <script src="main.js?v=111f8de318" defer></script>
+  <script src="main.js?v=bb1fd2dba1" defer></script>
 </body>
 </html>

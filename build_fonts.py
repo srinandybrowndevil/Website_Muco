@@ -29,12 +29,13 @@ import urllib.request
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "assets", "fonts")
 
-# Requesting the weights we use; both families are variable, so each subset
-# resolves to one file regardless of how many weights are listed.
+# The two families style.css actually declares. Both are variable, so each
+# subset resolves to one file regardless of how many weights are listed --
+# request the whole axis rather than a list of stops.
 CSS_URL = (
     "https://fonts.googleapis.com/css2"
-    "?family=Plus+Jakarta+Sans:wght@400;500;600;700;800"
-    "&family=JetBrains+Mono:wght@400;500;600"
+    "?family=Inter+Tight:wght@100..900"
+    "&family=JetBrains+Mono:wght@100..800"
     "&display=swap"
 )
 

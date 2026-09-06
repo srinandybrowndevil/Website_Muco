@@ -86,16 +86,21 @@ GA_MEASUREMENT_ID = ""
 # .html links under that setting would put a redirect hop in front of every
 # internal link, canonical tag and sitemap entry, so every URL is rewritten
 # once here, at the point each file is written.
+# Both quote styles: prose in content.py is written inside triple-quoted Python
+# strings, so a link embedded in a sentence is often single-quoted to avoid
+# escaping. Matching only double quotes let those links through unrewritten,
+# which is invisible in review and costs a 308 redirect on every click.
 _REL_HTML = re.compile(
-    r'href="(?!https?:|//|mailto:|tel:|#)([^"#?]+)\.html([?#][^"]*)?"')
+    r'''href=(?P<q>["'])(?!https?:|//|mailto:|tel:|#)'''
+    r'''(?P<path>[^"'#?]+)\.html(?P<tail>[?#][^"']*)?(?P=q)''')
 _ABS_HTML = re.compile(re.escape(DOMAIN) + r'/([A-Za-z0-9_-]+)\.html(?![A-Za-z0-9._-])')
 
 
 def _rel(m):
-    """m: (path without .html, optional ?query or #fragment)."""
-    path, tail = m.group(1), m.group(2) or ""
+    """m: (quote character, path without .html, optional ?query or #fragment)."""
+    q, path, tail = m.group("q"), m.group("path"), m.group("tail") or ""
     root = "/" if path == "index" else "/" + path
-    return 'href="%s%s"' % (root, tail)
+    return "href=%s%s%s%s" % (q, root, tail, q)
 
 
 def clean_urls(text):

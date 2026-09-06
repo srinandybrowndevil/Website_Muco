@@ -2065,6 +2065,70 @@ textarea.form-control {
   border-color: var(--accent-line);
 }
 
+/* Three strengths of claim, three colours: grey Concept is a drawing, copper
+   Screenshot is a frozen moment of the real thing, green Screen recording is
+   the real thing moving. The tag is the whole point of the chrome. */
+.preview-kind.is-clip {
+  color: var(--ok);
+  border-color: rgba(110, 192, 138, 0.34);
+}
+
+.preview-clip video {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* No forced ratio and no crop: the width and height attributes carry the
+     real capture shape, which reserves the space and keeps the whole UI in
+     frame. Cropping a recording to a tidy 16/10 would cut off the product. */
+  background: var(--surface-2);
+}
+
+/* The tag and its button are one unit. The bar wraps on a narrow card, and
+   without this the button breaks onto a line of its own, orphaned under the
+   label it belongs to. */
+.preview-chrome-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Motion that starts on its own has to be stoppable (WCAG 2.2.2). This is the
+   mechanism, so it lives in the chrome rather than hiding on hover. */
+.preview-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.preview-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent-line);
+}
+
+.preview-toggle svg {
+  display: block;
+  fill: currentColor;
+}
+
+.preview-toggle .i-play,
+.preview-clip.is-paused .preview-toggle .i-pause {
+  display: none;
+}
+
+.preview-clip.is-paused .preview-toggle .i-play {
+  display: block;
+}
+
 /* Application shell. A bare list of rows reads as a wireframe; the furniture --
    a side rail, a toolbar, a table -- is what makes a drawing read as software.
    All of it is decorative and aria-hidden, so it stays out of the a11y tree. */

@@ -944,13 +944,72 @@ def screenshot(pid, alt):
         shot["width"], shot["height"], alt)
 
 
+# Short silent loops of the product running, written by build_clips.py. Same
+# contract as SHOTS: an entry here means the file exists and the dimensions are
+# real, so the markup can hold the space before anything downloads.
+def _load_clips():
+    path = os.path.join(ROOT, "assets", "clips", "index.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+CLIPS = _load_clips()
+
+
+def clip(pid, name):
+    """The product actually moving -- the strongest evidence on the page.
+
+    Nothing downloads on page load: preload is none and main.js starts playback
+    only when the card reaches the viewport, so six cards cost six poster
+    frames until someone scrolls to them.
+
+    The pause button is not decoration. Motion that starts on its own and runs
+    longer than five seconds has to be stoppable (WCAG 2.2.2), and a visitor on
+    reduced-motion never sees it move at all -- they get the poster frame.
+    """
+    c = CLIPS.get(pid)
+    if not c:
+        return ""
+    return """<figure class="preview preview-real preview-clip">
+              <div class="preview-bar">
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="preview-url">%s</span>
+                <span class="preview-chrome-end">
+                  <span class="preview-kind is-clip">Screen recording</span>
+                  <button class="preview-toggle" type="button" data-clip-toggle
+                          aria-label="Pause the %s screen recording">
+                    <span aria-hidden="true">
+                      <svg class="i-pause" viewBox="0 0 12 12" width="11" height="11"><rect x="2" y="1.5" width="3" height="9" rx="1"/><rect x="7" y="1.5" width="3" height="9" rx="1"/></svg>
+                      <svg class="i-play" viewBox="0 0 12 12" width="11" height="11"><path d="M3.2 1.6v8.8L10.2 6z"/></svg>
+                    </span>
+                  </button>
+                </span>
+              </div>
+              <video data-clip muted loop playsinline preload="none"
+                     poster="assets/clips/%s-poster.jpg"
+                     width="%d" height="%d"
+                     aria-label="Screen recording of %s running">
+                <source src="assets/clips/%s.webm" type="video/webm" />
+                <source src="assets/clips/%s.mp4" type="video/mp4" />
+              </video>
+            </figure>""" % (
+        DOMAIN.replace("https://", ""),
+        name, pid, c["width"], c["height"], name, pid, pid)
+
+
 def project_card(p):
     """Compact card: the headline facts are always visible, the detail is one
     click away, so a nineteen-project grid stays scannable."""
     chips = "".join('<span class="tag tag-subtle">%s</span>' % c for c in p["chips"])
     note = ('<p class="work-note">%s</p>' % p["note"]) if p.get("note") else ""
-    # A real screenshot always beats a drawing of one.
-    preview = screenshot(p["id"], "Screenshot of %s" % p["name"])
+    # Evidence beats illustration, and moving evidence beats a still one:
+    # recording, then screenshot, then the drawn concept.
+    preview = clip(p["id"], p["name"])
+    if not preview:
+        preview = screenshot(p["id"], "Screenshot of %s" % p["name"])
     if not preview and p["id"] in PREVIEWS:
         preview = PREVIEWS[p["id"]] + "\n            " + PREVIEW_NOTE
     return """          <article class="work-card reveal-on-scroll" id="{id}">
@@ -3228,9 +3287,11 @@ python3 build.py
 
 ## Adding a real screenshot of a project
 
-The portfolio labels every panel: **Screenshot** for a capture of the running
-product, **Concept** for a drawing of how it works. A project gets the honest
-label automatically -- put a real capture in and it switches.
+The portfolio labels every panel by how strong the evidence is: **Screen
+recording** for the product running, **Screenshot** for a still of it,
+**Concept** for a drawing of how it works. A project gets the honest label
+automatically -- put a real file in and it switches. A recording outranks a
+screenshot, a screenshot outranks a drawing.
 
 1. Capture the product at 1440x900 (or a phone at 390x844) with the browser
    scrollbar hidden.
@@ -3251,6 +3312,37 @@ screenshot when it is not.
 
 Commit `assets/shots/` as well as `shots/`: Vercel serves the generated files
 and does not run the scripts.
+
+## Adding a screen recording of a project
+
+A short silent loop of the product actually working is the strongest thing this
+page can show. It needs ffmpeg, and nothing else.
+
+1. Record the product at 1440x900 (or a phone at 390x844). Ten to fifteen
+   seconds of one real task -- not a tour of every screen. No cursor circling,
+   no dead time waiting for a page.
+2. Save it as `clips/<project id>.mp4` (`.mov`, `.webm` and `.mkv` also work),
+   using the same ids as above.
+3. Run both builds:
+
+```bash
+python3 build_clips.py && python3 build.py
+```
+
+`build_clips.py` writes an MP4 and a smaller WebM at 1280 wide plus a poster
+frame into `assets/clips/`, drops the audio, trims anything past twenty
+seconds, and records the real dimensions in `index.json`.
+
+On the page the clip does not autoplay on load: `preload` is `none` and
+playback starts only when the card reaches the viewport, so a grid of six costs
+six poster frames until somebody scrolls. It pauses when scrolled past, pauses
+in a background tab, carries a pause button in its chrome (motion that starts
+on its own has to be stoppable), and on `prefers-reduced-motion` it never moves
+at all -- that visitor gets the poster frame, which is still a real capture.
+
+Commit `assets/clips/`. Raw recordings in `clips/` stay out of git -- they are
+the one thing in this repo that runs to tens of megabytes, and only the encoded
+output is served. Keep the originals somewhere you can re-encode from.
 
 No dependencies, no npm, no build server. It writes the `.html` files plus
 `robots.txt` and `sitemap.xml`, and you commit the result.

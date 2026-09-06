@@ -33,9 +33,11 @@ python3 build.py
 
 ## Adding a real screenshot of a project
 
-The portfolio labels every panel: **Screenshot** for a capture of the running
-product, **Concept** for a drawing of how it works. A project gets the honest
-label automatically -- put a real capture in and it switches.
+The portfolio labels every panel by how strong the evidence is: **Screen
+recording** for the product running, **Screenshot** for a still of it,
+**Concept** for a drawing of how it works. A project gets the honest label
+automatically -- put a real file in and it switches. A recording outranks a
+screenshot, a screenshot outranks a drawing.
 
 1. Capture the product at 1440x900 (or a phone at 390x844) with the browser
    scrollbar hidden.
@@ -56,6 +58,37 @@ screenshot when it is not.
 
 Commit `assets/shots/` as well as `shots/`: Vercel serves the generated files
 and does not run the scripts.
+
+## Adding a screen recording of a project
+
+A short silent loop of the product actually working is the strongest thing this
+page can show. It needs ffmpeg, and nothing else.
+
+1. Record the product at 1440x900 (or a phone at 390x844). Ten to fifteen
+   seconds of one real task -- not a tour of every screen. No cursor circling,
+   no dead time waiting for a page.
+2. Save it as `clips/<project id>.mp4` (`.mov`, `.webm` and `.mkv` also work),
+   using the same ids as above.
+3. Run both builds:
+
+```bash
+python3 build_clips.py && python3 build.py
+```
+
+`build_clips.py` writes an MP4 and a smaller WebM at 1280 wide plus a poster
+frame into `assets/clips/`, drops the audio, trims anything past twenty
+seconds, and records the real dimensions in `index.json`.
+
+On the page the clip does not autoplay on load: `preload` is `none` and
+playback starts only when the card reaches the viewport, so a grid of six costs
+six poster frames until somebody scrolls. It pauses when scrolled past, pauses
+in a background tab, carries a pause button in its chrome (motion that starts
+on its own has to be stoppable), and on `prefers-reduced-motion` it never moves
+at all -- that visitor gets the poster frame, which is still a real capture.
+
+Commit `assets/clips/`. Raw recordings in `clips/` stay out of git -- they are
+the one thing in this repo that runs to tens of megabytes, and only the encoded
+output is served. Keep the originals somewhere you can re-encode from.
 
 No dependencies, no npm, no build server. It writes the `.html` files plus
 `robots.txt` and `sitemap.xml`, and you commit the result.

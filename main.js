@@ -214,6 +214,147 @@
     }, 3000);
   }
 
+  /* --------------------------------------------- portfolio screen recordings */
+  function initClips() {
+    var vids = document.querySelectorAll('video[data-clip]');
+    if (!vids.length) return;
+
+    // On reduced-motion the poster frame is the whole experience. It is still
+    // a real capture of the product, so nothing is lost but the movement.
+    if (reduceMotion) {
+      Array.prototype.forEach.call(vids, function (v) {
+        var fig = v.closest('.preview-clip');
+        if (fig) fig.classList.add('is-paused');
+      });
+      wireToggles(true);
+      return;
+    }
+
+    function play(v) {
+      if (v.dataset.paused === 'true') return;
+      if (v.preload === 'none') v.preload = 'auto';
+      // Autoplay can still be refused (a data-saver setting, a battery mode).
+      // The poster stays up and the pause button already reads Play, so a
+      // rejected promise needs nothing beyond not throwing.
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+
+    // Half the card has to be on screen. A clip playing in the corner of the
+    // viewport is decoration; one you are looking at is evidence.
+    function halfVisible(v) {
+      var box = v.getBoundingClientRect();
+      if (!box.height) return false;
+      var shown = Math.min(box.bottom, window.innerHeight) - Math.max(box.top, 0);
+      return shown / box.height >= 0.5;
+    }
+
+    function sweep() {
+      Array.prototype.forEach.call(vids, function (v) {
+        if (halfVisible(v)) play(v);
+        else v.pause();
+      });
+    }
+
+    var obs = null;
+    if ('IntersectionObserver' in window) {
+      obs = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) play(entry.target);
+            else entry.target.pause();
+          });
+        },
+        { threshold: 0.5 }
+      );
+      Array.prototype.forEach.call(vids, function (v) {
+        obs.observe(v);
+      });
+
+      // The same failsafe the reveal effect carries, for the same reason:
+      // there are rendering contexts where observer records are never
+      // delivered. A panel labelled Screen recording that never moves is worse
+      // than one that was never labelled -- so if nothing has started a few
+      // seconds in while a clip sits in view, fall back to scrolling.
+      setTimeout(function () {
+        var started = false;
+        var inView = false;
+        Array.prototype.forEach.call(vids, function (v) {
+          if (!v.paused || v.currentTime > 0) started = true;
+          if (halfVisible(v)) inView = true;
+        });
+        if (started || !inView) return;
+        obs.disconnect();
+        obs = null;
+        bindScroll();
+        sweep();
+      }, 3000);
+    } else {
+      bindScroll();
+      sweep();
+    }
+
+    function bindScroll() {
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function () {
+          ticking = false;
+          sweep();
+        });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+    }
+
+    // A backgrounded tab should not keep six videos decoding.
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) return;
+      Array.prototype.forEach.call(vids, function (v) {
+        v.pause();
+      });
+    });
+
+    wireToggles(false);
+  }
+
+  function wireToggles(startPaused) {
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-clip-toggle]'),
+      function (btn) {
+        var fig = btn.closest('.preview-clip');
+        var vid = fig && fig.querySelector('video[data-clip]');
+        if (!vid) return;
+
+        // The label names the project, so it is set from what is already there
+        // rather than rebuilt from a string this function would have to know.
+        var label = btn.getAttribute('aria-label') || '';
+        var subject = label.replace(/^(Pause|Play) the /, '');
+
+        function sync(paused) {
+          vid.dataset.paused = paused ? 'true' : 'false';
+          fig.classList.toggle('is-paused', paused);
+          btn.setAttribute('aria-label', (paused ? 'Play the ' : 'Pause the ') + subject);
+        }
+
+        sync(startPaused);
+
+        btn.addEventListener('click', function () {
+          var paused = vid.dataset.paused !== 'true';
+          sync(paused);
+          if (paused) {
+            vid.pause();
+          } else {
+            if (vid.preload === 'none') vid.preload = 'auto';
+            var p = vid.play();
+            if (p && p.catch) p.catch(function () {});
+          }
+        });
+      }
+    );
+  }
+
   /* --------------------------------------------- Meyra scenario simulator */
   var MEYRA_SCENARIOS = {
     briefing: {
@@ -542,6 +683,7 @@
     initSpotlight();
     initTabs();
     initReveal();
+    initClips();
     initMeyraSim();
     initClock();
     initEnquiryForm();
