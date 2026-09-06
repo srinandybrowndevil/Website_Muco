@@ -702,28 +702,59 @@ LOCAL_FAQS = [
 # project's own requirements document, so it represents real intended
 # behaviour. No mockup contains an invented metric, rating or count.
 # ===========================================================================
-def _win(url, body, phone=False):
-    """The "concept" tag is not decoration. These are drawings of how each
+def _win(url, body, phone=False, chrome=""):
+    """The "Concept" tag is not decoration. These are drawings of how each
     product works, and a visitor must be able to tell that at a glance without
-    reading a caption — so it lives in the window chrome, where a build label
+    reading a caption -- so it lives in the window chrome, where a build label
     belongs, rather than as a sentence apologising underneath."""
     return '''<div class="preview%s">
               <div class="preview-bar">
                 <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
                 <span class="preview-url">%s</span>
                 <span class="preview-kind">Concept</span>
-              </div>
+              </div>%s
               <div class="preview-body" aria-hidden="true">%s</div>
-            </div>''' % (" preview-phone" if phone else "", url, body)
+            </div>''' % (" preview-phone" if phone else "", url, chrome, body)
 
 
-def _phone(status, body):
+def _app(url, nav, active, toolbar, body):
+    """An application shell: side rail, toolbar, content.
+
+    A bare list of rows reads as a wireframe. The furniture -- navigation,
+    a toolbar, a current section -- is what makes a drawing read as software,
+    and it is also the honest shape of these products.
+    """
+    items = "".join(
+        '<span class="preview-nav-item%s">%s</span>' % (" on" if n == active else "", n)
+        for n in nav)
+    return '''<div class="preview">
+              <div class="preview-bar">
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="preview-url">%s</span>
+                <span class="preview-kind">Concept</span>
+              </div>
+              <div class="preview-app" aria-hidden="true">
+                <div class="preview-rail">%s</div>
+                <div class="preview-main">
+                  <div class="preview-toolbar">%s</div>
+                  <div class="preview-content">%s</div>
+                </div>
+              </div>
+            </div>''' % (url, items, toolbar, body)
+
+
+def _phone(status, body, tabs=None):
+    tabbar = ""
+    if tabs:
+        tabbar = '<div class="preview-tabbar">%s</div>' % "".join(
+            '<span class="preview-tab%s">%s</span>' % (" on" if i == 0 else "", t)
+            for i, t in enumerate(tabs))
     return '''<div class="preview preview-phone">
               <div class="preview-notch">
                 <span>%s</span><span class="preview-kind">Concept</span>
               </div>
-              <div class="preview-body" aria-hidden="true">%s</div>
-            </div>''' % (status, body)
+              <div class="preview-body" aria-hidden="true">%s</div>%s
+            </div>''' % (status, body, tabbar)
 
 
 def _row(title, sub, flag, cls=""):
@@ -731,57 +762,129 @@ def _row(title, sub, flag, cls=""):
             '<span class="preview-flag %s">%s</span></div>' % (title, sub, cls, flag))
 
 
+def _table(headers, rows):
+    """A table is the single strongest signal that something is a real tool."""
+    head = "".join("<span>%s</span>" % h for h in headers)
+    body = ""
+    for cells in rows:
+        body += '<div class="preview-tr">%s</div>' % "".join(
+            ('<span class="preview-td"><em class="preview-pill %s">%s</em></span>'
+             % (c[1], c[0]) if isinstance(c, tuple) else '<span class="preview-td">%s</span>' % c)
+            for c in cells)
+    return ('<div class="preview-table" style="--cols:%d">'
+            '<div class="preview-tr preview-th">%s</div>%s</div>' % (len(headers), head, body))
+
+
+def _tiles(items):
+    """State, never counts. An invented number would be a claim; a label is a
+    drawing of the interface."""
+    return '<div class="preview-stats">%s</div>' % "".join(
+        '<div class="preview-stat"><span class="preview-stat-k">%s</span>'
+        '<span class="preview-stat-v %s">%s</span></div>' % (k, cls, v)
+        for k, v, cls in items)
+
+
+def _search(text):
+    return '<span class="preview-search">%s</span>' % text
+
+
 PREVIEWS = {
     # Mission graph: idea -> requirements -> research -> build -> QA (doc 01)
-    "meyra": _win("meyra &mdash; mission graph", '''
-                <div class="preview-chat q">Take the billing module from requirements to a tested build.</div>
-                <div class="preview-chat a"><b>MEYRA</b>Requirements locked and research saved with sources. Moving to blueprint. Nothing runs on your machine without asking first.</div>
-                <div class="preview-pipe">
-                  <div class="preview-step">Requirements gate &middot; passed</div>
-                  <div class="preview-step">Research &middot; sources kept</div>
-                  <div class="preview-step">Blueprint &middot; awaiting approval</div>
-                </div>'''),
+    "meyra": _app(
+        "meyra &mdash; local build",
+        ["Missions", "Requirements", "Research", "Blueprint", "Runs", "Memory"],
+        "Missions",
+        _search("Billing module") + '<span class="preview-chip">Local only</span>'
+        '<span class="preview-chip acc">Approval required</span>',
+        '''<div class="preview-chat q">Take the billing module from requirements to a tested build.</div>
+           <div class="preview-chat a"><b>MEYRA</b>Requirements locked and research saved with sources.
+             Moving to blueprint. Nothing runs on your machine without asking first.</div>'''
+        + _table(["Stage", "Produces", "State"], [
+            ["Requirements", "Signed-off scope", ("Passed", "on")],
+            ["Research", "Sources kept", ("Passed", "on")],
+            ["Blueprint", "Data model, roles", ("Approval", "acc")],
+            ["Build", "Tested module", ("Blocked", "")],
+        ])),
 
     # Customer discovery: nearby, open, distance, category (doc 02)
-    "ooruva": _phone("Ooruva &middot; nearby", '''
-                ''' + _row("Tailoring &amp; alterations", "Open now &middot; Erode", "300 m", "on")
-                    + _row("Tiffin centre", "Menu &amp; hours listed", "600 m", "on")
-                    + _row("Two-wheeler service", "Verified vendor", "1.2 km", "acc")
-                    + _row("Provision store", "Offers this week", "1.8 km") + ''''''),
+    "ooruva": _phone(
+        "Ooruva &middot; nearby",
+        '<div class="preview-searchbar">Search shops and services</div>'
+        '<div class="preview-chips">'
+        '<span class="preview-chip on">Open now</span>'
+        '<span class="preview-chip">Verified</span>'
+        '<span class="preview-chip">Near me</span></div>'
+        + _row("Tailoring &amp; alterations", "Open now &middot; Erode", "300 m", "on")
+        + _row("Tiffin centre", "Menu &amp; hours listed", "600 m", "on")
+        + _row("Two-wheeler service", "Verified vendor", "1.2 km", "acc")
+        + _row("Provision store", "Offers this week", "1.8 km"),
+        tabs=["Nearby", "Saved", "Vendor", "Account"]),
 
     # Studio day view: appointments, consent, aftercare (doc 09)
-    "inknexis": _win("inknexis &mdash; studio", '''
-                ''' + _row("Today&rsquo;s chair", "Placement and size confirmed", "Booked", "acc")
-                    + _row("Consent form", "Signed before session starts", "Signed", "on")
-                    + _row("Deposit", "Optional &middot; owner verifies", "Recorded")
-                    + _row("Aftercare", "Scheduled follow-up messages", "Queued", "acc") + ''''''),
+    "inknexis": _app(
+        "inknexis &mdash; studio",
+        ["Today", "Bookings", "Artists", "Customers", "Consent", "Aftercare", "Billing"],
+        "Today",
+        _search("Today &middot; studio floor")
+        + '<span class="preview-chip">Day</span><span class="preview-chip acc">Chair view</span>',
+        _tiles([("Chair 1", "In session", "on"),
+                ("Chair 2", "Booked", "acc"),
+                ("Chair 3", "Free", "")])
+        + _table(["Client", "Artist", "Placement", "State"], [
+            ["Walk-in", "Artist A", "Forearm", ("Signed", "on")],
+            ["Returning", "Artist B", "Shoulder", ("Deposit", "acc")],
+            ["Booked", "Artist A", "Sleeve", ("Queued", "acc")],
+            ["Enquiry", "Unassigned", "Not decided", ("Quoted", "")],
+        ])),
 
     # Product storytelling site, WhatsApp conversion, client unnamed (doc 17)
-    "beauty-brand": _win("client website &mdash; products", '''
-                <div class="preview-tiles">
-                  <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
-                  <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
-                  <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
-                </div>
-                ''' + _row("Ingredients &amp; usage", "Verified copy only &middot; no invented claims", "Published", "on")
-                    + _row("Enquire on WhatsApp", "Product name prefilled in the message", "One tap", "acc") + ''''''),
+    "beauty-brand": _win(
+        "client website &mdash; products",
+        '''<div class="preview-sitenav"><span class="preview-sitelogo"></span>
+             <span>Shop</span><span>Ingredients</span><span>About</span>
+             <span class="preview-chip acc">Enquire</span></div>
+           <div class="preview-hero"><span class="preview-heroline"></span>
+             <span class="preview-heroline short"></span></div>
+           <div class="preview-tiles">
+             <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
+             <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
+             <div class="preview-tile"><div class="preview-swatch"></div><span>Product</span></div>
+           </div>'''
+        + _row("Ingredients &amp; usage", "Verified copy only &middot; no invented claims", "Published", "on")
+        + _row("Enquire on WhatsApp", "Product name prefilled in the message", "One tap", "acc")),
 
     # This site
-    "muco-platform": _win("mucolabs.com", '''
-                ''' + _row("Six projects, real stages", "Client, active build, specified, concept", "Live", "on")
-                    + _row("Enquiry with attribution", "Source captured with every message", "Live", "on")
-                    + _row("Customer &amp; admin portal", "Auth, roles and project status", "Next", "acc") + ''''''),
+    "muco-platform": _win(
+        "mucolabs.com",
+        '''<div class="preview-sitenav"><span class="preview-sitelogo"></span>
+             <span>Services</span><span>Work</span><span>Pricing</span>
+             <span class="preview-chip acc">Start a project</span></div>'''
+        + _tiles([("Enquiry", "Validated", "on"),
+                  ("Source", "Captured", "on"),
+                  ("Portal", "Next", "acc")])
+        + _table(["Piece", "Detail", "State"], [
+            ["Portfolio", "Real stage on every project", ("Live", "on")],
+            ["Enquiry", "Validated, rate limited", ("Live", "on")],
+            ["Attribution", "Source kept with the message", ("Live", "on")],
+            ["Portal", "Auth, roles, project status", ("Next", "acc")],
+        ])),
 
     # Recurring outreach workflow (doc 05) - stages only, no invented counts
-    "lead-automation": _win("outreach run", '''
-                <div class="preview-pipe">
-                  <div class="preview-step">Research public sources</div>
-                  <div class="preview-step">Remove duplicates</div>
-                  <div class="preview-step">Qualify against evidence</div>
-                  <div class="preview-step">Map to a service</div>
-                  <div class="preview-step">Draft personalised outreach</div>
-                </div>
-                ''' + _row("Every lead traceable", "Kept with the source it came from", "Logged", "acc") + ''''''),
+    "lead-automation": _app(
+        "outreach run",
+        ["Runs", "Sources", "Rules", "Drafts", "Log"],
+        "Runs",
+        _search("Latest run") + '<span class="preview-chip on">Evidence kept</span>',
+        # The pipeline list and the table said the same thing twice. The table
+        # says it better, because it also carries the rule and the state.
+        _table(["Step", "Rule applied", "State"], [
+            ["Collect", "Public sources only", ("Done", "on")],
+            ["Deduplicate", "Domain and phone", ("Done", "on")],
+            ["Qualify", "Evidence required", ("Done", "on")],
+            ["Map", "One service per lead", ("Done", "on")],
+            ["Draft", "Never sent unreviewed", ("Review", "acc")],
+        ])
+        + _row("Every lead traceable", "Kept with the source it came from", "Logged", "acc")),
 }
 
 PREVIEW_NOTE = ''
