@@ -445,7 +445,10 @@ header {
   border-bottom: 1px solid var(--rule);
 }
 
-nav {
+/* Scoped to the header. This was a bare `nav` selector, which also caught the
+   footer columns and the breadcrumb trail — both are <nav> landmarks — and gave
+   them a flex row and a 66px height, which is what broke the footer. */
+header nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1670,12 +1673,6 @@ textarea.form-control {
   aspect-ratio: 3 / 4;
   object-fit: cover;
   object-position: center 22%;
-  filter: grayscale(1) contrast(1.05);
-  transition: filter var(--transition);
-}
-
-.portrait:hover {
-  filter: grayscale(0) contrast(1);
 }
 
 .portrait-frame {
@@ -1763,6 +1760,11 @@ footer {
   margin-bottom: var(--sp-3);
   padding-bottom: var(--sp-2);
   border-bottom: 1px solid var(--rule-soft);
+}
+
+.footer-col {
+  display: block;
+  height: auto;
 }
 
 .footer-col ul {
@@ -2068,7 +2070,7 @@ main {
     display: inline;
   }
 
-  nav {
+  header nav {
     gap: var(--sp-2);
   }
 }
