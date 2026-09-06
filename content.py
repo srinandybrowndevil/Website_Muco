@@ -734,12 +734,14 @@ def project_card(p):
             <p>{summary}</p>
             <details class="work-details">
               <summary>Problem, scope and current status</summary>
-              <dl class="def-list">
-                <div class="def-row"><dt>Problem</dt><dd>{problem}</dd></div>
-                <div class="def-row"><dt>Scope</dt><dd>{scope}</dd></div>
-                <div class="def-row"><dt>Status</dt><dd>{state}</dd></div>
-              </dl>
-              {note}
+              <div class="reveal-wrap"><div class="reveal-inner">
+                <dl class="def-list">
+                  <div class="def-row"><dt>Problem</dt><dd>{problem}</dd></div>
+                  <div class="def-row"><dt>Scope</dt><dd>{scope}</dd></div>
+                  <div class="def-row"><dt>Status</dt><dd>{state}</dd></div>
+                </dl>
+                {note}
+              </div></div>
             </details>
             <div class="work-card-meta tag-row">{chips}</div>
           </article>
@@ -1105,7 +1107,7 @@ def build_service_page(sv):
     faqs = "".join(
         '''        <details class="faq-item">
           <summary><h2>%s</h2></summary>
-          <div class="faq-body">%s</div>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
 ''' % (qq, aa) for qq, aa in d["faqs"]
     )
@@ -1480,7 +1482,7 @@ def build_local_erode():
     faqs = "".join(
         '''        <details class="faq-item">
           <summary><h2>%s</h2></summary>
-          <div class="faq-body">%s</div>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
 ''' % (q, a) for q, a in LOCAL_FAQS
     )
@@ -2025,7 +2027,7 @@ def build_faq():
     items = "".join(
         """        <details class="faq-item">
           <summary><h2>%s</h2></summary>
-          <div class="faq-body">%s</div>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
 """ % (q, a) for q, a in FAQS
     )

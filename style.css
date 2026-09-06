@@ -2719,3 +2719,107 @@ body::after {
 @keyframes beam-rotate {
   to { --beam-angle: 360deg; }
 }
+
+/* --------------------------------------------------------------------------
+   26. Interaction polish
+   -------------------------------------------------------------------------- */
+
+/* Smooth disclosure. <details> height cannot be transitioned directly, but a
+   grid row can go from 0fr to 1fr, which gets the same result without needing
+   a hard-coded max-height that would clip longer answers. */
+.reveal-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+details[open] > .reveal-wrap {
+  grid-template-rows: 1fr;
+}
+
+/* Page entrance. Moving between twenty-one static pages is otherwise a hard
+   cut; a short fade makes navigation feel continuous. Deliberately brief —
+   content must not be waited for. */
+main {
+  animation: page-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Mobile menu: appearing instantly reads as a glitch rather than a panel. */
+.mobile-menu.open {
+  animation: menu-in 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translate3d(0, -8px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Reading progress. The work and services pages run past 4000px, and a thin
+   rule is the cheapest way to answer "how much of this is left?". */
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--accent), #818cf8);
+  z-index: 200;
+  pointer-events: none;
+}
+
+/* Cards in a grid appear in sequence rather than all at once. Small enough to
+   read as considered, short enough not to feel like waiting. */
+.work-grid > .reveal-on-scroll,
+.ecosystem-grid > .reveal-on-scroll,
+.grid > .reveal-on-scroll {
+  transition-delay: calc(var(--i, 0) * 65ms);
+}
+
+/* The work cards get the same cursor spotlight the service cards have, so the
+   two kinds of card behave alike. */
+.work-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.work-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    380px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+    rgba(56, 189, 248, 0.10),
+    transparent 76%
+  );
+}
+
+.work-card:hover::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-wrap {
+    transition: none;
+  }
+
+  .read-progress {
+    display: none;
+  }
+}

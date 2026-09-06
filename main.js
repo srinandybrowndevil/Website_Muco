@@ -16,9 +16,24 @@
     var header = document.querySelector('header');
     if (!header) return;
 
+    // Reading progress shares this handler rather than adding a second scroll
+    // listener. Only transform is written, so it stays off the main thread.
+    var bar = null;
+    if (!reduceMotion && document.body.scrollHeight > window.innerHeight * 2.2) {
+      bar = document.createElement('div');
+      bar.className = 'read-progress';
+      bar.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(bar);
+    }
+
     var ticking = false;
     function update() {
       header.classList.toggle('is-scrolled', window.scrollY > 8);
+      if (bar) {
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = max > 0 ? window.scrollY / max : 0;
+        bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, pct)) + ')';
+      }
       ticking = false;
     }
     window.addEventListener(
@@ -75,7 +90,7 @@
   /* ------------------------------------------------------- spotlight cards */
   function initSpotlight() {
     if (reduceMotion) return;
-    var cards = document.querySelectorAll('.spotlight-card');
+    var cards = document.querySelectorAll('.spotlight-card, .work-card');
     if (!cards.length) return;
 
     Array.prototype.forEach.call(cards, function (card) {
@@ -139,6 +154,20 @@
   function initReveal() {
     var els = document.querySelectorAll('.reveal-on-scroll');
     if (!els.length) return;
+
+    // Number each card within its own grid so siblings appear in sequence.
+    // Capped so a long grid never leaves the last card waiting.
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.work-grid, .ecosystem-grid, .grid'),
+      function (grid) {
+        var i = 0;
+        Array.prototype.forEach.call(grid.children, function (child) {
+          if (child.classList.contains('reveal-on-scroll')) {
+            child.style.setProperty('--i', Math.min(i++, 5));
+          }
+        });
+      }
+    );
 
     function revealAll() {
       Array.prototype.forEach.call(els, function (el) {
