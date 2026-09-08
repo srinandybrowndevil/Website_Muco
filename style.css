@@ -1889,7 +1889,15 @@ tbody tr:last-child td {
 }
 
 .form-control:focus {
-  outline: none;
+  /* Transparent, not none. In normal rendering the accent border and the ring
+     below are the indicator. But forced-colors mode drops box-shadow and forces
+     every border to a single system colour, which would leave a focused field
+     identical to an unfocused one -- focus would vanish for exactly the people
+     who need it most. A transparent outline gets repainted there as a real
+     system-coloured ring, and costs nothing here: outline never affects layout
+     and paints nothing when transparent. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(207, 144, 97, 0.16);
 }
@@ -3139,6 +3147,17 @@ footer {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+/* WCAG 2.2 SC 2.5.8 wants a 24px target unless neighbours sit 24px apart. At
+   375px "Refund & Cancellation" wrapped mid-phrase, so its box spanned two
+   lines and its centre landed 23.3px from "Terms" -- under the floor, and too
+   close to tap apart. inline-block keeps each link whole, so a break can only
+   fall between links, and the padding lifts the 14px text box to 24px without
+   moving the text. */
+.footer-copy a {
+  display: inline-block;
+  padding-block: 5px;
 }
 
 /* --------------------------------------------------------------------------

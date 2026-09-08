@@ -224,6 +224,15 @@ Supabase public values website API-க்கும் CRM-க்கும் ஒ
 3. **Root Directory:** `portal`.
 4. **Framework Preset:** Next.js.
 5. Install Command: `npm ci`; Build Command: `npm run build`; Output Directory: Next.js default. Root website-ன் `public-site` output-ஐ இங்கு பயன்படுத்த வேண்டாம்.
+**Portal build config — 2026-09-09-ல் சரிசெய்யப்பட்டது.** Portal project முதலில் fail
+ஆனது; காரணம் அது marketing site-ன் root `vercel.json`-ஐப் படித்து
+`node scripts/build-site.mjs` ஓட்டியது (`Cannot find module
+'/vercel/path0/portal/scripts/build-site.mjs'`). இப்போது `portal/vercel.json`
+உள்ளது — அது `framework: nextjs`, `buildCommand: next build`,
+`installCommand: npm ci` எனத் தெளிவாகச் சொல்கிறது. Vercel dashboard-ல் Build
+அல்லது Install Command manual override இருந்தால் **அதை நீக்கவும்**; `vercel.json`
+தான் முடிவு செய்ய வேண்டும். Root Directory `portal` ஆக இருக்க வேண்டும்.
+
 6. Environment Variables:
 
 ```dotenv
