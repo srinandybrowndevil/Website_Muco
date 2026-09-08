@@ -214,6 +214,17 @@ export default async function handler(req, res) {
     }
   }
 
+  // Both delivery paths failed, so this enquiry exists only in this log line
+  // and will age out with it. That is a lost customer, not a warning, and it
+  // stays invisible unless something says so loudly -- alert on this string.
+  if (!recorded && !emailed) {
+    console.error(
+      '[lead] DELIVERY FAILED: neither CRM nor email accepted this enquiry. ' +
+        'Check RESEND_API_KEY and NEXT_PUBLIC_SUPABASE_* in the Vercel project. ' +
+        JSON.stringify({ name: lead.name, phone: lead.phone, received: meta.received })
+    );
+  }
+
   // The lead is recorded either way, so the visitor is told it arrived.
   // Telling them it failed because our email provider is down would be a lie
   // that costs us the enquiry.
