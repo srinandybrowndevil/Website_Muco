@@ -2145,7 +2145,7 @@ def build_maintenance():
         "maintenance.html",
         "Maintenance &amp; Support Plans | %s" % BRAND,
         "Website maintenance from %s: uptime monitoring, security updates, backups, content "
-        "changes, bug fixes and monthly reporting. Clear inclusions and exclusions." % BRAND,
+        "changes, bug fixes and monthly reporting. Clear inclusions." % BRAND,
         body,
         schema_blocks=[ORG_JSONLD, breadcrumbs([("Home", ""), ("Maintenance", "maintenance.html")])],
     )
@@ -2396,6 +2396,7 @@ def build_contact():
           approach and a written scope. If we are not the right people for it, we will tell you that
           instead of taking the project.</p>
 
+        <h2 class="visually-hidden">Ways to reach us</h2>
         <div class="grid grid-4 channel-grid">{channel_cards}
         </div>
       </div>
@@ -2578,7 +2579,7 @@ def build_contact():
         "contact.html",
         "Contact | Start a Project | %s" % BRAND,
         "Contact %s in %s, %s. WhatsApp %s, call, email %s, or send a project enquiry with your "
-        "scope, budget and timeline." % (BRAND, CITY, REGION, PHONE, EMAIL),
+        "scope and budget." % (BRAND, CITY, REGION, PHONE, EMAIL),
         body,
         schema_blocks=[ORG_JSONLD, contact_jsonld,
                        faq_jsonld(contact_faqs),
@@ -2724,7 +2725,7 @@ def build_careers():
         "careers.html",
         "Careers &amp; Freelancer Collaboration | %s" % BRAND,
         "Contract and project roles at %s in %s: frontend, backend, mobile, design and SEO. Plus "
-        "freelancer and studio collaboration with terms agreed in writing." % (BRAND, CITY),
+        "freelancer and studio work, with terms agreed in writing." % (BRAND, CITY),
         body,
         schema_blocks=[ORG_JSONLD, breadcrumbs([("Home", ""), ("Careers", "careers.html")])],
     )
@@ -3688,8 +3689,8 @@ def build_website_audit():
     return render(
         "website-audit.html",
         "Free Website Review & Audit | %s" % BRAND,
-        "Free website review from %s in %s. Speed, mobile behaviour, technical SEO, local search "
-        "and broken links, checked by a person and written up in plain language." % (BRAND, CITY),
+        "Free website review from %s in %s. Speed, mobile UX, technical SEO, local "
+        "search and broken links, checked by a person and written in plain English." % (BRAND, CITY),
         body,
         schema_blocks=[
             ORG_JSONLD,

@@ -33,8 +33,31 @@ WHATSAPP = "916381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
 PORTAL_DOMAIN = "https://portal.mucolabs.com"
+# The customer portal is a separate Vercel project. Until it is deployed and
+# portal.mucolabs.com resolves, every link into it is a dead end -- and these
+# are the primary CTAs, so "Start a Project" hands the visitor a DNS error
+# instead of a form. While it is down, project starts go to the contact form,
+# which does reach the inbox, and the "Sign in" link is dropped rather than
+# pointed somewhere it does not belong. Set this to True once the portal is
+# deployed and its DNS answers.
+PORTAL_LIVE = False
 PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
-PORTAL_SIGNUP = PORTAL_DOMAIN + "/signup?next=/portal/requests/new"
+PORTAL_SIGNUP = (
+    PORTAL_DOMAIN + "/signup?next=/portal/requests/new" if PORTAL_LIVE else "contact.html"
+)
+NEWLINE = chr(10)
+PORTAL_LOGIN_LINK = "".join([
+    '          <a href="' + PORTAL_LOGIN + '" class="nav-portal-link" aria-label="Sign in to customer portal">',
+    NEWLINE,
+    '            <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>',
+    NEWLINE, '          </a>', NEWLINE,
+]) if PORTAL_LIVE else ""
+MOBILE_PORTAL_LOGIN_LINK = "".join([
+    '        <a href="' + PORTAL_LOGIN + '" class="nav-portal-link mobile-portal-link" aria-label="Sign in to customer portal">',
+    NEWLINE,
+    '          <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>',
+    NEWLINE, '        </a>', NEWLINE,
+]) if PORTAL_LIVE else ""
 FOUNDER = "Srinivash Mahalingam"
 CITY = "Erode"
 REGION = "Tamil Nadu"
@@ -306,10 +329,7 @@ def header_html(current, key):
         </ul>
 
         <div class="nav-actions">
-          <a href="{portal_login}" class="nav-portal-link" aria-label="Sign in to customer portal">
-            <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
-          </a>
-          <a href="{portal_signup}" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
+{portal_login_link}          <a href="{portal_signup}" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
           <button id="menu-toggle" class="menu-toggle" aria-label="Open navigation menu"
                   aria-expanded="false" aria-controls="mobile-menu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -330,10 +350,7 @@ def header_html(current, key):
       <div class="mobile-menu-actions">
         <a href="{portal_signup}" class="btn btn-accent">Start a Project</a>
         <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp {phone}</a>
-        <a href="{portal_login}" class="nav-portal-link mobile-portal-link" aria-label="Sign in to customer portal">
-          <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
-        </a>
-      </div>
+{mobile_portal_login_link}      </div>
     </div>
   </header>
 """.format(
@@ -344,7 +361,8 @@ def header_html(current, key):
         mobile=nav_html(current, mobile=True),
         wa=wa("Hi MUCO LABS, I would like to discuss a project."),
         phone=PHONE,
-        portal_login=PORTAL_LOGIN,
+        portal_login_link=PORTAL_LOGIN_LINK,
+        mobile_portal_login_link=MOBILE_PORTAL_LOGIN_LINK,
         portal_signup=PORTAL_SIGNUP,
     )
 

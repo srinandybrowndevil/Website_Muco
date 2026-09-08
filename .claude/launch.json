@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "mucolabs",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["serve.py", "8080"],
-      "port": 8080
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/dev-site.mjs", "8123"],
+      "port": 8123
     }
   ]
 }
