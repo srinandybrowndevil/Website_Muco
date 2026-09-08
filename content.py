@@ -1000,16 +1000,63 @@ def clip(pid, name):
         name, pid, c["width"], c["height"], name, pid, pid)
 
 
+def live_platform():
+    return """<figure class="preview live-platform" data-live-platform>
+              <div class="preview-bar">
+                <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <span class="preview-url">portal.mucolabs.com / command</span>
+                <span class="preview-chrome-end">
+                  <span class="live-signal"><i aria-hidden="true"></i> Interactive concept</span>
+                  <span class="live-clock" data-live-clock>--:--:--</span>
+                </span>
+              </div>
+              <div class="live-shell">
+                <aside class="live-rail" aria-label="Dashboard views">
+                  <div class="live-brand"><span>M</span><b>MUCO</b></div>
+                  <button type="button" class="live-nav is-active" data-live-view="overview" aria-pressed="true"><span>Overview</span></button>
+                  <button type="button" class="live-nav" data-live-view="enquiries" aria-pressed="false"><span>Enquiries</span></button>
+                  <button type="button" class="live-nav" data-live-view="delivery" aria-pressed="false"><span>Delivery</span></button>
+                  <div class="live-rail-status"><i aria-hidden="true"></i><span>Demo data<br><b>not live telemetry</b></span></div>
+                </aside>
+                <div class="live-stage">
+                  <div class="live-stage-head">
+                    <div><span class="live-kicker">Command centre</span><strong data-live-title>Business overview</strong></div>
+                    <button type="button" class="live-action" data-live-pulse>Refresh demo</button>
+                  </div>
+                  <div class="live-panel is-active" data-live-panel="overview">
+                    <div class="live-metrics">
+                      <article><span>Website</span><strong class="is-good">Online</strong><small><i></i> Public pages served</small></article>
+                      <article><span>Lead capture</span><strong class="is-good">Active</strong><small><i></i> Validation flow</small></article>
+                      <article><span>Deploy</span><strong>Current</strong><small data-live-relative>Demo checked just now</small></article>
+                    </div>
+                    <div class="live-grid">
+                      <article class="live-chart-card">
+                        <div class="live-card-head"><span>Sample activity</span><em>Demo</em></div>
+                        <svg class="live-chart" viewBox="0 0 420 128" preserveAspectRatio="none" aria-label="Sample activity chart"><defs><linearGradient id="liveFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cf9061" stop-opacity=".3"/><stop offset="1" stop-color="#cf9061" stop-opacity="0"/></linearGradient></defs><path class="live-chart-grid" d="M0 32H420M0 64H420M0 96H420"/><path class="live-chart-area" d="M0 106 C45 99 56 74 96 82 S148 102 184 64 S248 35 278 58 S332 85 420 24 V128 H0Z"/><path class="live-chart-line" d="M0 106 C45 99 56 74 96 82 S148 102 184 64 S248 35 278 58 S332 85 420 24"/><circle class="live-chart-point" cx="420" cy="24" r="4"/></svg>
+                      </article>
+                      <article class="live-activity"><div class="live-card-head"><span>Activity stream</span><em>Demo</em></div><div data-live-feed><p><i class="ok"></i><span><b>Lead endpoint demo</b><small>Validation and rate-limit flow shown</small></span><time>now</time></p><p><i></i><span><b>Portfolio evidence loaded</b><small>Public assets available</small></span><time>1m</time></p><p><i></i><span><b>Source attribution ready</b><small>Campaign context preserved</small></span><time>3m</time></p></div></article>
+                    </div>
+                  </div>
+                  <div class="live-panel" data-live-panel="enquiries" hidden>
+                    <div class="live-empty-icon">↗</div><strong>Enquiry pipeline concept</strong><p>How enquiries are captured, attributed and handed off to WhatsApp or email.</p><div class="live-flow"><span>Visitor</span><i></i><span>Validate</span><i></i><span>Record</span><i></i><span>Respond</span></div>
+                  </div>
+                  <div class="live-panel" data-live-panel="delivery" hidden>
+                    <div class="live-delivery"><span class="is-done">Discover</span><span class="is-done">Design</span><span class="is-done">Build</span><span class="is-active">Operate</span></div><strong>Production delivery</strong><p>The public platform is live. Secure customer and administration areas are the next planned phase.</p>
+                  </div>
+                </div>
+              </div>
+            </figure>"""
+
+
 def project_card(p):
     """Compact card: the headline facts are always visible, the detail is one
     click away, so a nineteen-project grid stays scannable."""
     chips = "".join('<span class="tag tag-subtle">%s</span>' % c for c in p["chips"])
     note = ('<p class="work-note">%s</p>' % p["note"]) if p.get("note") else ""
-    # Evidence beats illustration, and moving evidence beats a still one:
-    # recording, then screenshot, then the drawn concept.
-    preview = clip(p["id"], p["name"])
-    if not preview:
-        preview = screenshot(p["id"], "Screenshot of %s" % p["name"])
+    # Editorial cover first; retain actual product evidence in the details.
+    evidence = clip(p["id"], p["name"]) or screenshot(p["id"], "Screenshot of %s" % p["name"])
+    illustration = project_illustration(p)
+    preview = illustration or evidence
     if not preview and p["id"] in PREVIEWS:
         preview = PREVIEWS[p["id"]] + "\n            " + PREVIEW_NOTE
     return """          <article class="work-card reveal-on-scroll" id="{id}">
@@ -1030,7 +1077,7 @@ def project_card(p):
                   <div class="def-row"><dt>Scope</dt><dd>{scope}</dd></div>
                   <div class="def-row"><dt>Status</dt><dd>{state}</dd></div>
                 </dl>
-                {note}
+{note}{capture}
               </div></div>
             </details>
             <div class="work-card-meta tag-row">{chips}</div>
@@ -1045,9 +1092,29 @@ def project_card(p):
         scope=p["scope"],
         state=p["state"],
         note=note,
+        capture=evidence if illustration else "",
         chips=chips,
         preview=preview,
     )
+
+
+def project_illustration(p):
+    index_path = os.path.join(ROOT, "assets", "projects", "index.json")
+    try:
+        with open(index_path, encoding="utf-8") as source:
+            entry = json.load(source).get(p["id"])
+    except (OSError, ValueError):
+        return ""
+    if not entry:
+        return ""
+    pid = p["id"]
+    srcset = ", ".join("/assets/projects/%s-%d.webp %dw" % (pid, w, w) for w in entry["widths"])
+    return '''<figure class="project-illustration">
+              <picture><source type="image/webp" srcset="%s" sizes="(max-width: 768px) 94vw, (max-width: 1200px) 46vw, 560px" />
+                <img src="/assets/projects/%s-%d.jpg" width="%d" height="%d" loading="lazy" decoding="async"
+                     alt="AI-generated project illustration for %s" /></picture>
+              <figcaption><span>%s</span><span>AI-generated illustration</span></figcaption>
+            </figure>''' % (srcset, pid, entry["width"], entry["width"], entry["height"], p["name"], p["name"])
 
 
 
@@ -1203,7 +1270,7 @@ def build_home():
             </p>
 
             <div class="btn-group">
-              <a href="contact.html" class="btn btn-accent btn-lg">Start your project</a>
+              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project<span class="visually-hidden"> (opens customer portal)</span></a>
               <a href="work.html" class="btn btn-secondary btn-lg">View our work</a>
               <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp</a>
             </div>
@@ -1370,6 +1437,7 @@ def build_home():
         region=REGION,
         wa=wa("Hi MUCO LABS, I would like to discuss a project."),
         wa_svg=WA_SVG,
+        portal_signup=PORTAL_SIGNUP,
         trust=trust_row(),
         services=services_html,
         industries=industries,
@@ -1546,7 +1614,7 @@ def build_service_page(sv):
             <p class="lead">{outcome}</p>
             <p>{bodytext}</p>
             <div class="btn-group mt-6">
-              <a href="contact.html?service={q}" class="btn btn-accent btn-lg">Start a project</a>
+              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a project<span class="visually-hidden"> (opens customer portal)</span></a>
               <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Ask a question</a>
             </div>
           </div>
@@ -1603,7 +1671,7 @@ def build_service_page(sv):
                           (sv["title"], None)]),
         title=sv["title"], outcome=sv["outcome"], bodytext=sv["body"], q=q,
         wa=wa("Hi MUCO LABS, I have a question about %s." % sv["title"].lower()),
-        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, deliver=deliver,
+        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup=PORTAL_SIGNUP, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
         others=others,
         cta=final_cta(
@@ -1611,7 +1679,6 @@ def build_service_page(sv):
             "Describe the problem and we will come back with questions, an approach and a written "
             "scope. The scope costs you nothing.",
             "Hi MUCO LABS, I would like to discuss %s." % sv["title"].lower(),
-            primary="contact.html?service=" + q,
         ),
     )
 
@@ -1675,10 +1742,10 @@ def build_work():
 {cards}        </div>
 
         <div class="callout mt-7">
-          <p class="fs-sm">Panels marked <strong>Screenshot</strong> are captures of the running
-          product. Panels marked <strong>Concept</strong> are drawings of how a product works, not
-          captures of a screen &mdash; we label the difference rather than letting you assume.
-          Ask and we will walk you through the real thing on a call.</p>
+          <p class="fs-sm">Cover images are <strong>AI-generated project illustrations</strong>.
+          They show the setting and purpose of each project, not a verified product interface
+          or client photo. Real screenshots and screen recordings, where available, are inside
+          the project details. Each project keeps its actual build status.</p>
         </div>
       </div>
     </section>
@@ -1834,6 +1901,7 @@ def build_pricing():
                     "scope and a price you can plan around.",
                     "Hi MUCO LABS, I would like a quote for a project.",
                     primary_label="Request a quote",
+                    primary="contact.html",
                 ))
 
     return render(
@@ -1893,7 +1961,7 @@ def build_local_erode():
           with the code in your name.</p>
 
         <div class="btn-group">
-          <a href="contact.html" class="btn btn-accent btn-lg">Start your project</a>
+          <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project<span class="visually-hidden"> (opens customer portal)</span></a>
           <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp {phone}</a>
         </div>
 
@@ -1976,7 +2044,7 @@ def build_local_erode():
         crumbs=crumb_nav([("Home", "index.html"), ("Website development in Erode", None)]),
         brand=BRAND, city=CITY, region=REGION, phone=PHONE,
         wa=wa("Hi MUCO LABS, I need a website for my business in Erode."),
-        wa_svg=WA_SVG, trust=trust_row(), sectors=sectors_html, faqs=faqs,
+        wa_svg=WA_SVG, portal_signup=PORTAL_SIGNUP, trust=trust_row(), sectors=sectors_html, faqs=faqs,
         markets=", ".join(MARKETS),
         cta=final_cta(
             "Let us look at what you need",
@@ -2132,7 +2200,7 @@ def build_about():
 
             <div class="btn-group mt-6">
               <a href="work.html" class="btn btn-secondary">See the work &rarr;</a>
-              <a href="contact.html" class="btn btn-accent">Start a project</a>
+              <a href="{portal_signup}" class="btn btn-accent">Start a project<span class="visually-hidden"> (opens customer portal)</span></a>
             </div>
 
             {trust}
@@ -2196,6 +2264,7 @@ def build_about():
         markets=", ".join(MARKETS),
         counts=portfolio_counts(),
         trust=trust_row(),
+        portal_signup=PORTAL_SIGNUP,
         values=vhtml,
         cta=final_cta(
             "Want to talk it through first?",
@@ -2393,7 +2462,8 @@ def build_contact():
                 </div>
                 <div class="form-group">
                   <label for="email">Email</label>
-                  <input type="email" id="email" name="email" class="form-control" autocomplete="email" />
+                  <input type="email" id="email" name="email" class="form-control" autocomplete="email" aria-describedby="email-error" />
+                  <p class="form-error" id="email-error">Please enter a valid email address or leave this blank.</p>
                 </div>
               </div>
 
@@ -2409,7 +2479,8 @@ def build_contact():
                 </div>
                 <div class="form-group">
                   <label for="website">Current website</label>
-                  <input type="url" id="website" name="website" class="form-control" placeholder="https://" />
+                  <input type="url" id="website" name="website" class="form-control" placeholder="https://" aria-describedby="website-error" />
+                  <p class="form-error" id="website-error">Please enter a full website URL, starting with https://, or leave this blank.</p>
                 </div>
               </div>
 
@@ -2539,6 +2610,7 @@ def build_faq():
         "Ask it on WhatsApp and you will get a straight answer, whether or not it leads to a project.",
         "Hi MUCO LABS, I have a question: ",
         primary_label="Ask by form",
+        primary="contact.html",
     ))
 
     return render(
@@ -2644,6 +2716,7 @@ def build_careers():
             "built with it. We would rather hear from you than miss you.",
             "Hi MUCO LABS, I would like to work with you.",
             primary_label="Send an enquiry",
+            primary="contact.html",
         ),
     )
 
@@ -2659,22 +2732,19 @@ def build_careers():
 
 # The privacy page has to describe what the site actually does, so this text
 # follows GA_MEASUREMENT_ID rather than being written by hand and going stale.
-if GA_MEASUREMENT_ID:
-    ANALYTICS_PRIVACY_TEXT = (
-        "This site uses Google Analytics to count visits and see which pages are useful. It "
-        "records the pages you view, roughly where you are (country or region level, not your "
-        "address), your device and browser type, and how you arrived here. Advertising features "
-        "and ad personalisation are switched off, so this data is not used to target you with "
-        "advertising. We use it to decide what to write and fix, nothing else. You can block it "
-        "with any ad blocker or your browser's Do Not Track setting, and the site works exactly "
-        "the same either way."
-    )
-else:
-    ANALYTICS_PRIVACY_TEXT = (
-        "We do not currently run analytics, advertising trackers or third-party cookies on this "
-        "website. If that changes, this page will be updated first and consent will be requested "
-        "where the law requires it."
-    )
+ANALYTICS_PRIVACY_TEXT = (
+    "This site runs its own first-party operational analytics to count visits and see which "
+    "pages and calls-to-action are useful. It does not use Google Analytics or any other "
+    "third-party tracker, and it does not set cookies. For each visit it stores a random "
+    "anonymous session identifier only in sessionStorage while the browser tab is open; the "
+    "identifier is not linked to any name, email address, phone number or other personal "
+    "information. The data collected is limited to the pages viewed, the site that referred "
+    "you, any campaign tags in the link, and which links or forms were used. We use this only "
+    "to understand which of our pages are useful and to respond to enquiries. Analytics data "
+    "is retained for approximately 90 days and then deleted automatically. If your browser "
+    "sends a Do Not Track signal or you have enabled Global Privacy Control, analytics events "
+    "are not sent, and the site works exactly the same either way."
+)
 
 LEGAL_NOTICE = """      <div class="callout callout-warn mb-7">
         <p><strong>Please read.</strong> This page describes how {brand} actually operates today and
@@ -2726,14 +2796,14 @@ def build_privacy():
         "WhatsApp, email or phone." % BRAND,
         [
             ("What this website itself collects", [
-                "This site is a set of static pages with one piece of server code: the endpoint "
-                "that receives the enquiry form. There are no user accounts and no public database.",
+                "This site is a set of static pages with a small amount of server code: the "
+                "endpoint that receives the enquiry form and a first-party analytics endpoint. "
+                "There are no user accounts on this website.",
                 "When you submit the enquiry form, what you typed is sent to us and recorded so we "
                 "can reply. The same details are also opened in WhatsApp or your email application "
                 "so you can continue the conversation there if you want to \u2014 but the enquiry "
                 "reaches us either way, which is the point: before this, an enquiry was lost if "
-                "WhatsApp failed to open. Browsing the site without submitting the form sends us "
-                "nothing.",
+                "WhatsApp failed to open.",
                 "Alongside your answers we record the page you submitted from, the site that "
                 "referred you and any campaign tags in the link, so we know which of our pages are "
                 "actually useful. Your IP address is recorded with the submission as a basic "
@@ -2763,16 +2833,20 @@ def build_privacy():
                 "add you to a marketing list because you asked a question.",
             ]),
             ("Where it is stored", [
-                "Enquiries and project correspondence live in the business tools we actually use "
-                "to run the company &mdash; our WhatsApp Business account, our email, and our own "
-                "project files. Access is limited to the people working on your project.",
-                "Where a project requires a third-party service such as a database, payment "
-                "gateway or email provider, that is stated in your project agreement along with "
-                "who the provider is.",
+                "Enquiries, project correspondence and first-party analytics data live in our own "
+                "Supabase project. They are not shared with advertisers, analytics vendors or other "
+                "third parties. Access is limited to the people working on your project.",
+                "WhatsApp messages and emails are stored in the respective services we use to "
+                "communicate with you.",
+                "Where a project requires a third-party service such as a payment gateway or "
+                "email provider, that is stated in your project agreement along with who the "
+                "provider is.",
             ]),
             ("How long we keep it", [
                 "Enquiries that do not become projects are kept while there is a realistic chance "
                 "of the conversation continuing, and removed on request at any time.",
+                "First-party analytics data is retained for approximately 90 days and then deleted "
+                "automatically.",
                 "Records relating to a project we delivered are kept for as long as we may need "
                 "them for accounting, tax or contractual reasons.",
             ]),
@@ -3192,11 +3266,10 @@ def build_vercel_json():
     measured. Generating it keeps the promise that the Measurement ID is the
     only thing you have to set.
     """
+    # First-party analytics posts to /api/event only; no third-party scripts or
+    # connect targets are emitted, so the policy stays tight.
     script_src = "'self'"
     connect_src = "'self'"
-    if GA_MEASUREMENT_ID:
-        script_src += " https://www.googletagmanager.com"
-        connect_src += " https://*.google-analytics.com https://*.analytics.google.com"
 
     csp = "; ".join([
         "default-src 'self'",
@@ -3214,6 +3287,10 @@ def build_vercel_json():
 
     config = {
         "$schema": "https://openapi.vercel.sh/vercel.json",
+        "framework": None,
+        "buildCommand": "node scripts/build-site.mjs",
+        "outputDirectory": "public-site",
+        "installCommand": "",
         "cleanUrls": True,
         "trailingSlash": False,
         "headers": [
@@ -3256,7 +3333,7 @@ def build_readme():
 
 Official website for {brand}. {tagline}
 
-Static HTML plus one serverless function (`api/lead.js`). Deployed from `main`.
+Static HTML plus two Vercel serverless functions (`api/lead.js` and `api/event.js`). Deployed from `main`.
 
 ## Contact
 
@@ -3276,7 +3353,7 @@ build will overwrite your changes. Edit the source and rebuild instead:
 | `content.py` | All page copy, the service list, and the project portfolio data |
 | `style.css` | Design system — edit directly |
 | `main.js` | Browser behaviour — edit directly |
-| `analytics.js` | GA4 event map — edit directly, only loaded when an ID is set |
+| `analytics.js` | First-party analytics event sender — edit directly |
 
 `vercel.json`, `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and
 the `.html` files are all generated. Edit the sources above, not the output.
@@ -3286,6 +3363,27 @@ python3 build.py
 ```
 
 ## Adding a real screenshot of a project
+
+The six featured projects also have AI-generated photographic illustrations in
+`project-images/`, labelled as illustrations in the page. Their prompts and
+provenance are in `project-images/PROMPTS.md`. Responsive assets are generated by
+`python build_project_images.py`, and only those generated files are committed.
+The ~2 MB source PNGs are deliberately not in the repository -- nothing serves
+them and they would add about 13 MB to a public clone forever. Keep them
+somewhere you can re-run the script from. Existing real recordings and
+screenshots remain available inside each project's expanded details.
+
+## Local preview and production setup
+
+Run `node scripts/dev-site.mjs` from the repository root for the website and its
+API endpoints at localhost:8123. Run `npm run dev` from `portal/` for the CRM.
+`serve.py` is a static-only fallback; it does not execute API functions.
+
+Vercel packages only public site assets with `node scripts/build-site.mjs` into
+`public-site/`. Deploy `portal/` as a separate Next.js project.
+See `DEPLOYMENT_GUIDE_TA.md` for the complete Supabase + Vercel setup and checks.
+
+## Capturing real project evidence
 
 The portfolio labels every panel by how strong the evidence is: **Screen
 recording** for the product running, **Screenshot** for a still of it,
@@ -3363,28 +3461,28 @@ Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
 enquiry to you. Without it nothing breaks; the leads are in
 Vercel → Deployments → Functions → Logs, filtered on `[lead]`.
 
+Optional: set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+in Vercel so accepted enquiries are also stored in the MUCO CRM. If these are
+not set, the form still works and the visitor is handed off normally.
+
 The browser opens WhatsApp *before* awaiting the request, because doing it
 afterwards loses the click gesture and pop-up blockers eat the window.
 
-## Turning on analytics
+## Analytics
 
-Open `build.py`, put the GA4 Measurement ID in `GA_MEASUREMENT_ID`, and run
-`python3 build.py`.
+`analytics.js` is loaded on every page. It sends only first-party,
+allowlisted events to `/api/event`: `page_view`, `cta_click`, `contact_click`,
+`signup_click`, `form_start`, `lead_submit`, `whatsapp_click`, `phone_click`,
+`email_click`, `instagram_click`, `faq_open`, `project_detail_open`.
 
-That one line switches on three things at once: the gtag tag on every page,
-the event map in `analytics.js`, and the paragraph in the privacy policy that
-describes what is being collected. While the value is empty the site loads no
-analytics, makes no third-party request, and the privacy policy says exactly
-that — so the page can never claim something untrue about itself.
+No cookies, no third-party scripts, no fingerprinting, and no form field
+contents are ever collected. The visitor's browser stores a random anonymous
+session id in `sessionStorage`; it is not linked to any personal information.
+Do Not Track and Global Privacy Control signals are honoured.
 
-`vercel.json` is generated too, so the Content-Security-Policy widens to allow
-Google's hosts only while the ID is set and narrows again when it is cleared.
-Any *other* third-party script needs its host adding to `build_vercel_json()`
-in `content.py`, or the browser will block it.
-
-Events sent: `whatsapp_click`, `phone_click`, `email_click`,
-`instagram_click`, `cta_click`, `form_start`, `form_error`, `generate_lead`,
-`faq_open`, `project_detail_open` — see the header of `analytics.js`.
+The endpoint is configured with `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Without them the endpoint returns a
+soft failure and the page is unaffected.
 
 ## Content rules
 
@@ -3409,12 +3507,16 @@ is a GitHub Pages mechanism and GitHub Pages is not serving this repository.
 To go live on the real domain, add it in the Vercel project settings and point
 DNS at the records Vercel gives you.
 
-## Known limitations
+## Environment variables
 
-The enquiry form is client-side only: it opens WhatsApp or the visitor's email
-app with the message pre-filled. Nothing is stored or transmitted by the page.
-Server-side validation, spam protection, lead storage and transactional email
-need a backend, which this repository does not have yet.
+| Variable | Purpose |
+|---|---|
+| `RESEND_API_KEY` | Optional. Emails accepted enquiries from `api/lead.js`. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Optional. CRM / analytics project URL. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional. Publishable / anon key for CRM RPC calls. |
+
+No secret keys should be exposed in the browser bundle or in source. The portal
+Supabase project supplies the same public values.
 """.format(brand=BRAND, tagline=TAGLINE, founder=FOUNDER,
            domain=DOMAIN, email=EMAIL, phone=PHONE)
     with open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8") as f:

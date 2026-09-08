@@ -58,8 +58,8 @@ def fetch(url):
     ).read()
 
 
-SERIF_URL = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap"
-SERIF_FILE = "instrument-serif-italic-latin.woff2"
+SERIF_URL = "https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap"
+SERIF_FILE = "instrument-serif-latin.woff2"
 
 
 def subset_serif():

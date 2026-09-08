@@ -81,6 +81,24 @@
       }
     });
 
+    // While the menu is open, Tab cycles through the toggle and the menu's
+    // links instead of falling through to the page behind it.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab' || !menu.classList.contains('open')) return;
+      var items = [toggle].concat(
+        Array.prototype.slice.call(menu.querySelectorAll('a'))
+      );
+      var idx = items.indexOf(document.activeElement);
+      var next;
+      if (e.shiftKey) {
+        next = idx <= 0 ? items[items.length - 1] : items[idx - 1];
+      } else {
+        next = idx === -1 || idx === items.length - 1 ? items[0] : items[idx + 1];
+      }
+      e.preventDefault();
+      next.focus();
+    });
+
     // Close when the viewport grows back to the desktop nav.
     window.addEventListener('resize', function () {
       if (window.innerWidth > 768 && menu.classList.contains('open')) setOpen(false);
@@ -382,6 +400,53 @@
 
     var meyraLabel = meyraEl.querySelector('strong');
     var meyraBody = document.getElementById('mockup-meyra-body');
+    var target = meyraBody || meyraEl;
+
+    // The reply is announced when it finishes typing, not on every keystroke.
+    meyraEl.setAttribute('aria-live', 'polite');
+
+    // A run id cancels a sequence still in flight when the visitor clicks a
+    // second scenario before the first has finished typing.
+    var run = 0;
+
+    function playReply(text) {
+      var id = ++run;
+
+      if (reduceMotion) {
+        target.textContent = text;
+        return;
+      }
+
+      // "Composing" beat: the bubble shows the dots for a moment before the
+      // reply starts, which is what makes the panel read as a live product
+      // rather than a paragraph that swapped.
+      meyraEl.classList.add('is-thinking');
+      target.textContent = '';
+      var dots = document.createElement('span');
+      dots.className = 'typing-dots';
+      dots.setAttribute('aria-hidden', 'true');
+      dots.innerHTML = '<span></span><span></span><span></span>';
+      target.appendChild(dots);
+
+      setTimeout(function () {
+        if (id !== run) return;
+        meyraEl.classList.remove('is-thinking');
+        meyraEl.classList.add('is-typing');
+        target.removeChild(dots);
+
+        var i = 0;
+        (function step() {
+          if (id !== run) return;
+          i += Math.random() < 0.3 ? 2 : 1;
+          target.textContent = text.slice(0, i);
+          if (i < text.length) {
+            setTimeout(step, 14 + Math.random() * 24);
+          } else {
+            meyraEl.classList.remove('is-typing');
+          }
+        })();
+      }, 600);
+    }
 
     Array.prototype.forEach.call(buttons, function (btn) {
       btn.addEventListener('click', function () {
@@ -399,13 +464,93 @@
 
         userEl.textContent = data.user;
         if (meyraBody) {
-          meyraBody.textContent = data.meyra;
+          playReply(data.meyra);
         } else {
           meyraEl.textContent = data.meyra;
           if (meyraLabel) meyraEl.insertBefore(meyraLabel, meyraEl.firstChild);
         }
       });
     });
+  }
+
+  function initLivePlatform() {
+    var root = document.querySelector('[data-live-platform]');
+    if (!root) return;
+
+    var clock = root.querySelector('[data-live-clock]');
+    var relative = root.querySelector('[data-live-relative]');
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-live-view]'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('[data-live-panel]'));
+    var title = root.querySelector('[data-live-title]');
+    var pulse = root.querySelector('[data-live-pulse]');
+    var feed = root.querySelector('[data-live-feed]');
+    var checkedAt = Date.now();
+    var labels = {
+      overview: 'Business overview',
+      enquiries: 'Enquiry operations',
+      delivery: 'Delivery status'
+    };
+
+    function tick() {
+      var now = new Date();
+      if (clock) {
+        clock.textContent = now.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      if (relative) {
+        var elapsed = Math.floor((Date.now() - checkedAt) / 1000);
+        relative.textContent = elapsed < 5 ? 'Checked just now' : 'Checked ' + elapsed + 's ago';
+      }
+    }
+
+    function select(name) {
+      tabs.forEach(function (tab) {
+        var selected = tab.getAttribute('data-live-view') === name;
+        tab.classList.toggle('is-active', selected);
+        tab.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+      panels.forEach(function (panel) {
+        var selected = panel.getAttribute('data-live-panel') === name;
+        panel.hidden = !selected;
+        panel.classList.toggle('is-active', selected);
+      });
+      if (title) title.textContent = labels[name] || labels.overview;
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        select(tab.getAttribute('data-live-view'));
+      });
+    });
+
+    if (pulse) {
+      pulse.addEventListener('click', function () {
+        pulse.classList.remove('is-running');
+        void pulse.offsetWidth;
+        pulse.classList.add('is-running');
+        pulse.textContent = 'Refreshing…';
+        setTimeout(function () {
+          checkedAt = Date.now();
+          pulse.textContent = 'Demo data refreshed';
+          if (feed) {
+            var row = document.createElement('p');
+            row.innerHTML = '<i class="ok"></i><span><b>Demo data refreshed</b><small>Mock services responding normally</small></span><time>now</time>';
+            feed.insertBefore(row, feed.firstChild);
+            while (feed.children.length > 3) feed.removeChild(feed.lastChild);
+          }
+          setTimeout(function () {
+            pulse.textContent = 'Refresh demo';
+            pulse.classList.remove('is-running');
+          }, 1800);
+        }, 700);
+      });
+    }
+
+    tick();
+    setInterval(tick, 1000);
   }
 
   /* ----------------------------------------------------------------- clock */
@@ -490,7 +635,13 @@
     }
 
     function fieldIsValid(el) {
-      return el.type === 'checkbox' ? el.checked : el.checkValidity() && el.value.trim();
+      if (el.type === 'checkbox') return !el.required || el.checked;
+      var value = el.value.trim();
+      if (!value) return !el.required;
+      // Match the API's contact checks before opening WhatsApp or email.
+      if (el.name === 'phone' && (value.match(/\d/g) || []).length < 7) return false;
+      if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return false;
+      return el.checkValidity();
     }
 
     function markField(el) {
@@ -503,7 +654,7 @@
 
     function validate() {
       var ok = true;
-      Array.prototype.forEach.call(form.querySelectorAll('[required]'), function (el) {
+      Array.prototype.forEach.call(form.querySelectorAll('[required], input[type="email"], input[type="url"]'), function (el) {
         if (!markField(el) && ok) {
           el.focus();
           ok = false;
@@ -515,7 +666,7 @@
     // Once a field has been flagged, clear the flag the moment it is fixed.
     // Leaving an error visible under a field the visitor has already corrected
     // reads as "this is still wrong" and it isn't.
-    Array.prototype.forEach.call(form.querySelectorAll('[required]'), function (el) {
+    Array.prototype.forEach.call(form.querySelectorAll('[required], input[type="email"], input[type="url"]'), function (el) {
       var event = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
       el.addEventListener(event, function () {
         if (el.getAttribute('aria-invalid') === 'true' && fieldIsValid(el)) markField(el);
@@ -612,7 +763,7 @@
         budget: fieldValue('budget'),
         timeline: fieldValue('timeline'),
         message: fieldValue('message'),
-        consent: true,
+        consent: !!form.elements.consent && form.elements.consent.checked,
         channel: channel,
         page: window.location.pathname,
         referrer: document.referrer || ''
@@ -648,11 +799,34 @@
         })
         .then(function (r) {
           if (r.ok) {
-            showStatus(
-              'ok',
-              'Your enquiry has reached us — we will reply to you directly. ' +
-                'You can still press send in WhatsApp if you would like to talk there.'
-            );
+            // A 200 means the lead was accepted and written to the function log,
+            // not that an email was sent. The response tells us whether email
+            // notification actually fired, so the message stays truthful.
+            return r
+              .json()
+              .then(function (data) {
+                if (typeof window.mucoTrackEvent === 'function') {
+                  window.mucoTrackEvent('lead_submit', {
+                    service: fieldValue('service') || 'unspecified',
+                    channel: channel
+                  });
+                }
+                var recorded = 'Your enquiry has been recorded.';
+                var reply = data.emailed
+                  ? ' We will reply to you directly.'
+                  : ' We will reply as soon as we can.';
+                var whatsappNote =
+                  channel === 'whatsapp'
+                    ? ' You can still press send in WhatsApp if you would like to talk there.'
+                    : '';
+                showStatus('ok', recorded + reply + whatsappNote);
+              })
+              .catch(function () {
+                showStatus(
+                  'ok',
+                  'Your enquiry has been recorded. We will reply as soon as we can.'
+                );
+              });
           } else {
             // The WhatsApp window is already open, so the enquiry is not lost.
             showStatus('ok', handedOff + ' Press send there so we receive it.');
@@ -676,15 +850,90 @@
     }
   }
 
+  /* ------------------------------------------- nav sliding indicator */
+  // One underline that travels between items rather than six underlines
+  // each appearing in place. Keyboard focus moves it too, so the effect is
+  // not pointer-only decoration.
+  function initNavIndicator() {
+    var list = document.querySelector('.nav-links');
+    if (!list) return;
+
+    var current = list.querySelector('a[aria-current="page"]');
+    var indicator = document.createElement('span');
+    indicator.className = 'nav-indicator';
+    indicator.setAttribute('aria-hidden', 'true');
+    var indicatorWrap = document.createElement('li');
+    indicatorWrap.className = 'nav-indicator-wrap';
+    indicatorWrap.setAttribute('aria-hidden', 'true');
+    indicatorWrap.appendChild(indicator);
+    list.appendChild(indicatorWrap);
+    list.classList.add('nav-indicator-on');
+
+    function place(link, animate) {
+      // offsetParent is null while the bar is display:none (mobile), which
+      // is also the signal to hide the indicator entirely.
+      if (!link || !link.offsetParent) {
+        indicator.style.opacity = '0';
+        return;
+      }
+      if (!animate) indicator.style.transition = 'none';
+      indicator.style.opacity = '1';
+      indicator.style.width = link.offsetWidth + 'px';
+      indicator.style.transform = 'translateX(' + link.offsetLeft + 'px)';
+      if (!animate) {
+        void indicator.offsetWidth; // reflow so the next move animates
+        indicator.style.transition = '';
+      }
+    }
+
+    Array.prototype.forEach.call(list.querySelectorAll('a'), function (link) {
+      link.addEventListener('pointerenter', function () {
+        place(link, true);
+      });
+      link.addEventListener('focus', function () {
+        place(link, true);
+      });
+    });
+
+    list.addEventListener('pointerleave', function () {
+      place(current, true);
+    });
+    list.addEventListener('focusout', function () {
+      if (!list.contains(document.activeElement)) place(current, true);
+    });
+    window.addEventListener(
+      'resize',
+      function () {
+        place(current, false);
+      },
+      { passive: true }
+    );
+
+    // First paint lands on the current page with no visible slide.
+    place(current, false);
+  }
+
+  /* ---------------------------------------------------- hero entrance */
+  // Staged rise on the hero, defined in the stylesheet under .hero-enter.
+  // Skipped for reduced motion and absent entirely without JS.
+  function initHeroEntrance() {
+    if (reduceMotion) return;
+    if (!document.querySelector('.hero-split')) return;
+    document.body.classList.add('hero-enter');
+  }
+
   /* ------------------------------------------------------------------ boot */
   function init() {
     initHeaderShadow();
     initMobileMenu();
+    initNavIndicator();
+    initHeroEntrance();
     initSpotlight();
     initTabs();
     initReveal();
     initClips();
     initMeyraSim();
+    initLivePlatform();
     initClock();
     initEnquiryForm();
   }

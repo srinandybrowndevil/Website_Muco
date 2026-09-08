@@ -1,0 +1,56 @@
+{
+  "beauty-brand": {
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "width": 1200,
+    "height": 800
+  },
+  "inknexis": {
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "width": 1200,
+    "height": 800
+  },
+  "lead-automation": {
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "width": 1200,
+    "height": 800
+  },
+  "meyra": {
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "width": 1200,
+    "height": 800
+  },
+  "muco-platform": {
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "width": 1200,
+    "height": 800
+  },
+  "ooruva": {
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "width": 1200,
+    "height": 800
+  }
+}

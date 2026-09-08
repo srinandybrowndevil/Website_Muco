@@ -21,3 +21,15 @@ _audit.js
 # scripts. The sources can run to tens of megabytes each and nothing serves
 # them, so they stay out. Keep the originals somewhere you can re-encode from.
 /clips/
+/public-site/
+/.qa/
+
+# Source illustrations for the portfolio. Each is ~2 MB and nothing serves
+# them: build_project_images.py turns them into assets/projects/, which IS
+# committed. Keeping the originals here would add ~13 MB to a public repo
+# permanently. PROMPTS.md stays tracked so the provenance is not lost.
+/project-images/*.png
+
+# Personal Claude Code permissions, not shared settings. This repository is
+# public and the file records one machine's local paths.
+.claude/settings.local.json

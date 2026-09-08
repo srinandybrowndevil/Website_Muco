@@ -32,6 +32,9 @@ PHONE_TEL = "+916381809844"
 WHATSAPP = "916381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
+PORTAL_DOMAIN = "https://portal.mucolabs.com"
+PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
+PORTAL_SIGNUP = PORTAL_DOMAIN + "/signup?next=/portal/requests/new"
 FOUNDER = "Srinivash Mahalingam"
 CITY = "Erode"
 REGION = "Tamil Nadu"
@@ -66,14 +69,13 @@ LEGAL_REVISED = "2026-09-05"  # privacy, terms and refund wording
 PAGE_REVISED = {}             # e.g. {"work.html": "2026-10-02"} — key "" is the home page
 
 # ---------------------------------------------------------------------------
-# Analytics
+# Analytics (legacy field, unused)
 # ---------------------------------------------------------------------------
-# Paste the GA4 Measurement ID here (it looks like "G-XXXXXXXXXX") and run
-# `python3 build.py`. While this is empty, no analytics tag is emitted, the
-# page makes no third-party request, and the privacy policy says so — all of
-# that flips automatically when you fill it in. The event map lives in
-# analytics.js, which is a separate file because our own CSP blocks the inline
-# gtag snippet.
+# The site now uses first-party analytics only: analytics.js is loaded on every
+# page and posts allowlisted, privacy-conscious events to /api/event. It does
+# not call Google Analytics or any other third-party tracker, so no Measurement
+# ID is required. This constant is kept for backward compatibility with tooling
+# that may read it; the build ignores it.
 GA_MEASUREMENT_ID = ""
 
 
@@ -304,7 +306,10 @@ def header_html(current, key):
         </ul>
 
         <div class="nav-actions">
-          <a href="contact.html" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
+          <a href="{portal_login}" class="nav-portal-link" aria-label="Sign in to customer portal">
+            <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
+          </a>
+          <a href="{portal_signup}" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
           <button id="menu-toggle" class="menu-toggle" aria-label="Open navigation menu"
                   aria-expanded="false" aria-controls="mobile-menu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -315,11 +320,20 @@ def header_html(current, key):
     </div>
 
     <div id="mobile-menu" class="mobile-menu">
+      <div class="mobile-menu-nav">
 {mobile}
-      <a href="faq.html">FAQ</a>
-      <a href="careers.html">Careers</a>
-      <a href="contact.html" class="btn btn-accent">Start a Project</a>
-      <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp {phone}</a>
+      </div>
+      <div class="mobile-menu-secondary">
+        <a href="faq.html">FAQ</a>
+        <a href="careers.html">Careers</a>
+      </div>
+      <div class="mobile-menu-actions">
+        <a href="{portal_signup}" class="btn btn-accent">Start a Project</a>
+        <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp {phone}</a>
+        <a href="{portal_login}" class="nav-portal-link mobile-portal-link" aria-label="Sign in to customer portal">
+          <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
+        </a>
+      </div>
     </div>
   </header>
 """.format(
@@ -330,6 +344,8 @@ def header_html(current, key):
         mobile=nav_html(current, mobile=True),
         wa=wa("Hi MUCO LABS, I would like to discuss a project."),
         phone=PHONE,
+        portal_login=PORTAL_LOGIN,
+        portal_signup=PORTAL_SIGNUP,
     )
 
 
@@ -565,11 +581,12 @@ SHELL = """<!DOCTYPE html>
 <meta name="twitter:image" content="{domain}/assets/og-image.jpg" />
 <meta name="twitter:image:alt" content="{brand} — {tagline}" />
 
-<link rel="icon" type="image/svg+xml" href="favicon.svg" />
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
-<link rel="manifest" href="site.webmanifest" />
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight-latin.woff2" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
 <link rel="stylesheet" href="{css}" />
 {schema}{analytics}</head>
 <body>
@@ -585,13 +602,9 @@ def render(slug, title, description, body, current=None, og_type="website",
            schema_blocks=None, noindex=False):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
     canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
-    analytics = ""
-    if GA_MEASUREMENT_ID:
-        analytics = (
-            '<script async src="https://www.googletagmanager.com/gtag/js?id=%s"></script>\n'
-            '<script src="analytics.js" data-ga-id="%s" defer></script>\n'
-            % (GA_MEASUREMENT_ID, GA_MEASUREMENT_ID)
-        )
+    # First-party analytics only: analytics.js posts allowlisted, bounded events
+    # to /api/event. No third-party scripts or cookies are emitted.
+    analytics = '<script src="%s" defer></script>\n' % asset_v("analytics.js")
 
     body = band_sections(body)
 
@@ -627,7 +640,7 @@ def render(slug, title, description, body, current=None, og_type="website",
 # ---------------------------------------------------------------------------
 # Shared page fragments
 # ---------------------------------------------------------------------------
-def final_cta(heading, sub, wa_text, primary_label="Start a Project", primary="contact.html"):
+def final_cta(heading, sub, wa_text, primary_label="Start a Project", primary=PORTAL_SIGNUP):
     return """    <section class="section-divider">
       <div class="container">
         <div class="cta-box reveal-on-scroll">

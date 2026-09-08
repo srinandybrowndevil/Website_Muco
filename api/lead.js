@@ -124,10 +124,48 @@ export default async function handler(req, res) {
   // provider outage or a missing key — the Vercel function log is the backstop.
   console.log('[lead]', JSON.stringify({ ...lead, ...meta }));
 
-  const key = process.env.RESEND_API_KEY;
+    const resendKey = process.env.RESEND_API_KEY;
   let emailed = false;
 
-  if (key) {
+  // Best-effort CRM ingestion. The visitor has already been handed off to
+  // WhatsApp or email, so a Supabase outage must not break the response.
+  let recorded = false;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseKey) {
+    const rpcUrl = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/ingest_website_enquiry`;
+    const crmPayload = {
+      ...lead,
+      page: meta.page,
+      referrer: meta.referrer,
+      utm_source: meta.utm_source,
+      utm_medium: meta.utm_medium,
+      utm_campaign: meta.utm_campaign,
+      ip: meta.ip,
+      channel: body.channel || 'whatsapp'
+    };
+    try {
+      const r = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ payload: crmPayload })
+      });
+      recorded = r.ok;
+      if (!r.ok) console.error('[lead] crm ingest failed', r.status, await r.text());
+    } catch (err) {
+      console.error('[lead] crm ingest threw', err && err.message);
+    }
+  }
+
+  if (resendKey) {
     const rows = [
       ['Name', lead.name],
       ['Business', lead.business || '—'],
@@ -160,7 +198,7 @@ export default async function handler(req, res) {
     try {
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: process.env.LEAD_FROM_EMAIL || 'MUCO LABS <onboarding@resend.dev>',
           to: [process.env.LEAD_TO_EMAIL || 'founder@mucolabs.com'],
@@ -179,5 +217,5 @@ export default async function handler(req, res) {
   // The lead is recorded either way, so the visitor is told it arrived.
   // Telling them it failed because our email provider is down would be a lie
   // that costs us the enquiry.
-  return res.status(200).json({ ok: true, emailed });
+  return res.status(200).json({ ok: true, recorded, emailed });
 }

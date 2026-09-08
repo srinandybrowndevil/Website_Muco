@@ -162,5 +162,90 @@ await check('rate-limits a flood from one address', quiet(async () => {
   eq(last, 429, 'status on the sixth post inside a minute');
 }));
 
+const realFetch = global.fetch;
+function restoreMocks() {
+  global.fetch = realFetch;
+  delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+  delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+}
+function mockOkFetch() {
+  global.fetch = async () => ({ ok: true, status: 200, text: async () => '' });
+}
+function mockFailFetch() {
+  global.fetch = async () => ({ ok: false, status: 503, text: async () => 'service unavailable' });
+}
+
+await check('records the enquiry when CRM ingestion succeeds', async () => {
+  try {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
+    mockOkFetch();
+    capture();
+    const r = await call(valid);
+    const logged = release();
+    eq(r.code, 200, 'status');
+    eq(r.body.ok, true, 'ok');
+    eq(r.body.recorded, true, 'recorded');
+    eq(r.body.emailed, false, 'emailed, with no Resend key configured');
+    if (logged.includes('test-publishable-key-12345')) {
+      throw new Error('Supabase key leaked to function logs');
+    }
+    if (JSON.stringify(r.body).includes('test-publishable-key-12345')) {
+      throw new Error('Supabase key leaked to response body');
+    }
+  } finally {
+    restoreMocks();
+  }
+});
+
+await check('wraps enquiry data in the named RPC payload argument', async () => {
+  try {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
+    let sent;
+    global.fetch = async (_url, options) => {
+      sent = JSON.parse(options.body);
+      return { ok: true, status: 200, text: async () => '' };
+    };
+    await call(valid);
+    eq(typeof sent.payload, 'object', 'named payload argument');
+    eq(sent.payload.name, valid.name, 'lead name');
+    eq(sent.payload.message, valid.message, 'lead message');
+  } finally {
+    restoreMocks();
+  }
+});
+
+await check('still accepts the lead when CRM ingestion fails', async () => {
+  try {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
+    mockFailFetch();
+    const r = await call(valid);
+    eq(r.code, 200, 'status');
+    eq(r.body.ok, true, 'ok');
+    eq(r.body.recorded, false, 'recorded is false when CRM ingestion fails');
+    eq(r.body.emailed, false, 'emailed, with no Resend key configured');
+  } finally {
+    restoreMocks();
+  }
+});
+
+await check('does not send the Supabase key to the browser on failed validation', async () => {
+  try {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
+    mockOkFetch();
+    const r = await call({ ...valid, name: '' });
+    eq(r.code, 400, 'status');
+    if (JSON.stringify(r.body).includes('test-publishable-key-12345')) {
+      throw new Error('Supabase key leaked in validation error response');
+    }
+  } finally {
+    restoreMocks();
+  }
+});
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 process.exit(failures.length ? 1 : 0);

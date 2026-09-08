@@ -1,0 +1,11 @@
+{
+  "name": "mucolabs-site",
+  "private": true,
+  "type": "module",
+  "description": "Static site plus the two Vercel serverless functions. No dependencies: vercel.json sets installCommand to \"\" and nothing here is installed. This file exists so api/*.js and scripts/*.mjs are unambiguously ES modules -- without it a .js file is CommonJS by default and 'export default' is a syntax error on any runtime that follows that default.",
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "dev": "node scripts/dev-site.mjs",
+    "test": "node --test test-*.mjs"
+  }
+}

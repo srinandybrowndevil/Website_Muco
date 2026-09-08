@@ -26,12 +26,13 @@
 <meta name="twitter:image" content="https://mucolabs.com/assets/og-image.jpg" />
 <meta name="twitter:image:alt" content="MUCO LABS — Your Vision, Our Technology." />
 
-<link rel="icon" type="image/svg+xml" href="favicon.svg" />
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
-<link rel="manifest" href="site.webmanifest" />
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight-latin.woff2" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css?v=f77879bf91" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
+<link rel="stylesheet" href="style.css?v=57ff4ce33a" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -73,6 +74,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mucolabs.com/"},{"@type":"ListItem","position":2,"name":"Privacy Policy","item":"https://mucolabs.com/privacy"}]}
 </script>
+<script src="analytics.js?v=3d7d3edf52" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -117,7 +119,10 @@
         </ul>
 
         <div class="nav-actions">
-          <a href="/contact" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
+          <a href="https://portal.mucolabs.com/login" class="nav-portal-link" aria-label="Sign in to customer portal">
+            <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
+          </a>
+          <a href="https://portal.mucolabs.com/signup?next=/portal/requests/new" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
           <button id="menu-toggle" class="menu-toggle" aria-label="Open navigation menu"
                   aria-expanded="false" aria-controls="mobile-menu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -128,16 +133,25 @@
     </div>
 
     <div id="mobile-menu" class="mobile-menu">
+      <div class="mobile-menu-nav">
       <a href="/">Home</a>
       <a href="/services">Services</a>
       <a href="/work">Work</a>
       <a href="/pricing">Pricing</a>
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
-      <a href="/faq">FAQ</a>
-      <a href="/careers">Careers</a>
-      <a href="/contact" class="btn btn-accent">Start a Project</a>
-      <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS%2C%20I%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp +91 6381809844</a>
+      </div>
+      <div class="mobile-menu-secondary">
+        <a href="/faq">FAQ</a>
+        <a href="/careers">Careers</a>
+      </div>
+      <div class="mobile-menu-actions">
+        <a href="https://portal.mucolabs.com/signup?next=/portal/requests/new" class="btn btn-accent">Start a Project</a>
+        <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS%2C%20I%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp +91 6381809844</a>
+        <a href="https://portal.mucolabs.com/login" class="nav-portal-link mobile-portal-link" aria-label="Sign in to customer portal">
+          <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -156,11 +170,11 @@
 
       <div class="prose">
         <h2>What this website itself collects</h2>
-        <p>This site is a set of static pages with one piece of server code: the endpoint that receives the enquiry form. There are no user accounts and no public database.</p>
-        <p>When you submit the enquiry form, what you typed is sent to us and recorded so we can reply. The same details are also opened in WhatsApp or your email application so you can continue the conversation there if you want to — but the enquiry reaches us either way, which is the point: before this, an enquiry was lost if WhatsApp failed to open. Browsing the site without submitting the form sends us nothing.</p>
+        <p>This site is a set of static pages with a small amount of server code: the endpoint that receives the enquiry form and a first-party analytics endpoint. There are no user accounts on this website.</p>
+        <p>When you submit the enquiry form, what you typed is sent to us and recorded so we can reply. The same details are also opened in WhatsApp or your email application so you can continue the conversation there if you want to — but the enquiry reaches us either way, which is the point: before this, an enquiry was lost if WhatsApp failed to open.</p>
         <p>Alongside your answers we record the page you submitted from, the site that referred you and any campaign tags in the link, so we know which of our pages are actually useful. Your IP address is recorded with the submission as a basic anti-abuse measure.</p>
         <p>Our hosting provider, GitHub, records standard technical request logs such as IP address and browser type as part of serving the site. We do not control or have access to those logs. Everything else this site loads — stylesheets, scripts, typefaces and images — is served from this domain, so loading a page makes no request to any third party.</p>
-        <p>We do not currently run analytics, advertising trackers or third-party cookies on this website. If that changes, this page will be updated first and consent will be requested where the law requires it.</p>
+        <p>This site runs its own first-party operational analytics to count visits and see which pages and calls-to-action are useful. It does not use Google Analytics or any other third-party tracker, and it does not set cookies. For each visit it stores a random anonymous session identifier only in sessionStorage while the browser tab is open; the identifier is not linked to any name, email address, phone number or other personal information. The data collected is limited to the pages viewed, the site that referred you, any campaign tags in the link, and which links or forms were used. We use this only to understand which of our pages are useful and to respond to enquiries. Analytics data is retained for approximately 90 days and then deleted automatically. If your browser sends a Do Not Track signal or you have enabled Global Privacy Control, analytics events are not sent, and the site works exactly the same either way.</p>
         <h2>What we collect when you contact us</h2>
         <p>When you message us on WhatsApp, email us, call us or send an enquiry, we receive whatever you chose to include: typically your name, business name, phone number, email address, location, the service you are interested in, your budget range, your timeline and a description of your project.</p>
         <p>We ask only for what we need to understand and quote your project. You are never required to give us financial details, identity documents or anything sensitive in order to make an enquiry.</p>
@@ -169,10 +183,12 @@
         <p>For an active project, to keep the records any working relationship needs: the agreed scope, milestones, invoices and correspondence.</p>
         <p>We do not sell your information, rent it, or share it with advertisers. We do not add you to a marketing list because you asked a question.</p>
         <h2>Where it is stored</h2>
-        <p>Enquiries and project correspondence live in the business tools we actually use to run the company &mdash; our WhatsApp Business account, our email, and our own project files. Access is limited to the people working on your project.</p>
-        <p>Where a project requires a third-party service such as a database, payment gateway or email provider, that is stated in your project agreement along with who the provider is.</p>
+        <p>Enquiries, project correspondence and first-party analytics data live in our own Supabase project. They are not shared with advertisers, analytics vendors or other third parties. Access is limited to the people working on your project.</p>
+        <p>WhatsApp messages and emails are stored in the respective services we use to communicate with you.</p>
+        <p>Where a project requires a third-party service such as a payment gateway or email provider, that is stated in your project agreement along with who the provider is.</p>
         <h2>How long we keep it</h2>
         <p>Enquiries that do not become projects are kept while there is a realistic chance of the conversation continuing, and removed on request at any time.</p>
+        <p>First-party analytics data is retained for approximately 90 days and then deleted automatically.</p>
         <p>Records relating to a project we delivered are kept for as long as we may need them for accounting, tax or contractual reasons.</p>
         <h2>Your choices</h2>
         <p>You can ask us what we hold about you, ask for it to be corrected, or ask us to delete it. Email <a href="mailto:founder@mucolabs.com">founder@mucolabs.com</a> and we will confirm what we have done. If deleting something would conflict with a legal or accounting obligation, we will tell you which part and why.</p>
@@ -245,6 +261,6 @@
     </div>
   </footer>
 
-  <script src="main.js?v=bb1fd2dba1" defer></script>
+  <script src="main.js?v=9cc54de1a8" defer></script>
 </body>
 </html>

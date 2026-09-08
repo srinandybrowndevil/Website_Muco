@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { AuthShell, AuthStatus } from "@/components/auth/AuthShell";
+const reasons:Record<string,string>={expired:"This link has expired. Request a new email and try again.",invalid:"This link is invalid or has already been used.",callback:"We could not complete authentication. Please try again.",unauthorized:"You do not have access to a workspace. Contact your administrator for an invitation."};
+export default async function AuthError({searchParams}:{searchParams:Promise<{reason?:string}>}){const {reason}=await searchParams;return <AuthShell><h2>Authentication interrupted.</h2><AuthStatus tone="error" title="We couldn’t continue">{reasons[reason??""]??reasons.callback}</AuthStatus><Link className="primary authaction" href="/login">Return to sign in</Link></AuthShell>}

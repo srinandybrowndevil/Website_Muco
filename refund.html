@@ -26,12 +26,13 @@
 <meta name="twitter:image" content="https://mucolabs.com/assets/og-image.jpg" />
 <meta name="twitter:image:alt" content="MUCO LABS — Your Vision, Our Technology." />
 
-<link rel="icon" type="image/svg+xml" href="favicon.svg" />
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
-<link rel="manifest" href="site.webmanifest" />
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-tight-latin.woff2" crossorigin />
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css?v=f77879bf91" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
+<link rel="stylesheet" href="style.css?v=57ff4ce33a" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -73,6 +74,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mucolabs.com/"},{"@type":"ListItem","position":2,"name":"Refund &amp; Cancellation","item":"https://mucolabs.com/refund"}]}
 </script>
+<script src="analytics.js?v=3d7d3edf52" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -117,7 +119,10 @@
         </ul>
 
         <div class="nav-actions">
-          <a href="/contact" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
+          <a href="https://portal.mucolabs.com/login" class="nav-portal-link" aria-label="Sign in to customer portal">
+            <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
+          </a>
+          <a href="https://portal.mucolabs.com/signup?next=/portal/requests/new" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
           <button id="menu-toggle" class="menu-toggle" aria-label="Open navigation menu"
                   aria-expanded="false" aria-controls="mobile-menu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -128,16 +133,25 @@
     </div>
 
     <div id="mobile-menu" class="mobile-menu">
+      <div class="mobile-menu-nav">
       <a href="/">Home</a>
       <a href="/services">Services</a>
       <a href="/work">Work</a>
       <a href="/pricing">Pricing</a>
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
-      <a href="/faq">FAQ</a>
-      <a href="/careers">Careers</a>
-      <a href="/contact" class="btn btn-accent">Start a Project</a>
-      <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS%2C%20I%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp +91 6381809844</a>
+      </div>
+      <div class="mobile-menu-secondary">
+        <a href="/faq">FAQ</a>
+        <a href="/careers">Careers</a>
+      </div>
+      <div class="mobile-menu-actions">
+        <a href="https://portal.mucolabs.com/signup?next=/portal/requests/new" class="btn btn-accent">Start a Project</a>
+        <a href="https://wa.me/916381809844?text=Hi%20MUCO%20LABS%2C%20I%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp +91 6381809844</a>
+        <a href="https://portal.mucolabs.com/login" class="nav-portal-link mobile-portal-link" aria-label="Sign in to customer portal">
+          <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -240,6 +254,6 @@
     </div>
   </footer>
 
-  <script src="main.js?v=bb1fd2dba1" defer></script>
+  <script src="main.js?v=9cc54de1a8" defer></script>
 </body>
 </html>
