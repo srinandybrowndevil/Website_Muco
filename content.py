@@ -1270,7 +1270,7 @@ def build_home():
             </p>
 
             <div class="btn-group">
-              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project<span class="visually-hidden"> (opens customer portal)</span></a>
+              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project{portal_signup_note}</a>
               <a href="work.html" class="btn btn-secondary btn-lg">View our work</a>
               <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp</a>
             </div>
@@ -1437,7 +1437,7 @@ def build_home():
         region=REGION,
         wa=wa("Hi MUCO LABS, I would like to discuss a project."),
         wa_svg=WA_SVG,
-        portal_signup=PORTAL_SIGNUP,
+        portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE,
         trust=trust_row(),
         services=services_html,
         industries=industries,
@@ -1614,7 +1614,7 @@ def build_service_page(sv):
             <p class="lead">{outcome}</p>
             <p>{bodytext}</p>
             <div class="btn-group mt-6">
-              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a project<span class="visually-hidden"> (opens customer portal)</span></a>
+              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a project{portal_signup_note}</a>
               <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Ask a question</a>
             </div>
           </div>
@@ -1671,7 +1671,7 @@ def build_service_page(sv):
                           (sv["title"], None)]),
         title=sv["title"], outcome=sv["outcome"], bodytext=sv["body"], q=q,
         wa=wa("Hi MUCO LABS, I have a question about %s." % sv["title"].lower()),
-        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup=PORTAL_SIGNUP, deliver=deliver,
+        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
         others=others,
         cta=final_cta(
@@ -1961,7 +1961,7 @@ def build_local_erode():
           with the code in your name.</p>
 
         <div class="btn-group">
-          <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project<span class="visually-hidden"> (opens customer portal)</span></a>
+          <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project{portal_signup_note}</a>
           <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp {phone}</a>
         </div>
 
@@ -2044,7 +2044,7 @@ def build_local_erode():
         crumbs=crumb_nav([("Home", "index.html"), ("Website development in Erode", None)]),
         brand=BRAND, city=CITY, region=REGION, phone=PHONE,
         wa=wa("Hi MUCO LABS, I need a website for my business in Erode."),
-        wa_svg=WA_SVG, portal_signup=PORTAL_SIGNUP, trust=trust_row(), sectors=sectors_html, faqs=faqs,
+        wa_svg=WA_SVG, portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE, trust=trust_row(), sectors=sectors_html, faqs=faqs,
         markets=", ".join(MARKETS),
         cta=final_cta(
             "Let us look at what you need",
@@ -2200,7 +2200,7 @@ def build_about():
 
             <div class="btn-group mt-6">
               <a href="work.html" class="btn btn-secondary">See the work &rarr;</a>
-              <a href="{portal_signup}" class="btn btn-accent">Start a project<span class="visually-hidden"> (opens customer portal)</span></a>
+              <a href="{portal_signup}" class="btn btn-accent">Start a project{portal_signup_note}</a>
             </div>
 
             {trust}
@@ -2264,7 +2264,7 @@ def build_about():
         markets=", ".join(MARKETS),
         counts=portfolio_counts(),
         trust=trust_row(),
-        portal_signup=PORTAL_SIGNUP,
+        portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE,
         values=vhtml,
         cta=final_cta(
             "Want to talk it through first?",

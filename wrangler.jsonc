@@ -1,0 +1,23 @@
+{
+  // Without this file wrangler generates its own on the build machine and
+  // guesses `"directory": "."` -- the whole repository. The last Cloudflare
+  // build read 2219 files from the repo root and died on
+  // node_modules/workerd/bin/workerd (146 MiB against a 25 MiB asset limit).
+  // Worth noticing that the crash was the good outcome: had it fit, build.py,
+  // content.py and the entire portal source would have been published as
+  // static assets on a public URL.
+  //
+  // public-site/ is what vercel.json already treats as the deployable output:
+  // the built HTML plus only the assets it references, written by
+  // scripts/build-site.mjs. Nothing else belongs on a CDN.
+  //
+  // The Cloudflare project still needs its build command set to
+  //   node scripts/build-site.mjs
+  // or public-site/ will not exist when wrangler looks for it. That is a
+  // dashboard setting, not a repository one.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "website-muco",
+  "compatibility_date": "2026-09-08",
+  "observability": { "enabled": true },
+  "assets": { "directory": "./public-site" }
+}

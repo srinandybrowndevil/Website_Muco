@@ -42,8 +42,27 @@ PORTAL_DOMAIN = "https://portal.mucolabs.com"
 # deployed and its DNS answers.
 PORTAL_LIVE = False
 PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
+# The fragment matters. "Start a Project" is the primary CTA in the header of
+# every page and in the mobile menu, so while it falls back to the contact page
+# it should land on the form, not on the top of a page the visitor then has to
+# scroll: the first field sits 1.33 screens down on a 900px desktop viewport,
+# and further on a phone. #enquiry-form is the form's own id, clean_urls keeps
+# the fragment when it strips .html, and html{scroll-padding-top} already
+# offsets the sticky header, so the field lands clear of it.
 PORTAL_SIGNUP = (
-    PORTAL_DOMAIN + "/signup?next=/portal/requests/new" if PORTAL_LIVE else "contact.html"
+    PORTAL_DOMAIN + "/signup?next=/portal/requests/new"
+    if PORTAL_LIVE
+    else "contact.html#enquiry-form"
+)
+# Screen-reader-only suffix on the "Start a project" buttons. It has to follow
+# the same flag as the href: while the portal is down these land on the contact
+# form, and a button that announces itself as opening the customer portal and
+# then delivers a contact form is a promise the page does not keep -- for the
+# one group of visitors who cannot see where they ended up.
+PORTAL_SIGNUP_NOTE = (
+    '<span class="visually-hidden"> (opens customer portal)</span>'
+    if PORTAL_LIVE
+    else ""
 )
 NEWLINE = chr(10)
 PORTAL_LOGIN_LINK = "".join([

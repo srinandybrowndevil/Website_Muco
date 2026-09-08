@@ -957,8 +957,14 @@ header nav {
   border-color: var(--accent-line);
 }
 
+/* Press has to read as contact, not as a slow cancellation of the hover lift.
+   Easing back to rest over the standard 0.22s feels like lag on the one gesture
+   that must feel instant, so a press drops just past rest in 0.09s. The release
+   is left alone, so it picks the standard curve back up: quick down, smooth up
+   -- that asymmetry is what makes a button feel physical rather than animated. */
 .btn:active {
-  transform: translateY(0);
+  transform: translateY(1px);
+  transition-duration: 0.09s;
 }
 
 .btn svg {
@@ -1008,6 +1014,14 @@ header nav {
   background: var(--accent-bright);
   border-color: var(--accent-bright);
   box-shadow: 0 6px 26px -8px rgba(207, 144, 97, 0.55);
+}
+
+/* The cast glow tightens as the button travels toward the surface, the way a
+   real object's shadow does. Without this the halo stays put and the 1px drop
+   reads as a glitch rather than a press. */
+.btn-primary:active,
+.btn-accent:active {
+  box-shadow: 0 2px 10px -7px rgba(207, 144, 97, 0.5);
 }
 
 .btn-secondary {
@@ -1340,7 +1354,10 @@ header nav {
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
   padding: 9px 17px;
-  transition: all var(--transition);
+  /* Named rather than `all`: `all` animates every future property too, so a
+     later layout fix silently becomes an animation. Only these three change. */
+  transition: color var(--transition), background var(--transition),
+    border-color var(--transition);
 }
 
 .chip:hover {
@@ -2322,6 +2339,22 @@ textarea.form-control {
   cursor: pointer;
   flex-shrink: 0;
   transition: color var(--transition), border-color var(--transition);
+}
+
+/* The control that stops the motion should not itself be the hardest thing on
+   the page to hit. At 20px it clears WCAG 2.5.8 only because nothing sits near
+   it, and it is under every platform floor (44pt iOS, 48dp Android). This
+   widens the hit area to 34px without moving or resizing the visible dial --
+   absolute positioning keeps the pseudo-element out of the button's own grid
+   flow, so nothing reflows. */
+.preview-toggle {
+  position: relative;
+}
+
+.preview-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
 }
 
 .preview-toggle:hover {
@@ -3614,7 +3647,8 @@ main {
     animation: none !important;
   }
 
-  .btn:hover {
+  .btn:hover,
+  .btn:active {
     transform: none;
   }
 }
