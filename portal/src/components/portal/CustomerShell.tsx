@@ -13,7 +13,9 @@ import { LiveRefresh } from "@/components/live/LiveRefresh";
 
 const nav = [
   ["Dashboard", "/portal", "grid"],
+  ["Projects", "/portal#projects", "briefcase"],
   ["Requests", "/portal/requests", "inbox"],
+  ["Files", "/portal#files", "file"],
   ["New request", "/portal/requests/new", "plus"],
 ] as const;
 
@@ -35,6 +37,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
   const path = pathname ?? "";
   const isActive = (href: string) => {
     if (href === "/portal") return path === href;
+    if (href.startsWith("/portal#")) return path === "/portal";
     if (href === "/portal/requests") return path === href || /^\/portal\/requests\/[^/]+$/.test(path);
     return path === href;
   };
