@@ -64,6 +64,10 @@ supabase/migrations/20261014000000_customer_requests.sql
 supabase/migrations/20261015000000_website_monitoring.sql
 supabase/migrations/20261016000000_security_fixes.sql
 supabase/migrations/20261017000000_live_workspace.sql
+supabase/migrations/20261018000000_analytics_retention.sql
+supabase/migrations/20261019000000_website_enquiry_conversion.sql
+supabase/migrations/20261020000000_customer_request_files.sql
+supabase/migrations/20261021000000_profile_avatars.sql
 ```
 
 3. Set only the public project values (and optionally the public app origin).
@@ -104,4 +108,4 @@ npx tsc --noEmit
 npm run build
 ```
 
-Deploy to a Next.js-compatible Node host, apply all six migrations in order, configure matching callback URLs and custom SMTP, and use HTTPS in production. Existing databases must only receive missing migrations. Run `npm run check:setup` for a read-only API check and the staging access checks in `supabase/tests/access_checks.sql` before opening customer access.
+Deploy to a Next.js-compatible Node host, apply every migration in filename order, configure matching callback URLs and custom SMTP, and use HTTPS in production. Existing databases must only receive missing migrations. Run `npm run check:setup` for a read-only API check and the staging access checks in `supabase/tests/access_checks.sql` before opening customer access.
