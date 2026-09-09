@@ -4,8 +4,19 @@
     {
       "name": "mucolabs",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["scripts/dev-site.mjs", "8123"],
+      "runtimeArgs": [
+        "scripts/dev-site.mjs",
+        "8123"
+      ],
       "port": 8123
+    },
+    {
+      "name": "portal",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/dev-portal.mjs"
+      ],
+      "port": 3000
     }
   ]
 }

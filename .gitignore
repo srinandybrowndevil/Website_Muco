@@ -33,3 +33,8 @@ _audit.js
 # Personal Claude Code permissions, not shared settings. This repository is
 # public and the file records one machine's local paths.
 .claude/settings.local.json
+
+# Mobile audit output. reports/*.md are written findings and stay tracked;
+# reports/mobile/ is regenerated screenshots and measurements from
+# scripts/mobile-audit.cjs, which nothing serves and every run rewrites.
+/reports/mobile/

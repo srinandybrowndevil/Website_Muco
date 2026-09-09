@@ -29,8 +29,6 @@ BRAND = "MUCO LABS"
 TAGLINE = "Your Vision, Our Technology."
 DOMAIN = "https://mucolabs.com"
 PHONE = "+91 6381809844"
-PHONE_TEL = "+916381809844"
-WHATSAPP = "916381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
 PORTAL_DOMAIN = "https://portal.mucolabs.com"
@@ -42,6 +40,11 @@ PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
 # Login exposes both Sign in and Create a customer account. The encoded next
 # path brings either route to the authenticated project-request form.
 PORTAL_SIGNUP = PORTAL_LOGIN + "?next=%2Fportal%2Frequests%2Fnew"
+# Every contact action on the site is account-gated: WhatsApp, phone and email
+# all route through sign-in, so an enquiry always arrives attached to a customer
+# account instead of as an anonymous message. The legal pages are the one
+# exemption -- see GATE_KEEP_EMAIL.
+PORTAL_CONTACT = PORTAL_LOGIN + "?next=%2Fportal%2Fcontact"
 PORTAL_SIGNUP_NOTE = ""
 NEWLINE = chr(10)
 PORTAL_LOGIN_LINK = "".join([
@@ -108,6 +111,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','%s');""" % GTM_CONTAINER_ID
 
 
+# A CSP hash covers a script element's text content exactly, newlines and all.
+# Hashing GA_INLINE_SCRIPT while emitting a newline before and after it produced
+# a hash that matched nothing, so the browser blocked the tag and the site
+# measured zero -- silently, because a blocked inline script reports no error to
+# the page. Both sides now derive from one string so they cannot drift again.
+GA_INLINE_BODY = "\n%s\n" % GA_INLINE_SCRIPT
+GTM_INLINE_BODY = "\n%s\n" % GTM_INLINE_SCRIPT
+
+
+def inline_script_hash(body):
+    """CSP source expression for an inline <script> with exactly this content."""
+    digest = hashlib.sha256(body.encode("utf-8")).digest()
+    return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
+
+
 def google_analytics_tag():
     """Return the Google tag and its inline initialisation script."""
     if not GA_MEASUREMENT_ID:
@@ -115,15 +133,14 @@ def google_analytics_tag():
     return (
         "<!-- Google tag (gtag.js) -->\n"
         '<script async src="https://www.googletagmanager.com/gtag/js?id=%s"></script>\n'
-        "<script>\n%s\n</script>\n"
-        % (GA_MEASUREMENT_ID, GA_INLINE_SCRIPT)
+        "<script>%s</script>\n"
+        % (GA_MEASUREMENT_ID, GA_INLINE_BODY)
     )
 
 
 def google_analytics_csp_hash():
     """Return the CSP hash required for the inline Google tag bootstrap."""
-    digest = hashlib.sha256(GA_INLINE_SCRIPT.encode("utf-8")).digest()
-    return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
+    return inline_script_hash(GA_INLINE_BODY)
 
 
 def google_tag_manager_head():
@@ -132,9 +149,9 @@ def google_tag_manager_head():
         return ""
     return (
         "<!-- Google Tag Manager -->\n"
-        "<script>\n%s\n</script>\n"
+        "<script>%s</script>\n"
         "<!-- End Google Tag Manager -->\n"
-        % GTM_INLINE_SCRIPT
+        % GTM_INLINE_BODY
     )
 
 
@@ -153,8 +170,7 @@ def google_tag_manager_noscript():
 
 def google_tag_manager_csp_hash():
     """Return the CSP hash required for the inline GTM bootstrap."""
-    digest = hashlib.sha256(GTM_INLINE_SCRIPT.encode("utf-8")).digest()
-    return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
+    return inline_script_hash(GTM_INLINE_BODY)
 
 
 # ---------------------------------------------------------------------------
@@ -228,11 +244,6 @@ def band_sections(body):
         return "<section%s>" % attrs
 
     return _SECTION_TAG.sub(swap, body)
-
-
-def wa(text):
-    """WhatsApp deep link with a prefilled, context-carrying message."""
-    return "https://wa.me/%s?text=%s" % (WHATSAPP, quote(text))
 
 
 # ---------------------------------------------------------------------------
@@ -406,7 +417,7 @@ def header_html(current, key):
       </div>
       <div class="mobile-menu-actions">
         <a href="{portal_signup}" class="btn btn-accent">Start a Project</a>
-        <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">WhatsApp {phone}</a>
+        <a href="{portal_contact}" class="btn btn-whatsapp">WhatsApp, call or email</a>
 {mobile_portal_login_link}      </div>
     </div>
   </header>
@@ -416,8 +427,7 @@ def header_html(current, key):
         logo=LOGO_SVG.replace("{k}", key),
         desktop=nav_html(current),
         mobile=nav_html(current, mobile=True),
-        wa=wa("Hi MUCO LABS, I would like to discuss a project."),
-        phone=PHONE,
+        portal_contact=PORTAL_CONTACT,
         portal_login_link=PORTAL_LOGIN_LINK,
         mobile_portal_login_link=MOBILE_PORTAL_LOGIN_LINK,
         portal_signup=PORTAL_SIGNUP,
@@ -450,7 +460,7 @@ def footer_html():
           <p>{tagline} Software, AI systems and automation built for businesses in {city} and across {region}.</p>
           <div class="btn-group mt-5">
             <a href="{ig}" target="_blank" rel="noopener noreferrer" class="btn btn-instagram btn-sm">{ig_svg} @muco_labs</a>
-            <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-sm">WhatsApp</a>
+            <a href="{portal_contact}" class="btn btn-whatsapp btn-sm">Contact us</a>
           </div>
         </div>
 
@@ -459,10 +469,11 @@ def footer_html():
         <div class="footer-col">
           <p class="footer-col-label">Contact</p>
           <ul>
-            <li><a href="tel:{tel}">{phone}</a></li>
-            <li><a href="mailto:{email}">{email}</a></li>
+            <li><span class="note">{phone}</span></li>
+            <li><span class="note">{email}</span></li>
             <li><span class="note">{city}, {region}, India</span></li>
             <li><span class="note">{hours}</span></li>
+            <li><a href="{portal_contact}">Sign in to contact us</a></li>
           </ul>
         </div>
       </div>
@@ -485,9 +496,8 @@ def footer_html():
         region=REGION,
         ig=INSTAGRAM,
         ig_svg=IG_SVG,
-        wa=wa("Hi MUCO LABS"),
+        portal_contact=PORTAL_CONTACT,
         cols="\n\n".join(cols),
-        tel=PHONE_TEL,
         phone=PHONE,
         email=EMAIL,
         hours=HOURS,
@@ -673,8 +683,34 @@ SHELL = """<!DOCTYPE html>
 {footer}"""
 
 
+# Two gate strengths. GATE_ALL is the site default: WhatsApp, phone and email
+# all route through portal sign-in, so an enquiry always arrives attached to an
+# account. GATE_KEEP_EMAIL is for the legal pages, where a data-protection or
+# refund request has to stay reachable by someone who has no account and is not
+# about to create one; WhatsApp and phone are still gated there.
+GATE_ALL = "all"
+GATE_KEEP_EMAIL = "keep-email"
+
+_DIRECT_CONTACT = {
+    GATE_ALL: re.compile(
+        r'''href=(?P<q>["'])(?:https://wa\.me/[^"']*|mailto:[^"']*|tel:[^"']*)(?P=q)'''),
+    GATE_KEEP_EMAIL: re.compile(
+        r'''href=(?P<q>["'])(?:https://wa\.me/[^"']*|tel:[^"']*)(?P=q)'''),
+}
+
+
+def gate_contact_links(html, mode=GATE_ALL):
+    """Route direct WhatsApp/phone/email links through portal sign-in.
+
+    This is a backstop, not the whole design: the shared fragments already
+    label their buttons for what they now do. It catches the one-off link
+    written inline in a page body, where a stale mailto: is easy to miss.
+    """
+    return _DIRECT_CONTACT[mode].sub('href="%s"' % PORTAL_CONTACT, html)
+
+
 def render(slug, title, description, body, current=None, og_type="website",
-           schema_blocks=None, noindex=False):
+           schema_blocks=None, noindex=False, contact_gate=GATE_ALL):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
     canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
     analytics = '<script src="%s" defer></script>\n%s' % (
@@ -707,6 +743,8 @@ def render(slug, title, description, body, current=None, og_type="website",
     )
 
     html = clean_urls(html)
+    if contact_gate:
+        html = gate_contact_links(html, contact_gate)
 
     with open(os.path.join(ROOT, slug), "w", encoding="utf-8") as f:
         f.write(html)
@@ -716,7 +754,7 @@ def render(slug, title, description, body, current=None, og_type="website",
 # ---------------------------------------------------------------------------
 # Shared page fragments
 # ---------------------------------------------------------------------------
-def final_cta(heading, sub, wa_text, primary_label="Start a Project", primary=PORTAL_SIGNUP):
+def final_cta(heading, sub, primary_label="Start a Project", primary=PORTAL_SIGNUP):
     return """    <section class="section-divider">
       <div class="container">
         <div class="cta-box reveal-on-scroll">
@@ -725,8 +763,7 @@ def final_cta(heading, sub, wa_text, primary_label="Start a Project", primary=PO
           <p class="mb-6">{sub}</p>
           <div class="btn-group btn-group-center">
             <a href="{primary}" class="btn btn-accent btn-lg">{primary_label}</a>
-            <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp {phone}</a>
-            <a href="tel:{tel}" class="btn btn-secondary btn-lg">Call us</a>
+            <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp, call or email</a>
           </div>
         </div>
       </div>
@@ -736,10 +773,8 @@ def final_cta(heading, sub, wa_text, primary_label="Start a Project", primary=PO
         sub=sub,
         primary=primary,
         primary_label=primary_label,
-        wa=wa(wa_text),
+        portal_contact=PORTAL_CONTACT,
         wa_svg=WA_SVG,
-        phone=PHONE,
-        tel=PHONE_TEL,
     )
 
 

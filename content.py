@@ -1134,10 +1134,10 @@ def industry_matrix():
                    '<div class="matrix-modules">{mods}</div>'
                    '<p class="matrix-lead">Where it usually starts</p>'
                    '<p class="matrix-start">{start}</p>'
-                   '<a class="card-cta matrix-cta" href="contact.html?industry={q}">'
+                   '<a class="card-cta matrix-cta" href="{portal_contact}">'
                    'Talk about {name} &rarr;</a></div>').format(
                        i=i, hid="" if i == 0 else " hidden", name=name, reality=reality,
-                       start=start, q=quote(name),
+                       start=start, portal_contact=PORTAL_CONTACT,
                        mods="".join("<span>%s</span>" % mo for mo in modules))
     return ('<div class="matrix reveal-on-scroll">'
             '<div class="matrix-list" role="tablist" aria-label="Industries">%s</div>'
@@ -1272,7 +1272,7 @@ def build_home():
             <div class="btn-group">
               <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project{portal_signup_note}</a>
               <a href="work.html" class="btn btn-secondary btn-lg">View our work</a>
-              <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp, call or email</a>
             </div>
 
             {trust}
@@ -1407,7 +1407,7 @@ def build_home():
                 and what is not. If your site is fine, we will say so.</p>
             </div>
             <div class="stack center">
-              <a href="{wa_audit}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg btn-block">{wa_svg} Send your website on WhatsApp</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg btn-block">{wa_svg} Sign in to send your website</a>
               <a href="website-audit.html" class="btn btn-secondary btn-block">See what we check &rarr;</a>
               <p class="note">Reviewed by a person, not an automated
                 score generator. We will tell you when we can get to it.</p>
@@ -1435,7 +1435,6 @@ def build_home():
         home_faq_html=home_faq_html,
         city=CITY,
         region=REGION,
-        wa=wa("Hi MUCO LABS, I would like to discuss a project."),
         wa_svg=WA_SVG,
         portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE,
         trust=trust_row(),
@@ -1443,12 +1442,11 @@ def build_home():
         industries=industries,
         featured=featured_html,
         process=process,
-        wa_audit=wa("Hi MUCO LABS, please review my website: "),
+        portal_contact=PORTAL_CONTACT,
         cta=final_cta(
             "Tell us what you want to build",
             "Send a short description and we will come back with questions, an approach and a "
             "written scope. No obligation, and no pressure to decide on the call.",
-            "Hi MUCO LABS, I would like to discuss a project.",
         ),
     )
 
@@ -1531,7 +1529,6 @@ def build_services():
             "Not sure which of these you need?",
             "Describe the problem rather than the solution. Most of our projects start that way, "
             "and the right service usually becomes obvious in the first conversation.",
-            "Hi MUCO LABS, I want to discuss which service fits my business.",
         ),
     )
 
@@ -1615,7 +1612,7 @@ def build_service_page(sv):
             <p>{bodytext}</p>
             <div class="btn-group mt-6">
               <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a project{portal_signup_note}</a>
-              <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Ask a question</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} Sign in to ask</a>
             </div>
           </div>
           <div class="card card-lg">
@@ -1670,7 +1667,7 @@ def build_service_page(sv):
         crumbs=crumb_nav([("Home", "index.html"), ("Services", "services.html"),
                           (sv["title"], None)]),
         title=sv["title"], outcome=sv["outcome"], bodytext=sv["body"], q=q,
-        wa=wa("Hi MUCO LABS, I have a question about %s." % sv["title"].lower()),
+        portal_contact=PORTAL_CONTACT,
         wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
         others=others,
@@ -1678,7 +1675,6 @@ def build_service_page(sv):
             "Tell us what you need",
             "Describe the problem and we will come back with questions, an approach and a written "
             "scope. The scope costs you nothing.",
-            "Hi MUCO LABS, I would like to discuss %s." % sv["title"].lower(),
         ),
     )
 
@@ -1754,7 +1750,6 @@ def build_work():
         "Want something like one of these for your business?",
         "The systems above were built to solve specific problems. Tell us yours and we will tell "
         "you honestly how much of it we have solved before.",
-        "Hi MUCO LABS, I saw your work page and want to discuss a project.",
     ))
 
     names = ", ".join(p["name"] for p in shown[:3])
@@ -1800,11 +1795,11 @@ def build_pricing():
             <p class="fs-sm mt-1">{sub}</p>
             <p class="price-tagline">Quoted per scope</p>
             <ul class="feature-list">{points}</ul>
-            <a href="contact.html?service={q}" class="btn {btn} btn-block">Request a quote</a>
+            <a href="{portal_signup}" class="btn {btn} btn-block">Request a quote</a>
           </article>
 """.format(cls="price-card-featured" if featured else "", name=name, sub=sub,
            points="".join("<li>%s</li>" % p for p in points),
-           btn="btn-accent" if featured else "btn-secondary", q=q)
+           btn="btn-accent" if featured else "btn-secondary", portal_signup=PORTAL_SIGNUP)
 
     affects = [
         ("Page and screen count", "Ten pages is not twice the work of five, and a dashboard is not a page."),
@@ -1902,7 +1897,6 @@ def build_pricing():
                     "Get a real number for your project",
                     "Describe what you want to build. You will get questions first, then a written "
                     "scope and a price you can plan around.",
-                    "Hi MUCO LABS, I would like a quote for a project.",
                     primary_label="Request a quote",
                     primary="contact.html",
                 ))
@@ -1965,7 +1959,7 @@ def build_local_erode():
 
         <div class="btn-group">
           <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project{portal_signup_note}</a>
-          <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp {phone}</a>
+          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp, call or email</a>
         </div>
 
         {trust}
@@ -2046,14 +2040,13 @@ def build_local_erode():
 {cta}""".format(
         crumbs=crumb_nav([("Home", "index.html"), ("Website development in Erode", None)]),
         brand=BRAND, city=CITY, region=REGION, phone=PHONE,
-        wa=wa("Hi MUCO LABS, I need a website for my business in Erode."),
+        portal_contact=PORTAL_CONTACT,
         wa_svg=WA_SVG, portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE, trust=trust_row(), sectors=sectors_html, faqs=faqs,
         markets=", ".join(MARKETS),
         cta=final_cta(
             "Let us look at what you need",
             "Tell us about the business and we will come back with questions and a written scope. "
             "If a website is not what you actually need, we will say so.",
-            "Hi MUCO LABS, I need a website for my business in Erode.",
         ),
     )
 
@@ -2138,9 +2131,8 @@ def build_maintenance():
             "Need cover for a site you already have?",
             "Tell us what is running and where, and we will quote a maintenance arrangement that "
             "matches it. We also take over sites built by someone else.",
-            "Hi MUCO LABS, I need a maintenance and support plan.",
             primary_label="Request a maintenance quote",
-            primary="contact.html?service=Maintenance%20%26%20support",
+            primary=PORTAL_SIGNUP,
         ),
     )
 
@@ -2273,7 +2265,6 @@ def build_about():
             "Want to talk it through first?",
             "No sales script and no obligation. Describe the problem and we will tell you honestly "
             "whether we are the right people for it.",
-            "Hi MUCO LABS, I would like to talk about a project.",
         ),
     )
 
@@ -2326,18 +2317,18 @@ def build_contact():
     # Spec 29 CONTACT 02. Each channel says what it is actually good for and what
     # to expect back, so the choice is obvious before the tap.
     channels = [
-        ("WhatsApp", wa("Hi MUCO LABS, I would like to discuss a project."),
+        ("WhatsApp", PORTAL_CONTACT,
          PHONE, WA_SVG, "channel-whatsapp",
          "Quick questions, sharing screenshots, and everything after we start.",
-         "Fastest during working hours", "_blank"),
-        ("Phone", "tel:" + PHONE_TEL, PHONE,
+         "Sign in to open &middot; fastest during working hours", ""),
+        ("Phone", PORTAL_CONTACT, PHONE,
          icon('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>', 20),
          "", "When it is easier to explain than to type.",
-         HOURS, ""),
-        ("Email", "mailto:" + EMAIL, EMAIL,
+         "Sign in to call &middot; " + HOURS, ""),
+        ("Email", PORTAL_CONTACT, EMAIL,
          icon('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5L12 13l9.5-6.5"/>', 20),
          "", "Detailed briefs, documents, quotes and anything you want on record.",
-         "Usually the same working day", ""),
+         "Sign in to open &middot; usually the same working day", ""),
         ("Instagram", INSTAGRAM, "@muco_labs", IG_SVG, "channel-instagram",
          "Recent work and what we are building. Not the place for a scope.",
          "Checked less often", "_blank"),
@@ -2451,96 +2442,22 @@ def build_contact():
           <div class="form-card">
             <span class="eyebrow">Project enquiry</span>
             <h2 class="h2-sm">Send the details</h2>
-            <p class="form-intro">This reaches us directly, and opens WhatsApp with the same details
-              already written out so you can carry on the conversation there.</p>
+            <p class="form-intro">Enquiries go through your customer account, so your brief,
+              our replies and the project itself all stay in one place.</p>
 
-            <form id="enquiry-form" novalidate>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="name">Your name<span class="form-req">*</span></label>
-                  <input type="text" id="name" name="name" class="form-control" autocomplete="name" required />
-                  <p class="form-error" id="name-error">Please enter your name.</p>
-                </div>
-                <div class="form-group">
-                  <label for="business">Business name</label>
-                  <input type="text" id="business" name="business" class="form-control" autocomplete="organization" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="phone">Phone / WhatsApp<span class="form-req">*</span></label>
-                  <input type="tel" id="phone" name="phone" class="form-control" autocomplete="tel"
-                         inputmode="tel" placeholder="+91 " required />
-                  <p class="form-error" id="phone-error">Please enter a number we can reach you on.</p>
-                </div>
-                <div class="form-group">
-                  <label for="email">Email</label>
-                  <input type="email" id="email" name="email" class="form-control" autocomplete="email" aria-describedby="email-error" />
-                  <p class="form-error" id="email-error">Please enter a valid email address or leave this blank.</p>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="service">What do you need?</label>
-                <select id="service" name="service" class="form-control">{services}</select>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="location">Town or city</label>
-                  <input type="text" id="location" name="location" class="form-control" placeholder="{city}" />
-                </div>
-                <div class="form-group">
-                  <label for="website">Current website</label>
-                  <input type="url" id="website" name="website" class="form-control" placeholder="https://" aria-describedby="website-error" />
-                  <p class="form-error" id="website-error">Please enter a full website URL, starting with https://, or leave this blank.</p>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="budget">Budget range</label>
-                  <select id="budget" name="budget" class="form-control">{budgets}</select>
-                </div>
-                <div class="form-group">
-                  <label for="timeline">Timeline</label>
-                  <select id="timeline" name="timeline" class="form-control">{timelines}</select>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="message">What do you want to build?<span class="form-req">*</span></label>
-                <textarea id="message" name="message" class="form-control" required
-                          placeholder="What the business does, what problem you are trying to solve, and anything you already have."></textarea>
-                <p class="form-error" id="message-error">Please tell us a little about the project.</p>
-              </div>
-
-              <div class="hp-field" aria-hidden="true">
-                <label for="company_website">Leave this field empty</label>
-                <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
-              </div>
-
-              <div class="form-consent">
-                <input type="checkbox" id="consent" name="consent" required />
-                <label for="consent">I agree that {brand} may contact me about this enquiry.
-                  See the <a href="privacy.html">privacy policy</a>.</label>
-              </div>
-              <p class="form-error" id="consent-error">Please confirm we may contact you.</p>
-
+            <div class="contact-auth-gate">
+              <h3>Sign in to send your enquiry</h3>
+              <p>Creating an account takes a minute. It is also where your request,
+                our replies, quotes and files live once we start.</p>
               <div class="btn-group mt-3">
-                <button type="submit" class="btn btn-whatsapp btn-lg grow">{wa_svg} Send on WhatsApp</button>
-                <button type="button" id="send-email" class="btn btn-secondary btn-lg">Send by email</button>
+                <a class="btn btn-accent btn-lg grow" href="{portal_contact}">Sign in to continue</a>
+                <a class="btn btn-secondary btn-lg" href="{portal_signup_contact}">Create customer account</a>
               </div>
-
-              <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-
-              <p class="form-hint mt-4">
-                Your enquiry is sent to us and also opened in WhatsApp, so it reaches us even if you
-                do not press send there. We use these details to reply and quote, nothing else &mdash;
-                see the <a href="privacy.html">privacy policy</a>.
-              </p>
-            </form>
+              <p class="form-hint mt-4">Once you are signed in you can send the brief, email us
+                or carry on over WhatsApp &mdash; and everything stays against your account.
+                We use your details to reply and quote, nothing else &mdash; see the
+                <a href="privacy.html">privacy policy</a>.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -2579,6 +2496,8 @@ def build_contact():
         services=options(service_opts, "Select a service"),
         budgets=options(budgets, "Select a range"),
         timelines=options(timelines, "Select a timeline"),
+        portal_contact=PORTAL_CONTACT,
+        portal_signup_contact=PORTAL_DOMAIN + "/signup?next=%2Fportal%2Fcontact",
     )
 
     contact_jsonld = """{
@@ -2599,6 +2518,7 @@ def build_contact():
                        breadcrumbs([("Home", ""), ("Contact", "contact.html")]),
                        speakable_jsonld(DOMAIN + "/contact.html", ["h1", ".def-list"])],
     )
+
 
 def build_faq():
     items = "".join(
@@ -2622,7 +2542,6 @@ def build_faq():
 {cta}""".format(items=items, cta=final_cta(
         "Still have a question?",
         "Ask it on WhatsApp and you will get a straight answer, whether or not it leads to a project.",
-        "Hi MUCO LABS, I have a question: ",
         primary_label="Ask by form",
         primary="contact.html",
     ))
@@ -2664,7 +2583,7 @@ def build_careers():
             <p>%s</p>
             <a href="%s" class="btn btn-secondary btn-sm mt-4 self-start">Apply for this role</a>
           </article>
-""" % (kind, title, desc, wa("Hi MUCO LABS, I want to apply for the %s role." % title))
+""" % (kind, title, desc, "mailto:%s?subject=%s" % (EMAIL, quote("Application: " + title)))
         for title, kind, desc in roles
     )
 
@@ -2702,14 +2621,14 @@ def build_careers():
               We are not publishing a fixed split here until it is confirmed in a form we can hold
               ourselves to.</p>
             <div class="btn-group mt-5">
-              <a href="{wa_free}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">{wa_svg} Talk about collaborating</a>
               <a href="mailto:{email}?subject=Freelance%20collaboration" class="btn btn-secondary">Email us</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp">{wa_svg} Sign in for WhatsApp</a>
             </div>
           </div>
           <div class="card card-lg">
             <h3>How to apply</h3>
             <ul class="feature-list mt-4">
-              <li>Message us on WhatsApp or email with the role you want</li>
+              <li>Email us with the role you want &mdash; no account needed</li>
               <li>Send links to real work &mdash; repositories, live sites or apps</li>
               <li>Tell us what you actually built in each one</li>
               <li>Mention your availability and how you prefer to be paid</li>
@@ -2723,12 +2642,11 @@ def build_careers():
 
 {cta}""".format(
         brand=BRAND, roles=rhtml, email=EMAIL, wa_svg=WA_SVG,
-        wa_free=wa("Hi MUCO LABS, I am a freelancer and would like to collaborate."),
+        portal_contact=PORTAL_CONTACT,
         cta=final_cta(
             "Nothing above matches you?",
             "If you are strong at something we have not listed, tell us what it is and what you have "
             "built with it. We would rather hear from you than miss you.",
-            "Hi MUCO LABS, I would like to work with you.",
             primary_label="Send an enquiry",
             primary="contact.html",
         ),
@@ -2740,6 +2658,7 @@ def build_careers():
         "Contract and project roles at %s in %s: frontend, backend, mobile, design and SEO. Plus "
         "freelancer and studio work, with terms agreed in writing." % (BRAND, CITY),
         body,
+        contact_gate=GATE_KEEP_EMAIL,
         schema_blocks=[ORG_JSONLD, breadcrumbs([("Home", ""), ("Careers", "careers.html")])],
     )
 
@@ -2788,13 +2707,14 @@ def legal_page(slug, nav_title, h1, eyebrow, description, sections):
       <div class="prose">
 {blocks}
         <h2>Questions about this page</h2>
-        <p>Email <a href="mailto:{email}">{email}</a>, call <a href="tel:{tel}">{phone}</a>, or
-        message us on <a href="{wa}" target="_blank" rel="noopener noreferrer">WhatsApp</a>.</p>
+        <p>Email <a href="mailto:{email}">{email}</a> &mdash; no account needed for a question
+        about this policy. For WhatsApp or a call, <a href="{portal_contact}">sign in to your
+        account</a>.</p>
       </div>
       </div>
     </section>
 """.format(eyebrow=eyebrow, h1=h1, updated=LEGAL_REVISED, notice=LEGAL_NOTICE, blocks=blocks,
-           email=EMAIL, tel=PHONE_TEL, phone=PHONE, wa=wa("Hi MUCO LABS, a question about your %s." % nav_title.lower()))
+           email=EMAIL, portal_contact=PORTAL_CONTACT)
 
     return render(
         slug,
@@ -2802,6 +2722,7 @@ def legal_page(slug, nav_title, h1, eyebrow, description, sections):
         description,
         body,
         og_type="article",
+        contact_gate=GATE_KEEP_EMAIL,
         schema_blocks=[ORG_JSONLD, breadcrumbs([("Home", ""), (nav_title, slug)])],
     )
 
@@ -3053,12 +2974,12 @@ def build_404():
 
         <div class="btn-group btn-group-center">
           <a href="index.html" class="btn btn-accent btn-lg">Back to home</a>
-          <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Ask us directly</a>
+          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} Sign in to ask us</a>
         </div>
       </div>
     </section>
 """.format(links=links.replace("<li>", '<li class="chip bare">'),
-           wa=wa("Hi MUCO LABS, I hit a broken link on your website."), wa_svg=WA_SVG)
+           portal_contact=PORTAL_CONTACT, wa_svg=WA_SVG)
 
     return render(
         "404.html", "Page not found | %s" % BRAND,
@@ -3485,9 +3406,31 @@ Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
-The contact form posts to `api/lead.js`, a Vercel serverless function. It
-validates server-side, rate limits by IP, drops honeypot submissions, and
-reports separately whether the CRM and notification paths accepted it.
+Enquiries are account-gated across the whole site. Every WhatsApp, phone and
+email action routes through portal sign-in, so a brief always arrives attached
+to a customer account and stays visible to that customer afterwards.
+
+Two layers do this. The shared fragments (`header_html`, `footer_html`,
+`final_cta`) and the page bodies link to `PORTAL_CONTACT` and are labelled for
+what they now do &mdash; no button says "Call us" and opens a login page. On top
+of that, `render()` applies `gate_contact_links()` to the finished HTML as a
+backstop, so a stale `mailto:` written inline in a page body cannot slip out.
+
+Two page groups are exempt, both via `contact_gate=GATE_KEEP_EMAIL`, which
+leaves `mailto:` alone and still gates WhatsApp and phone:
+
+- **Legal** (privacy, terms, refund) &mdash; a data-protection, cancellation or
+  refund request has to be sendable by someone with no account and no reason to
+  open one.
+- **Careers** &mdash; applying for a role is a hiring channel, not a sales one.
+  Asking a candidate to create a *customer* account to send a CV would close the
+  recruitment funnel.
+
+`api/lead.js` is still deployed and still tested, but no page posts to it now.
+It remains the intake path for any future anonymous form: a Vercel serverless
+function that validates server-side, rate limits by IP, drops honeypot
+submissions, and reports separately whether the CRM and notification paths
+accepted the enquiry.
 
 Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
 enquiry to you. Without it, a successful CRM record still appears in the
@@ -3656,7 +3599,6 @@ def build_website_audit():
         </details>
 """ % (q, a) for q, a in audit_faqs)
 
-    wa_audit = wa("Hi MUCO LABS, please review my website: ")
 
     body = page_header(
         "Free website review",
@@ -3666,11 +3608,11 @@ def build_website_audit():
         "you. You get a written list of what is worth fixing and what is not. No charge, no "
         "obligation, and no automated score.",
         extra="""        <div class="btn-group mt-5">
-          <a href="{wa}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg">{wa_svg} Send your website on WhatsApp</a>
-          <a href="contact.html?service=Website%20review%20%2F%20audit" class="btn btn-secondary btn-lg">Request it by form</a>
+          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} Sign in to send your website</a>
+          <a href="{portal_signup}" class="btn btn-secondary btn-lg">Request it by form</a>
         </div>
         {trust}
-""".format(wa=wa_audit, wa_svg=WA_SVG, trust=trust_row())
+""".format(portal_contact=PORTAL_CONTACT, portal_signup=PORTAL_SIGNUP, wa_svg=WA_SVG, trust=trust_row())
     ) + """    <section class="section-divider">
       <div class="container">
         <div class="section-head">
@@ -3717,9 +3659,8 @@ def build_website_audit():
             "Send us your website",
             "One message with the address is enough. We will come back with what we find and "
             "what, if anything, we think you should do about it.",
-            "Hi MUCO LABS, please review my website: ",
             primary_label="Request the review",
-            primary="contact.html?service=Website%20review%20%2F%20audit",
+            primary=PORTAL_SIGNUP,
         ),
     )
 

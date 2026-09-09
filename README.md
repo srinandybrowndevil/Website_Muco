@@ -121,9 +121,31 @@ Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
-The contact form posts to `api/lead.js`, a Vercel serverless function. It
-validates server-side, rate limits by IP, drops honeypot submissions, and
-reports separately whether the CRM and notification paths accepted it.
+Enquiries are account-gated across the whole site. Every WhatsApp, phone and
+email action routes through portal sign-in, so a brief always arrives attached
+to a customer account and stays visible to that customer afterwards.
+
+Two layers do this. The shared fragments (`header_html`, `footer_html`,
+`final_cta`) and the page bodies link to `PORTAL_CONTACT` and are labelled for
+what they now do &mdash; no button says "Call us" and opens a login page. On top
+of that, `render()` applies `gate_contact_links()` to the finished HTML as a
+backstop, so a stale `mailto:` written inline in a page body cannot slip out.
+
+Two page groups are exempt, both via `contact_gate=GATE_KEEP_EMAIL`, which
+leaves `mailto:` alone and still gates WhatsApp and phone:
+
+- **Legal** (privacy, terms, refund) &mdash; a data-protection, cancellation or
+  refund request has to be sendable by someone with no account and no reason to
+  open one.
+- **Careers** &mdash; applying for a role is a hiring channel, not a sales one.
+  Asking a candidate to create a *customer* account to send a CV would close the
+  recruitment funnel.
+
+`api/lead.js` is still deployed and still tested, but no page posts to it now.
+It remains the intake path for any future anonymous form: a Vercel serverless
+function that validates server-side, rate limits by IP, drops honeypot
+submissions, and reports separately whether the CRM and notification paths
+accepted the enquiry.
 
 Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
 enquiry to you. Without it, a successful CRM record still appears in the
