@@ -1,14 +1,15 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { primaryMembership } from "@/lib/membership";
 
 export async function requireWorkspace(customer = false) {
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening a live workspace.");
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) redirect("/login");
-  const { data, error: membershipError } = await client.from("memberships")
-    .select("organization_id, role").eq("user_id", user.id)
-    .order("organization_id").limit(1).maybeSingle();
+  const { data: rows, error: membershipError } = await client.from("memberships")
+    .select("organization_id, role").eq("user_id", user.id);
+  const data = primaryMembership(rows);
   if (membershipError) throw new Error("Workspace access could not be checked. Check the database migrations.");
   if (!data) redirect("/complete-profile");
   if (customer && data.role !== "client") redirect("/");

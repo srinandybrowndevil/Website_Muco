@@ -75,6 +75,7 @@ export default async function RequestsInboxPage() {
         .select("organization_id")
         .eq("user_id", user.id)
         .in("role", ["admin", "member"])
+        .order("organization_id")
         .limit(1)
         .maybeSingle();
       if (!membership) {

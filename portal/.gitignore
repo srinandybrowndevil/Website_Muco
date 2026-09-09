@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# A dev server started from the wrong directory writes its build here.
+# scripts/dev-portal.mjs pins the cwd so it should not happen; this keeps a
+# stray tree out of git and out of eslint if it ever does.
+/portal/

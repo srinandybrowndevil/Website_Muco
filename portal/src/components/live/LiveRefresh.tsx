@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { primaryMembership } from "@/lib/membership";
 
 export function LiveRefresh() {
   const router = useRouter();
@@ -30,7 +31,8 @@ export function LiveRefresh() {
     void (async () => {
       const { data: { user } } = await client.auth.getUser();
       if (!user || cancelled) return;
-      const { data } = await client.from("memberships").select("organization_id").eq("user_id", user.id).order("organization_id").limit(1).maybeSingle();
+      const { data: rows } = await client.from("memberships").select("organization_id, role").eq("user_id", user.id);
+      const data = primaryMembership(rows);
       if (!data || cancelled) return;
       let timer: ReturnType<typeof setTimeout>;
       const refresh = () => { clearTimeout(timer); timer = setTimeout(() => { if (!document.hidden) router.refresh(); }, 400); };

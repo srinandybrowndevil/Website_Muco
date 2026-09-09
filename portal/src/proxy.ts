@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
 import { workspaceDestination } from "@/lib/auth";
+import { primaryMembership } from "@/lib/membership";
 
 const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback"];
 const isPublic=(path:string)=>publicPaths.some(route=>path===route||path.startsWith(`${route}/`));
@@ -24,12 +25,11 @@ export async function proxy(request:NextRequest){
   if(!claims)return response;
 
   const userId=typeof claims.sub==="string"?claims.sub:null;
-  const {data:membership}=userId?await supabase
+  const {data:rows}=userId?await supabase
     .from("memberships")
-    .select("role")
-    .eq("user_id",userId)
-    .limit(1)
-    .maybeSingle():{data:null};
+    .select("organization_id,role")
+    .eq("user_id",userId):{data:null};
+  const membership=primaryMembership(rows);
 
   if(!membership){
     if(isPublic(path))return response;

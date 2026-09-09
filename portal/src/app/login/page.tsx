@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell, AuthStatus } from "@/components/auth/AuthShell";
 import { appOrigin, safeInternalPath, workspaceDestination, onboardingDestination } from "@/lib/auth";
+import { primaryMembership } from "@/lib/membership";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -34,12 +35,11 @@ export default function Login() {
     if (error) { setLoading(null); setMessage("error"); return; }
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData.user) { setLoading(null); setMessage("error"); return; }
-    const { data: membership, error: membershipError } = await supabase
+    const { data: membershipRows, error: membershipError } = await supabase
       .from("memberships")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .limit(1)
-      .maybeSingle();
+      .select("organization_id, role")
+      .eq("user_id", userData.user.id);
+    const membership = primaryMembership(membershipRows);
     if (membershipError) {
       setLoading(null);
       setMessage("error");

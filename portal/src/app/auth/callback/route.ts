@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { safeInternalPath, workspaceDestination, onboardingDestination } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { primaryMembership } from "@/lib/membership";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -44,12 +45,11 @@ export async function GET(request: Request) {
 
   // Existing members are routed to their workspace. Non-members are sent to
   // complete-profile so that self-serve customers can onboard safely.
-  const { data: membership, error: membershipError } = await supabase
+  const { data: membershipRows, error: membershipError } = await supabase
     .from("memberships")
-    .select("role")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
+    .select("organization_id, role")
+    .eq("user_id", user.id);
+  const membership = primaryMembership(membershipRows);
 
   if (membershipError) return NextResponse.redirect(new URL("/login?next=" + encodeURIComponent(requestedNext), url.origin));
   if (membership) return NextResponse.redirect(new URL(workspaceDestination(membership.role, requestedNext), url.origin));

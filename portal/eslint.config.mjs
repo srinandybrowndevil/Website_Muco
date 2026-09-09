@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // A dev server started from the wrong directory builds into portal/portal.
+    // scripts/dev-portal.mjs pins the cwd, but linting a stray Next.js bundle
+    // buries real findings under thousands of generated-code warnings.
+    "portal/**",
   ]),
 ]);
 
