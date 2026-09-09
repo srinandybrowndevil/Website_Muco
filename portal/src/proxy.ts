@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
-import { ADMIN_HOME, CLIENT_HOME, isAdminPath, isClientPath, workspaceDestination } from "@/lib/auth";
+import { homeForRole, isAdminPath, isClientPath, isInternPath, workspaceDestination } from "@/lib/auth";
 import { primaryMembership } from "@/lib/membership";
 
 const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback"];
@@ -49,15 +49,21 @@ export async function proxy(request:NextRequest){
   // ?wrongworkspace lets the destination say which account is actually signed
   // in, so a link that lands somewhere unexpected reads as the wrong account
   // rather than a broken link.
-  const client = membership.role === "client";
-  if(client && !isClientPath(path) && path !== "/" && !isPublic(path))
-    return redirect(`${CLIENT_HOME}?wrongworkspace=team`);
-  if(!client && isClientPath(path))
-    return redirect(`${ADMIN_HOME}?wrongworkspace=customer`);
-  // Anything outside a named workspace that is not public and not the router is
-  // no longer a page. Send a team member home rather than to a 404.
-  if(!client && !isAdminPath(path) && path !== "/" && !isPublic(path))
-    return redirect(ADMIN_HOME);
+  const home = homeForRole(membership.role);
+  // Which workspace this path belongs to, if any. "/" belongs to none: it is
+  // the router and is left alone.
+  const owner = isClientPath(path) ? "/portal"
+    : isInternPath(path) ? "/intern"
+    : isAdminPath(path) ? "/admin"
+    : null;
+
+  if(!isPublic(path) && path !== "/" && owner !== home){
+    // A path inside someone else's workspace says so, because landing
+    // elsewhere reads as a broken link rather than the wrong account.
+    // A path in no workspace at all is simply gone, and goes home quietly.
+    const reason = owner === "/portal" ? "customer" : owner === "/intern" ? "intern" : owner ? "team" : null;
+    return redirect(reason ? `${home}?wrongworkspace=${reason}` : home);
+  }
   return response;
 }
 export const config={matcher:["/((?!_next/static|_next/image|fonts/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|otf|ico)$).*)"]};

@@ -2,6 +2,7 @@
 // a nav link cannot disagree about where a workspace lives.
 export const ADMIN_HOME = "/admin";
 export const CLIENT_HOME = "/portal";
+export const INTERN_HOME = "/intern";
 
 export const DEFAULT_AUTHENTICATED_PATH = ADMIN_HOME;
 
@@ -13,14 +14,33 @@ export function isAdminPath(pathname: string) {
   return pathname === ADMIN_HOME || pathname.startsWith(`${ADMIN_HOME}/`);
 }
 
+export function isInternPath(pathname: string) {
+  return pathname === INTERN_HOME || pathname.startsWith(`${INTERN_HOME}/`);
+}
+
+/** The workspace a role owns. One place, so no guard invents its own answer. */
+export function homeForRole(role: string) {
+  if (role === "client") return CLIENT_HOME;
+  if (role === "intern") return INTERN_HOME;
+  return ADMIN_HOME;
+}
+
+/** Where this role should land, honouring a requested path it is allowed to open. */
 /** Where this role should land, honouring a requested path it is allowed to open. */
 export function workspaceDestination(role: string, requested?: string | null) {
   const path = safeInternalPath(requested);
   const pathname = new URL(path, "http://internal").pathname;
-  if (role === "client") return isClientPath(pathname) ? path : CLIENT_HOME;
-  // A team member asking for a client page is sent to their own workspace, not
-  // to the page they asked for. Every other request they may keep.
-  return isClientPath(pathname) ? ADMIN_HOME : (pathname === "/" ? ADMIN_HOME : path);
+  const home = homeForRole(role);
+
+  // Each role may only keep a request that lands inside its own workspace.
+  // Anything else -- another workspace, the router, an unknown path -- resolves
+  // to where that role belongs.
+  const ownsRequest =
+    role === "client" ? isClientPath(pathname)
+    : role === "intern" ? isInternPath(pathname)
+    : !isClientPath(pathname) && !isInternPath(pathname) && pathname !== "/";
+
+  return ownsRequest ? path : home;
 }
 
 export function onboardingDestination(requested?: string | null) {
