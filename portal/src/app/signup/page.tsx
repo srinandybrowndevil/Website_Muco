@@ -8,6 +8,13 @@ import { appOrigin, isStrongPassword, passwordRequirements, workspaceDestination
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
+function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Google sign-in is taking too long. Check the portal authentication settings and try again.")), milliseconds)),
+  ]);
+}
+
 export default function Signup() {
   const next = workspaceDestination("client", useSearchParams().get("next"));
   const [email, setEmail] = useState("");
@@ -84,13 +91,15 @@ export default function Signup() {
       return;
     }
     setLoading("google");
-    const { error } = await createClient()!.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${appOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
-    });
-    if (error) {
+    try {
+      const { error } = await withTimeout(createClient()!.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${appOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
+      }), 10000);
+      if (error) throw error;
+    } catch (error) {
       setLoading(null);
-      setErrors([error.message || "Could not continue with Google. Please try again."]);
+      setErrors([error instanceof Error ? error.message : "Could not continue with Google. Please try again."]);
     }
   }
 

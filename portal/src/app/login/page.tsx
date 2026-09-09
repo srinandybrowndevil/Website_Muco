@@ -8,6 +8,13 @@ import { appOrigin, safeInternalPath, workspaceDestination, onboardingDestinatio
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
+function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Google sign-in is taking too long. Check the portal authentication settings and try again.")), milliseconds)),
+  ]);
+}
+
 export default function Login() {
   const router = useRouter();
   const params = useSearchParams();
@@ -47,11 +54,16 @@ export default function Login() {
     setMessage(null);
     if (!isSupabaseConfigured) { setMessage("google"); return; }
     setLoading("google");
-    const { error } = await createClient()!.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${appOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
-    });
-    if (error) { setLoading(null); setMessage("error"); }
+    try {
+      const { error } = await withTimeout(createClient()!.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${appOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
+      }), 10000);
+      if (error) throw error;
+    } catch {
+      setLoading(null);
+      setMessage("error");
+    }
   }
 
   return <AuthShell>
