@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { currency, label } from "@/lib/crm";
 import { useLiveQuery } from "@/lib/use-live-query";
+import { EmptyState } from "../EmptyState";
 
 type Summary = { pipeline_value: number; active_projects: number; outstanding: number; open_tasks: number; customers: number; enquiries: number; stages: { stage: string; count: number; value: number }[] };
 export function LiveOverview({ organizationId, reports = false }: { organizationId: string; reports?: boolean }) {
@@ -18,7 +19,9 @@ export function LiveOverview({ organizationId, reports = false }: { organization
     {state.error && <div className="panel error" role="alert">Could not load the overview. Check that you are signed in with your team account, then refresh. <small>{state.error}</small></div>}
     {state.loading && <p role="status">Loading overview…</p>}
     {state.data && <><section className="metrics" aria-label="Workspace totals">{[["Open pipeline", currency(state.data.pipeline_value)], ["Active projects", state.data.active_projects], ["Unpaid invoices", currency(state.data.outstanding)], ["Open follow-ups", state.data.open_tasks]].map(([title, value]) => <article key={title}><span>{title}</span><b>{value}</b><small>Current saved records</small></article>)}</section>
-      <section className="panel"><div className="panelhead"><h2>Pipeline by stage</h2><span>{state.data.customers} customers · {state.data.enquiries} new enquiries</span></div><div className="tablewrap"><table><thead><tr><th>Stage</th><th>Leads</th><th>Estimated value</th></tr></thead><tbody>{state.data.stages.map(stage => <tr key={stage.stage}><td>{label(stage.stage)}</td><td>{stage.count}</td><td>{currency(stage.value)}</td></tr>)}</tbody></table></div><p>Pipeline excludes won/lost leads. Unpaid invoices include sent, viewed and overdue records; drafts and void records are excluded.</p></section></>}
+      <section className="panel"><div className="panelhead"><h2>Pipeline by stage</h2><span>{state.data.customers} customers · {state.data.enquiries} new enquiries</span></div>{state.data.stages.length
+        ? <div className="tablewrap"><table><thead><tr><th>Stage</th><th>Leads</th><th>Estimated value</th></tr></thead><tbody>{state.data.stages.map(stage => <tr key={stage.stage}><td>{label(stage.stage)}</td><td>{stage.count}</td><td>{currency(stage.value)}</td></tr>)}</tbody></table></div>
+        : <EmptyState compact icon="target" title="Nothing in the pipeline" body="Column headings with no rows under them look like a loading failure. There is simply no open lead yet: add one and its stage and value appear here." action={{ label: "Add the first lead", href: "/leads" }} />}<p>Pipeline excludes won/lost leads. Unpaid invoices include sent, viewed and overdue records; drafts and void records are excluded.</p></section></>}
     <div className="live-tools"><Link className="secondary" href="/enquiries">Website enquiries</Link><Link className="secondary" href="/requests">Customer requests</Link><Link className="secondary" href="/analytics">Website analytics</Link></div>
   </div>;
 }
