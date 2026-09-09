@@ -28,10 +28,17 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
     if (!isSupabaseConfigured) return;
     const client = createClient();
     if (!client) return;
-    client.auth.getUser().then(({ data: { user } }) => {
+    const loadProfile = async () => {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) return;
       const meta = user?.user_metadata ?? {};
-      setUserName(meta.full_name ?? user?.email ?? "Customer");
-    });
+      const { data: profile } = await client.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+      setUserName(profile?.full_name ?? meta.full_name ?? user.email ?? "Customer");
+    };
+    void loadProfile();
+    const onProfileUpdated = () => void loadProfile();
+    window.addEventListener("muco-profile-updated", onProfileUpdated);
+    return () => window.removeEventListener("muco-profile-updated", onProfileUpdated);
   }, []);
 
   const path = pathname ?? "";
@@ -79,7 +86,10 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
 
         <div>
           <span className="demo">Client portal</span>
-          <span className="avatar">{userName ? initials(userName) : "CP"}</span>
+          <Link className="profilechip" href="/portal/profile" aria-label="Open your profile">
+            <span className="avatar">{userName ? initials(userName) : "CP"}</span>
+            <span className="profilechip-name">{userName ?? "Profile"}</span>
+          </Link>
           <LogoutButton className="secondary compact" />
         </div>
       </header>
@@ -120,6 +130,10 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
                   <span>{label}</span>
                 </Link>
               ))}
+              <Link href="/portal/profile" onClick={() => setOpen(false)} className={path === "/portal/profile" ? "active" : ""} aria-current={path === "/portal/profile" ? "page" : undefined}>
+                <Icon name="user" size={16} />
+                <span>Profile</span>
+              </Link>
             </nav>
           </aside>
         </>

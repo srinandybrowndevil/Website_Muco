@@ -1449,6 +1449,22 @@ td span small {
   align-items: center;
 }
 
+.profilechip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.profilechip-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
 .clientportal main {
   max-width: 1120px;
   margin: auto;
@@ -1968,6 +1984,16 @@ td span small {
   padding: 28px 0;
 }
 
+.profilepage { max-width: 720px; margin: 0 auto; }
+.profilecard { padding: 26px; }
+.profileintro { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+.profileintro h2 { font: 23px var(--font-serif); }
+.profileintro p { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.avatar.large { width: 56px; height: 56px; font-size: 15px; }
+.profileform { max-width: 560px; }
+.profileform input:disabled { opacity: .65; cursor: not-allowed; }
+.success { color: var(--green); font-size: 12px; }
+
 .empty {
   max-width: 720px;
 }
@@ -2304,6 +2330,12 @@ td span small {
 }
 
 @media (max-width: 600px) {
+  .clientportal header { height: 62px; }
+  .clientportal header > div { gap: 6px; }
+  .profilechip-name, .clientportal header > div > .demo { display: none; }
+  .clientportal header .secondary.compact { min-height: 34px; padding: 0 9px; font-size: 11px; }
+  .profilecard { padding: 20px 16px; }
+  .profileintro { align-items: flex-start; }
   .customerhead {
     flex-direction: column;
     align-items: flex-start;

@@ -34,7 +34,9 @@ Customers never receive navigation to leads, staff settings, other customers, in
 
 - Start Project links now route through customer authentication.
 - Customer portal navigation now exposes Dashboard, Projects, Requests, Files and New request.
+- Customer profile now has a protected Profile page where customers can edit their full name; the header avatar and mobile menu link to it.
 - Projects and Files sections have stable anchors for direct navigation.
+- Mobile layout was tightened for the customer header, profile shortcut and form card; the profile route is included in the production build.
 - Local portal development server was started and `/login` returns HTTP 200.
 - Portal tests, TypeScript, lint and production build pass.
 
