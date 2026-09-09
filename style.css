@@ -3231,6 +3231,19 @@ footer {
   transition: color var(--transition);
 }
 
+/* Footer navigation links were 17px tall with no padding, which is below the
+   24px minimum a pointer target needs (WCAG 2.5.8) and awkward to hit on a
+   phone. Padding grows the target without moving the text: the list gap
+   shrinks by the same amount so the footer keeps its rhythm. */
+.footer-col ul a {
+  display: inline-block;
+  padding: 7px 0;
+}
+
+.footer-col ul {
+  gap: 0;
+}
+
 .footer-col a:hover {
   color: var(--accent);
 }
