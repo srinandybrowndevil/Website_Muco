@@ -13,7 +13,10 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  // Profile photos are served from the Supabase storage bucket, so the origin
+  // has to be named here or every avatar is blocked. blob: covers the local
+  // crop preview shown before a photo is uploaded, data: the inline SVG marks.
+  "img-src 'self' data: blob: https://*.supabase.co",
   "font-src 'self' data:",
   // Next.js talks to its own dev server over a websocket for hot reload. That
   // is a development-only origin, so it is added only in development rather
