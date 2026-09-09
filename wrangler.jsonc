@@ -11,13 +11,10 @@
   // the built HTML plus only the assets it references, written by
   // scripts/build-site.mjs. Nothing else belongs on a CDN.
   //
-  // The Cloudflare project still needs its build command set to
-  //   node scripts/build-site.mjs
-  // or public-site/ will not exist when wrangler looks for it. That is a
-  // dashboard setting, not a repository one.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "website-muco",
   "compatibility_date": "2026-09-08",
   "observability": { "enabled": true },
+  "build": { "command": "node scripts/build-site.mjs" },
   "assets": { "directory": "./public-site" }
 }
