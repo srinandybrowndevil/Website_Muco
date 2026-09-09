@@ -2697,3 +2697,26 @@ td span small {
 @media (prefers-reduced-motion: reduce) {
   .emptystate.celebrate .emptystate-icon { animation: none; }
 }
+
+/* The invite link input sat outside .record-fields, so it fell back to the
+   browser's default input width and showed about a fifth of a token URL. It is
+   the one thing on the panel that has to be read and copied whole. */
+.invitelink label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.invitelink-row { display: flex; gap: 10px; align-items: stretch; }
+.invitelink-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: inherit;
+  background: var(--bg, #10141c);
+  border: 1px solid var(--border, #343944);
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+}
+.invitelink-row .primary { flex: none; white-space: nowrap; }
+.invitelink-note { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+@media (max-width: 600px) {
+  .invitelink-row { flex-direction: column; }
+  .invitelink-row .primary { width: 100%; }
+}

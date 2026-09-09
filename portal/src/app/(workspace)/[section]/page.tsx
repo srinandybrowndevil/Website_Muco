@@ -17,7 +17,7 @@ export default async function Page({params}:{params:Promise<{section:string}>}) 
   if(!valid.includes(section)) notFound();
   if (isSupabaseConfigured) {
     const {organizationId, role} = await requireWorkspace();
-    const page = crmSections[section] ? <LiveRecords key={section} section={section} organizationId={organizationId}/>
+    const page = crmSections[section] ? <LiveRecords key={section} section={section} organizationId={organizationId} role={role}/>
       : section === "reports" ? <LiveOverview organizationId={organizationId} reports/>
       : section === "files" ? <LiveFiles organizationId={organizationId}/>
       : <LiveSettings organizationId={organizationId} role={role} automation={section === "automation"}/>;
