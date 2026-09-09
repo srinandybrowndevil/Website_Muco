@@ -8,6 +8,22 @@ export function LiveRefresh() {
   const path = usePathname();
   useEffect(() => {
     const client = createClient();
+    if (!client) return;
+    let initialized = false;
+    let previousUser: string | null = null;
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+      const nextUser = session?.user.id ?? null;
+      if (initialized && previousUser !== nextUser) {
+        // Clear the old account's client state and re-check server role guards.
+        window.location.reload();
+      }
+      previousUser = nextUser;
+      initialized = true;
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+  useEffect(() => {
+    const client = createClient();
     if (!client || !/\/(enquiries|requests|analytics)(\/|$)/.test(path)) return;
     let cancelled = false;
     let cleanup = () => {};

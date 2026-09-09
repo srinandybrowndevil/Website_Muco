@@ -23,6 +23,7 @@ function RequestTable({ requests }: { requests: ProjectRequest[] }) {
             <th scope="col">Service</th>
             <th scope="col">Submitted</th>
             <th scope="col">Status</th>
+            <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -43,6 +44,7 @@ function RequestTable({ requests }: { requests: ProjectRequest[] }) {
               <td>
                 <em className={`status ${requestStatusTone(r.status)}`}>{requestStatusLabel[r.status]}</em>
               </td>
+              <td><Link className="secondary" href={`/requests/${r.id}`}>Open request</Link></td>
             </tr>
           ))}
         </tbody>

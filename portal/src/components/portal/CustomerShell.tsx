@@ -22,6 +22,7 @@ const nav = [
 export function CustomerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [userName, setUserName] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -32,8 +33,9 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
       const { data: { user } } = await client.auth.getUser();
       if (!user) return;
       const meta = user?.user_metadata ?? {};
-      const { data: profile } = await client.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+      const { data: profile } = await client.from("profiles").select("full_name,avatar_url").eq("id", user.id).maybeSingle();
       setUserName(profile?.full_name ?? meta.full_name ?? user.email ?? "Customer");
+      setAvatar(profile?.avatar_url ?? null);
     };
     void loadProfile();
     const onProfileUpdated = () => void loadProfile();
@@ -87,7 +89,8 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
         <div>
           <span className="demo">Client portal</span>
           <Link className="profilechip" href="/portal/profile" aria-label="Open your profile">
-            <span className="avatar">{userName ? initials(userName) : "CP"}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {avatar ? <img src={avatar} className="avatar profile-photo" alt="" width={34} height={34} /> : <span className="avatar">{userName ? initials(userName) : "CP"}</span>}
             <span className="profilechip-name">{userName ?? "Profile"}</span>
           </Link>
           <LogoutButton className="secondary compact" />

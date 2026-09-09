@@ -150,8 +150,7 @@ export function AnalyticsDashboard({
               </article>
             </div>
             <p className="notetext">
-              Values are derived directly from recorded first-party events. No third-party
-              trackers or cookies are used.
+              These totals use recorded first-party events. Google Analytics reports separately and may show different totals.
             </p>
           </div>
         )}

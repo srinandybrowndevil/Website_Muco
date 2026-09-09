@@ -18,7 +18,7 @@ export function useLiveQuery<T>(tables: string, load: () => Promise<T>, organiza
       const result = await load();
       if (run === generation.current) { setData(result); setError(null); }
     } catch (err) {
-      if (run === generation.current) setError(err instanceof Error ? err.message : "Could not load records. Please retry.");
+      if (run === generation.current) { setData(null); setError(err instanceof Error ? err.message : "Could not load records. Please retry."); }
     } finally { if (run === generation.current) setLoading(false); }
   }, [load]);
   useEffect(() => {

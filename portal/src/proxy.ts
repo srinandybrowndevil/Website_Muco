@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
+import { workspaceDestination } from "@/lib/auth";
 
 const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback"];
 const isPublic=(path:string)=>publicPaths.some(route=>path===route||path.startsWith(`${route}/`));
@@ -35,9 +36,15 @@ export async function proxy(request:NextRequest){
     return redirect("/complete-profile");
   }
 
-  if(path==="/login"||path==="/signup")return redirect(membership.role==="client"?"/portal":"/");
-  if(membership.role==="client"&&!path.startsWith("/portal")&&!isPublic(path))return redirect("/portal");
-  if(membership.role!=="client"&&path.startsWith("/portal"))return redirect("/");
+  // An already-signed-in visitor still carries the destination they asked for
+  // — the marketing site links here as /login?next=/portal/contact — so honour
+  // it instead of dropping everyone on their role's home page.
+  if(path==="/login"||path==="/signup")return redirect(workspaceDestination(membership.role,request.nextUrl.searchParams.get("next")));
+  // Landing somewhere else than the link you clicked is confusing on its own.
+  // ?wrongworkspace lets the destination say which account is actually signed
+  // in, instead of leaving a team link looking simply broken.
+  if(membership.role==="client"&&!path.startsWith("/portal")&&!isPublic(path))return redirect("/portal?wrongworkspace=team");
+  if(membership.role!=="client"&&path.startsWith("/portal"))return redirect("/?wrongworkspace=customer");
   return response;
 }
 export const config={matcher:["/((?!_next/static|_next/image|fonts/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff|woff2|ttf|otf|ico)$).*)"]};

@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
           <div>
             <b>MUCO LABS</b>
-            <small>CLIENT WORKSPACE</small>
+            <small>TEAM WORKSPACE</small>
           </div>
           <button
             className="iconbtn close"

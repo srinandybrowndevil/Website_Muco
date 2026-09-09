@@ -2310,7 +2310,7 @@ td span small {
 }
 
 @media (max-width: 900px) {
-  .portaldesktop {
+  .clientportal header nav.portaldesktop {
     display: none;
   }
 
@@ -2446,3 +2446,25 @@ td span small {
 .record-dialog .error { margin: 14px 0; }
 .page > .panel + .panel { margin-top: 20px; }
 @media(max-width:600px) { .record-fields { grid-template-columns: 1fr; } .record-dialog { padding: 18px; } }
+/* Mobile interaction fixes and customer profile details. */
+.contact-actions { display:flex; flex-wrap:wrap; gap:12px; margin:24px 0; }
+.profile-photo { aspect-ratio:1; object-fit:cover; border-radius:50%; margin-bottom:12px; }
+.profile-photo-field, .profileform > .formactions, .profileform > [role] { grid-column:1/-1; }
+.profile-photo-field p { color:var(--muted); font-size:13px; margin:12px 0; }
+.requestdetailgrid > *, .requestmeta > * { min-width:0; overflow-wrap:anywhere; }
+@media(max-width:1100px) { .clientportal header nav.portaldesktop { display:none; } .clientportal header > .mobile { display:grid; margin-left:auto; margin-right:12px; } .clientportal .close { display:grid; } .clientportal .scrim { display:block; position:fixed; inset:0; z-index:20; background:#0009; } }
+@media(max-width:600px) {
+  .pagehead { flex-wrap:wrap; gap:14px; }
+  .pagehead > button { font-size:13px; min-height:44px; }
+  .clientportal header { padding:0 10px; gap:6px; }
+  .clientportal header > .mobile { margin-right:0; }
+  .clientportal .authbrand { gap:6px; font-size:14px; }
+  .iconbtn, .statusactions button { min-width:44px; min-height:44px; }
+  .record-fields input, .requestform input, .requestform textarea, .requestform select, .authform input { font-size:16px; }
+  .contact-actions { flex-direction:column; }
+}
+
+/* Explains a role-based redirect at the top of the workspace we landed on. */
+.panel.notice { border-left: 3px solid var(--accent, currentColor); margin-bottom: 20px; }
+.panel.notice p { margin: 0 0 10px; }
+.panel.notice p + p { color: var(--muted); font-size: 14px; }
