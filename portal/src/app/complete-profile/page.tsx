@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { workspaceDestination } from "@/lib/auth";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { AuthShell, AuthStatus } from "@/components/auth/AuthShell";
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +14,7 @@ type LoadingState = "idle" | "loading" | "done" | "error" | "unverified" | "demo
 
 export default function CompleteProfile() {
   const router = useRouter();
+  const next = workspaceDestination("client", useSearchParams().get("next"));
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
@@ -41,7 +43,7 @@ export default function CompleteProfile() {
 
       if (existingCustomer) {
         setState("done");
-        router.replace("/portal/requests");
+        router.replace(next);
         return;
       }
 
@@ -71,9 +73,9 @@ export default function CompleteProfile() {
       }
 
       setState("done");
-      router.replace("/portal/requests");
+      router.replace(next);
     },
-    [router]
+    [router, next]
   );
 
   useEffect(() => {

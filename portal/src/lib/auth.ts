@@ -1,5 +1,16 @@
 export const DEFAULT_AUTHENTICATED_PATH = "/";
 
+export function workspaceDestination(role: string, requested?: string | null) {
+  const path = safeInternalPath(requested);
+  const pathname = new URL(path, "http://internal").pathname;
+  const customerPath = pathname === "/portal" || pathname.startsWith("/portal/");
+  return role === "client" ? (customerPath ? path : "/portal") : (customerPath ? "/" : path);
+}
+
+export function onboardingDestination(requested?: string | null) {
+  return `/complete-profile?next=${encodeURIComponent(workspaceDestination("client", requested))}`;
+}
+
 export function safeInternalPath(value: string | null | undefined, fallback = DEFAULT_AUTHENTICATED_PATH) {
   if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return fallback;
   try {

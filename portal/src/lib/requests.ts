@@ -4,6 +4,7 @@ export type RequestAttachment = {
   name: string;
   size: number;
   type: string;
+  path?: string;
 };
 
 export type ProjectRequest = {

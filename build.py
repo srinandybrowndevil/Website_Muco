@@ -33,37 +33,19 @@ WHATSAPP = "916381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
 PORTAL_DOMAIN = "https://portal.mucolabs.com"
-# The customer portal is a separate Vercel project. Until it is deployed and
-# portal.mucolabs.com resolves, every link into it is a dead end -- and these
-# are the primary CTAs, so "Start a Project" hands the visitor a DNS error
-# instead of a form. While it is down, project starts go to the contact form,
-# which does reach the inbox, and the "Sign in" link is dropped rather than
-# pointed somewhere it does not belong. Set this to True once the portal is
-# deployed and its DNS answers.
-PORTAL_LIVE = False
+# The customer portal is deployed at portal.mucolabs.com. Keep sign-in
+# discoverable for returning customers; new enquiries still use the public
+# contact form and never require an account.
+PORTAL_LIVE = True
 PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
 # The fragment matters. "Start a Project" is the primary CTA in the header of
-# every page and in the mobile menu, so while it falls back to the contact page
-# it should land on the form, not on the top of a page the visitor then has to
-# scroll: the first field sits 1.33 screens down on a 900px desktop viewport,
-# and further on a phone. #enquiry-form is the form's own id, clean_urls keeps
-# the fragment when it strips .html, and html{scroll-padding-top} already
-# offsets the sticky header, so the field lands clear of it.
-PORTAL_SIGNUP = (
-    PORTAL_DOMAIN + "/signup?next=/portal/requests/new"
-    if PORTAL_LIVE
-    else "contact.html#enquiry-form"
-)
-# Screen-reader-only suffix on the "Start a project" buttons. It has to follow
-# the same flag as the href: while the portal is down these land on the contact
-# form, and a button that announces itself as opening the customer portal and
-# then delivers a contact form is a promise the page does not keep -- for the
-# one group of visitors who cannot see where they ended up.
-PORTAL_SIGNUP_NOTE = (
-    '<span class="visually-hidden"> (opens customer portal)</span>'
-    if PORTAL_LIVE
-    else ""
-)
+# every page and in the mobile menu, so it should land on the form rather than
+# the top of a page the visitor then has to scroll. #enquiry-form is the form's
+# own id and html{scroll-padding-top} offsets the sticky header.
+PORTAL_SIGNUP = "contact.html#enquiry-form"
+# New project CTAs intentionally remain account-free. Returning customers use
+# the separate sign-in link above.
+PORTAL_SIGNUP_NOTE = ""
 NEWLINE = chr(10)
 PORTAL_LOGIN_LINK = "".join([
     '          <a href="' + PORTAL_LOGIN + '" class="nav-portal-link" aria-label="Sign in to customer portal">',
@@ -298,12 +280,14 @@ NAV = [
     ("work.html", "Work"),
     ("pricing.html", "Pricing"),
     ("about.html", "About"),
+    ("learning.html", "Learning"),
     ("contact.html", "Contact"),
 ]
 
 FOOTER_COLS = [
     ("Company", [("about.html", "About"), ("work.html", "Work"), ("careers.html", "Careers"),
-                 ("contact.html", "Contact")]),
+                 ("contact.html", "Contact"), ("learning.html", "Learning & Courses"),
+                 ("learning-portal.html", "Learning Portal")]),
     ("Explore", [("services.html", "Services"), ("pricing.html", "Pricing"), ("faq.html", "FAQ"),
                  ("website-audit.html", "Free website review"),
                  ("maintenance.html", "Maintenance"),

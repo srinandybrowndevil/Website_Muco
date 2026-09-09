@@ -66,6 +66,10 @@ test("ordinary customer sign-in still goes to the customer portal", async () => 
   assert.equal(await callback("/enquiries", "client"), "https://portal.example/portal");
 });
 
+test("a new customer keeps the requested portal destination through onboarding", async () => {
+  assert.equal(await callback("/portal/requests/new", null), "https://portal.example/complete-profile?next=%2Fportal%2Frequests%2Fnew");
+});
+
 test("external redirects are rejected", async () => {
   assert.equal(await callback("https://external.example/reset-password", "client"),
     "https://portal.example/portal");

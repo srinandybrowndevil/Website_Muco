@@ -116,23 +116,23 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 
 ## Pages
 
-Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
+Home · Services · Work · Pricing · About · Learning · Contact · FAQ · Maintenance ·
 Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
 The contact form posts to `api/lead.js`, a Vercel serverless function. It
 validates server-side, rate limits by IP, drops honeypot submissions, and
-writes every accepted lead to the function log before doing anything else — so
-a lead survives an email outage or a missing API key.
+reports separately whether the CRM and notification paths accepted it.
 
 Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
-enquiry to you. Without it nothing breaks; the leads are in
-Vercel → Deployments → Functions → Logs, filtered on `[lead]`.
+enquiry to you. Without it, a successful CRM record still appears in the
+portal. If neither CRM nor email accepts an enquiry, the browser receives an
+error so the visitor can retry or use WhatsApp/email directly.
 
-Optional: set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-in Vercel so accepted enquiries are also stored in the MUCO CRM. If these are
-not set, the form still works and the visitor is handed off normally.
+Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in
+Vercel so accepted enquiries are stored in the MUCO CRM. These are required for
+the enquiry to appear in the portal's Enquiries inbox.
 
 The browser opens WhatsApp *before* awaiting the request, because doing it
 afterwards loses the click gesture and pop-up blockers eat the window.

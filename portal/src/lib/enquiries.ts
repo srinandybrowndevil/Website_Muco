@@ -29,6 +29,8 @@ export type WebsiteEnquiry = {
   status: WebsiteEnquiryStatus;
   created_at: string;
   updated_at: string;
+  converted_at?: string | null;
+  converted_lead_id?: string | null;
 };
 
 export const statusOrder: WebsiteEnquiryStatus[] = [

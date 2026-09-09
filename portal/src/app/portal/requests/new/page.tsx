@@ -23,6 +23,18 @@ export default function NewRequestPage() {
 }
 
 type CustomerRef = { id: string; organization_id: string };
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILES = 5;
+const ALLOWED_FILE_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "text/plain",
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+]);
 
 function NewRequestForm() {
   const [service, setService] = useState("");
@@ -87,8 +99,13 @@ function NewRequestForm() {
     return null;
   }
 
-  async function handleFiles(): Promise<RequestAttachment[]> {
-    return files.map((f) => ({ name: f.name, size: f.size, type: f.type || "application/octet-stream" }));
+  function validateFiles() {
+    if (files.length > MAX_FILES) return `Please choose no more than ${MAX_FILES} files.`;
+    for (const file of files) {
+      if (!file.size || file.size > MAX_FILE_SIZE) return `${file.name} is larger than 10 MB.`;
+      if (!ALLOWED_FILE_TYPES.has(file.type)) return `${file.name} has an unsupported file type.`;
+    }
+    return null;
   }
 
   async function submit(event: FormEvent) {
@@ -99,9 +116,12 @@ function NewRequestForm() {
       setError(validation);
       return;
     }
+    const fileValidation = validateFiles();
+    if (fileValidation) {
+      setError(fileValidation);
+      return;
+    }
     setSaving(true);
-
-    const attachments = await handleFiles();
 
     if (!isSupabaseConfigured) {
       setSaving(false);
@@ -122,8 +142,36 @@ function NewRequestForm() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("project_requests").insert([
-      {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError("Your session expired. Please sign in again.");
+      setSaving(false);
+      return;
+    }
+
+    const requestId = crypto.randomUUID();
+    const uploaded: { path: string; file: File }[] = [];
+    let requestCreated = false;
+    try {
+      for (const file of files) {
+        const path = `${customer.organization_id}/${customer.id}/${requestId}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const result = await supabase.storage.from("crm-files").upload(path, file, {
+          upsert: false,
+          contentType: file.type,
+        });
+        if (result.error) throw new Error(`${file.name}: ${result.error.message}`);
+        uploaded.push({ path, file });
+      }
+
+      const attachments: RequestAttachment[] = uploaded.map(({ path, file }) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        path,
+      }));
+
+      const { error: insertError } = await supabase.from("project_requests").insert({
+        id: requestId,
         organization_id: customer.organization_id,
         customer_id: customer.id,
         status: "new",
@@ -137,14 +185,37 @@ function NewRequestForm() {
         reference: reference.trim() || null,
         contact_preference: contactPreference || null,
         attachments,
-      },
-    ]);
+      });
+      if (insertError) throw new Error(insertError.message);
+      requestCreated = true;
 
-    setSaving(false);
-    if (insertError) {
-      setError(insertError.message);
+      if (uploaded.length) {
+        const { error: fileError } = await supabase.from("files").insert(
+          uploaded.map(({ path, file }) => ({
+            organization_id: customer.organization_id,
+            customer_id: customer.id,
+            request_id: requestId,
+            uploader_id: user.id,
+            bucket: "crm-files",
+            path,
+            name: file.name,
+            mime_type: file.type,
+            size_bytes: file.size,
+          }))
+        );
+        if (fileError) throw new Error(`Attachments could not be linked: ${fileError.message}`);
+      }
+    } catch (submissionError) {
+      if (requestCreated) {
+        await supabase.rpc("delete_customer_request_after_file_failure", { p_request_id: requestId });
+      }
+      if (uploaded.length) await supabase.storage.from("crm-files").remove(uploaded.map(({ path }) => path));
+      setError(submissionError instanceof Error ? submissionError.message : "Could not submit your request.");
+      setSaving(false);
       return;
     }
+
+    setSaving(false);
     setSuccess(true);
   }
 
@@ -304,7 +375,7 @@ function NewRequestForm() {
         </label>
         <p className="fieldhint">
           {isSupabaseConfigured
-            ? "Files are stored as metadata only until Supabase Storage is configured. The team will request files separately if needed."
+            ? "Up to 5 private files, 10 MB each. PDF, image, CSV, TXT, DOCX and XLSX are supported."
             : "Demo mode: file names and sizes are shown for preview but nothing is uploaded."}
         </p>
 

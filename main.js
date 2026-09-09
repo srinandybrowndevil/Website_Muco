@@ -799,12 +799,11 @@
         })
         .then(function (r) {
           if (r.ok) {
-            // A 200 means the lead was accepted and written to the function log,
-            // not that an email was sent. The response tells us whether email
-            // notification actually fired, so the message stays truthful.
-            return r
-              .json()
-              .then(function (data) {
+            return r.json().then(function (data) {
+                if (!data.recorded) {
+                  showStatus('err', 'We received the notification, but could not save the enquiry in our CRM. Please press send in WhatsApp or email us directly.');
+                  return;
+                }
                 if (typeof window.mucoTrackEvent === 'function') {
                   window.mucoTrackEvent('lead_submit', {
                     service: fieldValue('service') || 'unspecified',
@@ -820,20 +819,15 @@
                     ? ' You can still press send in WhatsApp if you would like to talk there.'
                     : '';
                 showStatus('ok', recorded + reply + whatsappNote);
-              })
-              .catch(function () {
-                showStatus(
-                  'ok',
-                  'Your enquiry has been recorded. We will reply as soon as we can.'
-                );
+              }).catch(function () {
+                showStatus('err', 'We could not confirm the enquiry was saved. Please press send in WhatsApp or email us directly.');
               });
           } else {
-            // The WhatsApp window is already open, so the enquiry is not lost.
-            showStatus('ok', handedOff + ' Press send there so we receive it.');
+            showStatus('err', 'We could not save the enquiry automatically. ' + handedOff + ' Press send there so we receive it.');
           }
         })
         .catch(function () {
-          showStatus('ok', handedOff + ' Press send there so we receive it.');
+          showStatus('err', 'We could not save the enquiry automatically. ' + handedOff + ' Press send there so we receive it.');
         });
     }
 
@@ -922,6 +916,41 @@
     document.body.classList.add('hero-enter');
   }
 
+  // Progressive enhancement: the full course list is readable without JS.
+  function initLearningCourses() {
+    var grid = document.getElementById('course-grid');
+    if (!grid) return;
+    var search = document.getElementById('course-search');
+    var category = document.getElementById('course-category');
+    var reset = document.getElementById('course-reset');
+    var count = document.getElementById('course-count');
+    var empty = document.getElementById('course-empty');
+    var cards = Array.from(grid.querySelectorAll('[data-course]'));
+    document.querySelector('[data-course-controls]').hidden = false;
+    function filter() {
+      var words = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+      var visible = 0;
+      cards.forEach(function (card) {
+        var text = card.querySelector('h3').textContent.toLocaleLowerCase();
+        var matches = (!category.value || card.dataset.category === category.value) &&
+          words.every(function (word) { return text.indexOf(word) !== -1; });
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+      count.textContent = visible + ' of ' + cards.length + ' courses shown';
+      empty.hidden = visible !== 0;
+    }
+    search.addEventListener('input', filter);
+    category.addEventListener('change', filter);
+    reset.addEventListener('click', function () {
+      search.value = '';
+      category.value = '';
+      filter();
+      search.focus();
+    });
+    filter();
+  }
+
   /* ------------------------------------------------------------------ boot */
   function init() {
     initHeaderShadow();
@@ -936,6 +965,7 @@
     initLivePlatform();
     initClock();
     initEnquiryForm();
+    initLearningCourses();
   }
 
   if (document.readyState === 'loading') {

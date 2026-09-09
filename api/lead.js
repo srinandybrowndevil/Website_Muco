@@ -120,9 +120,14 @@ export default async function handler(req, res) {
     ip
   };
 
-  // Written before the email is attempted, so a lead is never lost to a
-  // provider outage or a missing key — the Vercel function log is the backstop.
-  console.log('[lead]', JSON.stringify({ ...lead, ...meta }));
+  // Keep operational logs useful without copying contact details into them.
+  // The durable CRM record and founder email contain the submitted fields.
+  console.log('[lead] received', JSON.stringify({
+    service: lead.service || 'unspecified',
+    page: meta.page || '/',
+    received: meta.received,
+    ip: meta.ip
+  }));
 
     const resendKey = process.env.RESEND_API_KEY;
   let emailed = false;
@@ -221,12 +226,15 @@ export default async function handler(req, res) {
     console.error(
       '[lead] DELIVERY FAILED: neither CRM nor email accepted this enquiry. ' +
         'Check RESEND_API_KEY and NEXT_PUBLIC_SUPABASE_* in the Vercel project. ' +
-        JSON.stringify({ name: lead.name, phone: lead.phone, received: meta.received })
+        JSON.stringify({ service: lead.service || 'unspecified', page: meta.page || '/', received: meta.received, ip: meta.ip })
     );
   }
 
-  // The lead is recorded either way, so the visitor is told it arrived.
-  // Telling them it failed because our email provider is down would be a lie
-  // that costs us the enquiry.
-  return res.status(200).json({ ok: true, recorded, emailed });
+  // A notification is not a CRM record. Give the browser an honest contract:
+  // it must not show a successful receipt when neither durable path accepted
+  // the enquiry. The caller can retain the form and offer a retry.
+  if (!recorded && !emailed) {
+    return res.status(503).json({ ok: false, recorded: false, emailed: false, error: 'We could not save your enquiry. Please try again.' });
+  }
+  return res.status(recorded ? 200 : 202).json({ ok: recorded, recorded, emailed });
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { safeInternalPath } from "@/lib/auth";
+import { safeInternalPath, workspaceDestination, onboardingDestination } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -44,20 +44,16 @@ export async function GET(request: Request) {
 
   // Existing members are routed to their workspace. Non-members are sent to
   // complete-profile so that self-serve customers can onboard safely.
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("memberships")
     .select("role")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
 
-  if (membership) {
-    let destination = requestedNext || (membership.role === "client" ? "/portal" : "/");
-    if (membership.role === "client" && !destination.startsWith("/portal")) destination = "/portal";
-    if (membership.role !== "client" && destination.startsWith("/portal")) destination = "/";
-    return NextResponse.redirect(new URL(destination, url.origin));
-  }
+  if (membershipError) return NextResponse.redirect(new URL("/login?next=" + encodeURIComponent(requestedNext), url.origin));
+  if (membership) return NextResponse.redirect(new URL(workspaceDestination(membership.role, requestedNext), url.origin));
 
   // No membership: route to customer onboarding instead of showing an error.
-  return NextResponse.redirect(new URL("/complete-profile", url.origin));
+  return NextResponse.redirect(new URL(onboardingDestination(requestedNext), url.origin));
 }

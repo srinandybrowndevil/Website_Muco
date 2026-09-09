@@ -72,6 +72,8 @@ presented as available products.
 - [Pricing](https://mucolabs.com/pricing): how quotes are made and what changes the number
 - [Maintenance](https://mucolabs.com/maintenance): support plan inclusions and exclusions
 - [About](https://mucolabs.com/about): the studio, the founder, the operating model
+- [Learning & Courses](https://mucolabs.com/learning): 65 published Way2Me course listings, direct Way2Me enquiries, and all eight MUCO services
+- [Learning Portal](https://mucolabs.com/learning-portal): separate entry for Way2Me learner sign-in, registration and support
 - [FAQ](https://mucolabs.com/faq): cost, timelines, ownership, SEO guarantees
 - [Careers](https://mucolabs.com/careers): contract roles and freelancer collaboration
 - [Contact](https://mucolabs.com/contact): project enquiry form, WhatsApp, phone, email

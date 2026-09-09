@@ -37,6 +37,41 @@ export function EnquiryDetailClient({
   }, [enquiry]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conversion, setConversion] = useState<{ lead_id: string; already_converted: boolean } | null>(
+    item.converted_lead_id ? { lead_id: item.converted_lead_id, already_converted: true } : null
+  );
+
+  async function convertToLead() {
+    if (!isConfigured || role !== "admin" || conversion) return;
+    setBusy(true);
+    setError(null);
+    const supabase = createClient();
+    if (!supabase) {
+      setError("Supabase is not configured.");
+      setBusy(false);
+      return;
+    }
+    const { data, error: conversionError } = await supabase.rpc("convert_website_enquiry", {
+      p_enquiry_id: item.id,
+    });
+    setBusy(false);
+    if (conversionError) {
+      setError(conversionError.message);
+      return;
+    }
+    const result = data as { lead_id?: string; already_converted?: boolean } | null;
+    if (!result?.lead_id) {
+      setError("The lead was not created. Please try again.");
+      return;
+    }
+    setConversion({ lead_id: result.lead_id, already_converted: Boolean(result.already_converted) });
+    setItem((prev) => ({
+      ...prev,
+      status: "converted",
+      converted_at: prev.converted_at ?? new Date().toISOString(),
+      converted_lead_id: result.lead_id,
+    }));
+  }
 
   async function updateStatus(status: WebsiteEnquiryStatus) {
     if (!isConfigured || role == null) return;
@@ -156,7 +191,7 @@ export function EnquiryDetailClient({
                   key={status}
                   type="button"
                   className={item.status === status ? "selected" : ""}
-                  disabled={busy || !isConfigured || role == null}
+                  disabled={busy || !isConfigured || role == null || (status === "converted" && !conversion)}
                   onClick={() => updateStatus(status)}
                 >
                   {statusLabel[status]}
@@ -164,6 +199,24 @@ export function EnquiryDetailClient({
               ))}
             </div>
           </div>
+
+          {role === "admin" && !conversion && item.status !== "spam" && (
+            <div className="actiongroup">
+              <label>Sales pipeline</label>
+              <button type="button" className="primary" disabled={busy || !isConfigured} onClick={convertToLead}>
+                {busy ? "Converting…" : "Convert to lead"}
+              </button>
+              <p className="muted">Creates one linked lead and records the conversion.</p>
+            </div>
+          )}
+
+          {conversion && (
+            <div className="panel success conversion">
+              <h3>{conversion.already_converted ? "Lead already linked" : "Converted successfully"}</h3>
+              <p>Lead ID: <code>{conversion.lead_id.slice(0, 8)}</code></p>
+              <Link href={`/leads/${conversion.lead_id}`}>Open lead</Link>
+            </div>
+          )}
 
           {item.email && (
             <div className="actiongroup">

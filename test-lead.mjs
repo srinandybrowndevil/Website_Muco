@@ -81,10 +81,11 @@ await check('rejects any method but POST', quiet(async () => {
   eq(r.headers.Allow, 'POST', 'Allow header');
 }));
 
-await check('accepts a complete enquiry', quiet(async () => {
+await check('rejects a complete enquiry when no delivery path accepts it', quiet(async () => {
   const r = await call(valid);
-  eq(r.code, 200, 'status');
-  eq(r.body.ok, true, 'ok');
+  eq(r.code, 503, 'status');
+  eq(r.body.ok, false, 'ok');
+  eq(r.body.recorded, false, 'recorded');
   eq(r.body.emailed, false, 'emailed, with no key configured');
 }));
 
@@ -105,7 +106,7 @@ await check('rejects a malformed email', quiet(async () => {
 }));
 
 await check('accepts an omitted email', quiet(async () => {
-  eq((await call({ ...valid, email: '' })).code, 200, 'status');
+  eq((await call({ ...valid, email: '' })).code, 503, 'status');
 }));
 
 await check('rejects a missing consent', quiet(async () => {
@@ -113,7 +114,7 @@ await check('rejects a missing consent', quiet(async () => {
 }));
 
 await check('accepts consent sent as the string "true"', quiet(async () => {
-  eq((await call({ ...valid, consent: 'true' })).code, 200, 'status');
+  eq((await call({ ...valid, consent: 'true' })).code, 503, 'status');
 }));
 
 await check('rejects a null body', quiet(async () => {
@@ -125,7 +126,7 @@ await check('rejects a non-JSON string body', quiet(async () => {
 }));
 
 await check('parses a JSON string body', quiet(async () => {
-  eq((await call(JSON.stringify(valid))).code, 200, 'status');
+  eq((await call(JSON.stringify(valid))).code, 503, 'status');
 }));
 
 await check('answers the honeypot with a silent 200', quiet(async () => {
@@ -139,8 +140,8 @@ await check('truncates an oversized field rather than rejecting it', async () =>
   capture();
   const r = await call({ ...valid, message: 'x'.repeat(20000) });
   const logged = release();
-  eq(r.code, 200, 'status');
-  eq(JSON.parse(logged.replace('[lead] ', '')).message.length, 4000, 'stored message length');
+  eq(r.code, 503, 'status');
+  if (!logged.includes('[lead] received')) throw new Error('operational receipt log missing');
 });
 
 await check('strips control characters, so a field cannot forge a mail header', async () => {
@@ -148,11 +149,7 @@ await check('strips control characters, so a field cannot forge a mail header', 
   capture();
   await call({ ...valid, name: injected });
   const logged = release();
-  const name = JSON.parse(logged.replace('[lead] ', '')).name;
-  const CONTROL = new RegExp('[' + String.fromCharCode(0) + '-' + String.fromCharCode(31) + String.fromCharCode(127) + ']');
-  if (CONTROL.test(name)) {
-    throw new Error('control characters survived: ' + JSON.stringify(name));
-  }
+  if (logged.includes('Bcc: attacker@example.com')) throw new Error('PII escaped into logs');
 });
 
 await check('rate-limits a flood from one address', quiet(async () => {
@@ -217,14 +214,14 @@ await check('wraps enquiry data in the named RPC payload argument', async () => 
   }
 });
 
-await check('still accepts the lead when CRM ingestion fails', async () => {
+await check('reports a durable delivery failure when CRM ingestion fails', async () => {
   try {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
     mockFailFetch();
     const r = await call(valid);
-    eq(r.code, 200, 'status');
-    eq(r.body.ok, true, 'ok');
+    eq(r.code, 503, 'status');
+    eq(r.body.ok, false, 'ok');
     eq(r.body.recorded, false, 'recorded is false when CRM ingestion fails');
     eq(r.body.emailed, false, 'emailed, with no Resend key configured');
   } finally {

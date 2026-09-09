@@ -119,8 +119,8 @@ PROJECTS = [
         "scope": "Public marketing site, service and pricing architecture, enquiry capture with "
                  "source attribution, portfolio with honest project stages, and a roadmap to "
                  "authenticated customer and admin areas.",
-        "state": "Live at mucolabs.com, with server-side lead capture running. The "
-                 "authenticated customer and admin portal is the next phase.",
+        "state": "Live at mucolabs.com with server-side lead capture, and portal.mucolabs.com "
+                 "provides the authenticated customer and admin workspace.",
         "chips": ["Static-first", "SEO & schema", "Accessibility", "Portal roadmap"],
     },
     {
@@ -2295,6 +2295,16 @@ def build_about():
     )
 
 
+def build_learning():
+    from learning_pages import build_learning as render_learning
+    return render_learning(SERVICES)
+
+
+def build_learning_portal():
+    from learning_pages import build_learning_portal as render_portal
+    return render_portal()
+
+
 def build_contact():
     service_opts = ["Website design & development", "Mobile app development",
                     "UI/UX and product design", "Custom software & SaaS",
@@ -2800,11 +2810,11 @@ def build_privacy():
                 "This site is a set of static pages with a small amount of server code: the "
                 "endpoint that receives the enquiry form and a first-party analytics endpoint. "
                 "There are no user accounts on this website.",
-                "When you submit the enquiry form, what you typed is sent to us and recorded so we "
-                "can reply. The same details are also opened in WhatsApp or your email application "
-                "so you can continue the conversation there if you want to \u2014 but the enquiry "
-                "reaches us either way, which is the point: before this, an enquiry was lost if "
-                "WhatsApp failed to open.",
+                "When you submit the enquiry form, what you typed is sent to our server for CRM "
+                "recording and notification. The same details are also opened in WhatsApp or your "
+                "email application so you can continue the conversation there if you want. The "
+                "form shows an error and keeps the next step available if neither delivery path "
+                "accepts the submission.",
                 "Alongside your answers we record the page you submitted from, the site that "
                 "referred you and any campaign tags in the link, so we know which of our pages are "
                 "actually useful. Your IP address is recorded with the submission as a basic "
@@ -3125,6 +3135,8 @@ presented as available products.
 - [Pricing]({domain}/pricing.html): how quotes are made and what changes the number
 - [Maintenance]({domain}/maintenance.html): support plan inclusions and exclusions
 - [About]({domain}/about.html): the studio, the founder, the operating model
+- [Learning & Courses]({domain}/learning.html): 65 published Way2Me course listings, direct Way2Me enquiries, and all eight MUCO services
+- [Learning Portal]({domain}/learning-portal.html): separate entry for Way2Me learner sign-in, registration and support
 - [FAQ]({domain}/faq.html): cost, timelines, ownership, SEO guarantees
 - [Careers]({domain}/careers.html): contract roles and freelancer collaboration
 - [Contact]({domain}/contact.html): project enquiry form, WhatsApp, phone, email
@@ -3182,6 +3194,8 @@ SITEMAP_PAGES = [
     ("work.html", "0.9", "weekly"),
     ("pricing.html", "0.8", "monthly"),
     ("about.html", "0.7", "monthly"),
+    ("learning.html", "0.7", "monthly"),
+    ("learning-portal.html", "0.6", "monthly"),
     ("contact.html", "0.8", "monthly"),
     ("faq.html", "0.6", "monthly"),
     ("maintenance.html", "0.6", "monthly"),
@@ -3448,23 +3462,23 @@ No dependencies, no npm, no build server. It writes the `.html` files plus
 
 ## Pages
 
-Home · Services · Work · Pricing · About · Contact · FAQ · Maintenance ·
+Home · Services · Work · Pricing · About · Learning · Contact · FAQ · Maintenance ·
 Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
 The contact form posts to `api/lead.js`, a Vercel serverless function. It
 validates server-side, rate limits by IP, drops honeypot submissions, and
-writes every accepted lead to the function log before doing anything else — so
-a lead survives an email outage or a missing API key.
+reports separately whether the CRM and notification paths accepted it.
 
 Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
-enquiry to you. Without it nothing breaks; the leads are in
-Vercel → Deployments → Functions → Logs, filtered on `[lead]`.
+enquiry to you. Without it, a successful CRM record still appears in the
+portal. If neither CRM nor email accepts an enquiry, the browser receives an
+error so the visitor can retry or use WhatsApp/email directly.
 
-Optional: set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-in Vercel so accepted enquiries are also stored in the MUCO CRM. If these are
-not set, the form still works and the visitor is handed off normally.
+Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in
+Vercel so accepted enquiries are stored in the MUCO CRM. These are required for
+the enquiry to appear in the portal's Enquiries inbox.
 
 The browser opens WhatsApp *before* awaiting the request, because doing it
 afterwards loses the click gesture and pop-up blockers eat the window.
@@ -3716,6 +3730,8 @@ def build_all():
         ("maintenance.html", build_maintenance),
         ("website-development-erode.html", build_local_erode),
         ("about.html", build_about),
+        ("learning.html", build_learning),
+        ("learning-portal.html", build_learning_portal),
         ("contact.html", build_contact),
         ("faq.html", build_faq),
         ("careers.html", build_careers),

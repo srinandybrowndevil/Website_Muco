@@ -1,20 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { AuthShell, AuthStatus } from "@/components/auth/AuthShell";
-import { appOrigin, isStrongPassword, passwordRequirements } from "@/lib/auth";
+import { appOrigin, isStrongPassword, passwordRequirements, workspaceDestination } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export default function Signup() {
+  const next = workspaceDestination("client", useSearchParams().get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<"form" | "google" | null>(null);
   const [sent, setSent] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -44,10 +46,10 @@ export default function Signup() {
       setErrors(validation);
       return;
     }
-    setLoading(true);
+    setLoading("form");
 
     if (!isSupabaseConfigured) {
-      setLoading(false);
+      setLoading(null);
       setSent(true);
       return;
     }
@@ -57,7 +59,7 @@ export default function Signup() {
       email: email.trim().toLowerCase(),
       password,
       options: {
-        emailRedirectTo: `${appOrigin()}/auth/callback?next=/complete-profile`,
+        emailRedirectTo: `${appOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
         data: {
           full_name: fullName.trim(),
           phone: phone.trim(),
@@ -67,7 +69,7 @@ export default function Signup() {
       },
     });
 
-    setLoading(false);
+    setLoading(null);
     if (error) {
       setErrors([error.message || "Could not create your account. Please try again."]);
       return;
@@ -75,11 +77,33 @@ export default function Signup() {
     setSent(true);
   }
 
+  async function signUpWithGoogle() {
+    setErrors([]);
+    if (!isSupabaseConfigured) {
+      setErrors(["Google sign-in needs Supabase authentication to be configured."]);
+      return;
+    }
+    setLoading("google");
+    const { error } = await createClient()!.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${appOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
+    });
+    if (error) {
+      setLoading(null);
+      setErrors([error.message || "Could not continue with Google. Please try again."]);
+    }
+  }
+
   return (
     <AuthShell>
       {!isSupabaseConfigured && <span className="demo">Demo mode · No credentials required</span>}
       <h2>Create your customer account.</h2>
-      <p>Send project requests, track progress and chat with the MUCO LABS team.</p>
+      <p>Send project requests, track progress and access files shared by the MUCO LABS team.</p>
+      <button className="secondary" disabled={Boolean(loading) || sent} type="button" onClick={signUpWithGoogle}>
+        {loading === "google" ? "Opening Google…" : "Sign up with Google"}
+      </button>
+      <div className="or">OR</div>
+      <p className="auth-hint">Google customers finish their business profile after the first sign-in.</p>
 
       {sent && (
         <AuthStatus title="Check your inbox">
@@ -186,14 +210,14 @@ export default function Signup() {
             </AuthStatus>
           )}
 
-          <button className="primary" disabled={loading} type="submit">
-            {loading ? "Creating account…" : "Create customer account"}
+          <button className="primary" disabled={Boolean(loading)} type="submit">
+            {loading === "form" ? "Creating account…" : "Create customer account"}
           </button>
         </form>
       )}
 
       <small className="terms">
-        Already have an account? <Link href="/login">Sign in</Link>
+        Already have an account? <Link href={`/login?next=${encodeURIComponent(next)}`}>Sign in</Link>
       </small>
     </AuthShell>
   );
