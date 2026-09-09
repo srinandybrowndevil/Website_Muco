@@ -40,7 +40,7 @@ Customers never receive navigation to leads, staff settings, other customers, in
 
 ## Remaining live verification
 
-- Complete one real Google account sign-in and confirm callback routing to `/portal/requests/new`.
+- Complete one customer Google account sign-in and confirm customer membership routing to `/portal/requests/new` (the founder/admin callback was verified to the live `portal.mucolabs.com` workspace).
 - Complete one test customer signup and onboarding record.
 - Submit one agreed test request and confirm it appears in the staff CRM without sending an unintended customer notification.
 - Confirm the portal deployment has picked up the latest source commit; the Vercel CLI is not authenticated in this workspace.
