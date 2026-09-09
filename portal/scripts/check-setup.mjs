@@ -9,16 +9,28 @@ if (!origin || !key) {
 }
 try { new URL(origin); } catch { console.error("Supabase URL is invalid."); process.exit(1); }
 // Read-only requests: no personal records, privileged keys or writes.
-async function check(path) {
+async function check(path, parseJson = false) {
   return new Promise((resolve, reject) => {
     const request = https.get(new URL(path, origin), { headers: { apikey: key, ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}) } }, response => {
-      response.resume();
-      response.on("end", () => resolve(response.statusCode));
+      let body = "";
+      response.on("data", chunk => { if (parseJson) body += chunk; });
+      response.on("end", () => resolve(parseJson ? { statusCode: response.statusCode, body } : response.statusCode));
     });
     request.setTimeout(15000, () => request.destroy(new Error("Connection timed out")));
     request.on("error", reject);
   });
 }
+try {
+  const settings = await check("/auth/v1/settings", true);
+  if (settings.statusCode !== 200) {
+    console.error(`auth settings: HTTP ${settings.statusCode} — check Supabase Auth configuration`);
+    process.exitCode = 1;
+  } else {
+    const enabled = Boolean(JSON.parse(settings.body)?.external?.google);
+    console.log(`Supabase Google provider: ${enabled ? "Enabled" : "DISABLED — enable it before production Google sign-in"}`);
+    if (!enabled) process.exitCode = 1;
+  }
+} catch (error) { console.error(`Auth settings check failed: ${error.code ?? error.message}`); process.exitCode = 1; }
 for (const table of ["memberships", "invitations", "leads", "customers", "tasks", "projects", "proposals", "invoices", "files", "website_enquiries", "project_requests", "analytics_events"]) {
   try {
     const code = await check(`/rest/v1/${table}?select=id&limit=0`.replace("memberships?select=id", "memberships?select=organization_id"));
