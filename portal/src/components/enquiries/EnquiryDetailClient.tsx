@@ -96,7 +96,7 @@ export function EnquiryDetailClient({
       <div className="pagehead">
         <div>
           <p className="eyebrow">
-            <Link href="/enquiries">Enquiries</Link> / {item.id.slice(0, 8)}
+            <Link href="/admin/enquiries">Enquiries</Link> / {item.id.slice(0, 8)}
           </p>
           <h1>{item.name}</h1>
           <p>
@@ -214,7 +214,7 @@ export function EnquiryDetailClient({
             <div className="panel success conversion">
               <h3>{conversion.already_converted ? "Lead already linked" : "Converted successfully"}</h3>
               <p>Lead ID: <code>{conversion.lead_id.slice(0, 8)}</code></p>
-              <Link href={`/leads/${conversion.lead_id}`}>Open lead</Link>
+              <Link href={`/admin/leads/${conversion.lead_id}`}>Open lead</Link>
             </div>
           )}
 

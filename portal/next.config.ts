@@ -31,6 +31,21 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // The team workspace moved from the site root to /admin so an intern or
+  // employee token cannot reach it by loading "/", and so the client portal
+  // owns /portal outright. These keep every link that was ever shared or
+  // bookmarked working, pointing at the same page in its new home rather than
+  // dropping people on a 404 or on the workspace home.
+  async redirects() {
+    const moved = ["leads", "customers", "tasks", "projects", "proposals",
+                   "invoices", "files", "reports", "automation", "settings",
+                   "enquiries", "requests", "analytics"];
+    return moved.flatMap(section => [
+      { source: `/${section}`, destination: `/admin/${section}`, permanent: true },
+      { source: `/${section}/:path*`, destination: `/admin/${section}/:path*`, permanent: true },
+    ]);
+  },
+
   // The repository contains a separate lockfile for the static marketing site.
   // Pin Turbopack to this app so local and Vercel builds do not infer the
   // parent workspace and emit a root warning.

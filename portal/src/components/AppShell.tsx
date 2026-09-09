@@ -128,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="sidefoot">
-          <Link href={isSupabaseConfigured ? "/requests" : "/portal"}>
+          <Link href={isSupabaseConfigured ? "/admin/requests" : "/portal"}>
             <span className="avatar small">CP</span>
             <span>
               <b>{isSupabaseConfigured ? "Customer requests" : "Customer portal"}</b>
@@ -175,13 +175,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
           <div className="topactions">
             <span className="demo">{isSupabaseConfigured ? "Connected workspace" : "Demo mode"}</span>
-            <Link href="/enquiries"
+            <Link href="/admin/enquiries"
               className="iconbtn"
               aria-label="Open enquiry inbox"
             >
               <Icon name="bell" />
             </Link>
-            <Link className="primary compact" href="/leads">
+            <Link className="primary compact" href="/admin/leads">
               <Icon name="plus" />
               New lead
             </Link>

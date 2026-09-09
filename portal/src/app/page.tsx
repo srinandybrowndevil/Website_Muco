@@ -1,14 +1,29 @@
-import { AppShell } from "@/components/AppShell";
-import { Dashboard } from "@/components/CrmPages";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { primaryMembership } from "@/lib/membership";
+import { workspaceDestination } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { requireWorkspace } from "@/lib/workspace";
-import { LiveOverview } from "@/components/live/LiveOverview";
-import { WrongWorkspaceNotice } from "@/components/WrongWorkspaceNotice";
-export default async function Page({searchParams}:{searchParams:Promise<{wrongworkspace?:string}>}){
-  if (!isSupabaseConfigured) return <AppShell><Dashboard/></AppShell>;
-  const [workspace, query] = await Promise.all([requireWorkspace(), searchParams]);
-  return <AppShell>
-    {query.wrongworkspace === "customer" && <WrongWorkspaceNotice audience="customer"/>}
-    <LiveOverview organizationId={workspace.organizationId}/>
-  </AppShell>;
+
+// The team workspace used to live here. It now lives under /admin so an intern
+// or employee token cannot reach it by loading the site root, and so the client
+// portal can own /portal outright.
+//
+// This route stays as the front door: a bookmark, an old link or someone typing
+// the bare domain lands here and is sent to whichever workspace their account
+// actually belongs to, rather than meeting a 404.
+export default async function Root() {
+  if (!isSupabaseConfigured) redirect("/admin");
+
+  const client = await createClient();
+  if (!client) redirect("/login");
+
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: rows } = await client.from("memberships")
+    .select("organization_id, role").eq("user_id", user.id);
+  const membership = primaryMembership(rows);
+  if (!membership) redirect("/complete-profile");
+
+  redirect(workspaceDestination(membership.role));
 }

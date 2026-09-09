@@ -31,7 +31,7 @@ function RequestTable({ requests }: { requests: ProjectRequest[] }) {
           {requests.map((r) => (
             <tr key={r.id}>
               <td>
-                <Link href={`/requests/${r.id}`}>
+                <Link href={`/admin/requests/${r.id}`}>
                   <b>{r.title}</b>
                 </Link>
                 <small>{r.id.slice(0, 8)}</small>
@@ -45,7 +45,7 @@ function RequestTable({ requests }: { requests: ProjectRequest[] }) {
               <td>
                 <em className={`status ${requestStatusTone(r.status)}`}>{requestStatusLabel[r.status]}</em>
               </td>
-              <td><Link className="secondary" href={`/requests/${r.id}`}>Open request</Link></td>
+              <td><Link className="secondary" href={`/admin/requests/${r.id}`}>Open request</Link></td>
             </tr>
           ))}
         </tbody>

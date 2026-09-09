@@ -118,7 +118,7 @@ export function Dashboard() {
               <p className="eyebrow">Pipeline</p>
               <h2>Opportunity flow</h2>
             </div>
-            <Link href="/leads">View pipeline →</Link>
+            <Link href="/admin/leads">View pipeline →</Link>
           </div>
           <div className="funnel">
             {pipelineByStage.map((s, i) => (
@@ -138,7 +138,7 @@ export function Dashboard() {
               <p className="eyebrow">Today</p>
               <h2>Focus list</h2>
             </div>
-            <Link href="/tasks">All follow-ups →</Link>
+            <Link href="/admin/tasks">All follow-ups →</Link>
           </div>
           {seedTasks.slice(0, 4).map((t, i) => (
             <div className="focus" key={t.title}>

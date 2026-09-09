@@ -87,7 +87,7 @@ export function RequestDetailClient({ initialRequest, isConfigured, role }: Prop
       <div className="pagehead">
         <div>
           <p className="eyebrow">
-            <Link href="/requests">Requests</Link> / {request.id.slice(0, 8)}
+            <Link href="/admin/requests">Requests</Link> / {request.id.slice(0, 8)}
           </p>
           <h1>{request.title}</h1>
           <p>

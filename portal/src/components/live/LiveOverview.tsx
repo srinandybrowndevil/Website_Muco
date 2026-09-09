@@ -14,7 +14,7 @@ export function LiveOverview({ organizationId, reports = false }: { organization
     return data as Summary;
   }, [organizationId]);
   const state = useLiveQuery("leads,projects,invoices,tasks,customers,website_enquiries", load, organizationId);
-  return <div className="page"><div className="pagehead"><div><p className="eyebrow">Workspace / {reports ? "Reports" : "Overview"}</p><h1>{reports ? "Your business, by the numbers." : "Studio overview."}</h1><p>Current totals from your saved workspace records.</p></div><Link className="primary" href="/leads">Open pipeline →</Link></div>
+  return <div className="page"><div className="pagehead"><div><p className="eyebrow">Workspace / {reports ? "Reports" : "Overview"}</p><h1>{reports ? "Your business, by the numbers." : "Studio overview."}</h1><p>Current totals from your saved workspace records.</p></div><Link className="primary" href="/admin/leads">Open pipeline →</Link></div>
     <div className="live-tools"><span className="demo">{state.connected ? "Live updates" : "Auto-refresh every 30s"}</span><button className="secondary" onClick={() => void state.refresh()}>Refresh</button></div>
     {state.error && <div className="panel error" role="alert">Could not load the overview. Check that you are signed in with your team account, then refresh. <small>{state.error}</small></div>}
     {state.loading && <p role="status">Loading overview…</p>}
@@ -22,6 +22,6 @@ export function LiveOverview({ organizationId, reports = false }: { organization
       <section className="panel"><div className="panelhead"><h2>Pipeline by stage</h2><span>{state.data.customers} customers · {state.data.enquiries} new enquiries</span></div>{state.data.stages.length
         ? <div className="tablewrap"><table><thead><tr><th>Stage</th><th>Leads</th><th>Estimated value</th></tr></thead><tbody>{state.data.stages.map(stage => <tr key={stage.stage}><td>{label(stage.stage)}</td><td>{stage.count}</td><td>{currency(stage.value)}</td></tr>)}</tbody></table></div>
         : <EmptyState compact icon="target" title="Nothing in the pipeline" body="No open lead yet. Save one and it appears here with its stage and estimated value, and counts towards the pipeline total above." action={{ label: "Add the first lead", href: "/leads" }} />}<p>Pipeline excludes won/lost leads. Unpaid invoices include sent, viewed and overdue records; drafts and void records are excluded.</p></section></>}
-    <div className="live-tools"><Link className="secondary" href="/enquiries">Website enquiries</Link><Link className="secondary" href="/requests">Customer requests</Link><Link className="secondary" href="/analytics">Website analytics</Link></div>
+    <div className="live-tools"><Link className="secondary" href="/admin/enquiries">Website enquiries</Link><Link className="secondary" href="/admin/requests">Customer requests</Link><Link className="secondary" href="/admin/analytics">Website analytics</Link></div>
   </div>;
 }

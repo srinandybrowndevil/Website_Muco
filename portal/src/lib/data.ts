@@ -87,20 +87,20 @@ export const documents: { proposals: DocumentRow[]; invoices: DocumentRow[] } = 
 };
 
 export const nav = [
-  ["Command center", "/", "grid"],
-  ["Enquiries", "/enquiries", "mail"],
-  ["Requests", "/requests", "inbox"],
-  ["Analytics", "/analytics", "barChart"],
-  ["Leads", "/leads", "target"],
-  ["Customers", "/customers", "users"],
-  ["Follow-ups", "/tasks", "check"],
-  ["Projects", "/projects", "briefcase"],
-  ["Proposals", "/proposals", "file"],
-  ["Invoices", "/invoices", "receipt"],
-  ["Files", "/files", "folder"],
-  ["Reports", "/reports", "chart"],
-  ["Automation", "/automation", "bolt"],
-  ["Team", "/settings", "users"],
+  ["Command center", "/admin", "grid"],
+  ["Enquiries", "/admin/enquiries", "mail"],
+  ["Requests", "/admin/requests", "inbox"],
+  ["Analytics", "/admin/analytics", "barChart"],
+  ["Leads", "/admin/leads", "target"],
+  ["Customers", "/admin/customers", "users"],
+  ["Follow-ups", "/admin/tasks", "check"],
+  ["Projects", "/admin/projects", "briefcase"],
+  ["Proposals", "/admin/proposals", "file"],
+  ["Invoices", "/admin/invoices", "receipt"],
+  ["Files", "/admin/files", "folder"],
+  ["Reports", "/admin/reports", "chart"],
+  ["Automation", "/admin/automation", "bolt"],
+  ["Team", "/admin/settings", "users"],
 ] as const;
 
 export const money = (value: number) =>

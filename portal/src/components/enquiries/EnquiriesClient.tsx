@@ -203,7 +203,7 @@ export function EnquiriesClient({
               {filtered.map((e) => (
                 <tr key={e.id}>
                   <td>
-                    <Link href={`/enquiries/${e.id}`}>
+                    <Link href={`/admin/enquiries/${e.id}`}>
                       <b>{e.name}</b>
                     </Link>
                     {e.business ? <small>{e.business}</small> : null}

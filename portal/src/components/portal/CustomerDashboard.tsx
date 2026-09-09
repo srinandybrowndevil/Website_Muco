@@ -57,7 +57,7 @@ export function CustomerDashboard() {
         <section className="panel">
           <div className="panelhead">
             <h2>Recent files</h2>
-            <Link href="/files">View all →</Link>
+            <Link href="/portal#files">View all →</Link>
           </div>
           {["GST_export_template.xlsx", "Invoice_mocks.pdf", "Project_plan.pdf"].map((x, i) => (
             <div className="portalf" key={x}>

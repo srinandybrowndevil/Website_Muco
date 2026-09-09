@@ -1,10 +1,26 @@
-export const DEFAULT_AUTHENTICATED_PATH = "/";
+// The two workspaces, as path prefixes. Named once so a redirect, a guard and
+// a nav link cannot disagree about where a workspace lives.
+export const ADMIN_HOME = "/admin";
+export const CLIENT_HOME = "/portal";
 
+export const DEFAULT_AUTHENTICATED_PATH = ADMIN_HOME;
+
+export function isClientPath(pathname: string) {
+  return pathname === CLIENT_HOME || pathname.startsWith(`${CLIENT_HOME}/`);
+}
+
+export function isAdminPath(pathname: string) {
+  return pathname === ADMIN_HOME || pathname.startsWith(`${ADMIN_HOME}/`);
+}
+
+/** Where this role should land, honouring a requested path it is allowed to open. */
 export function workspaceDestination(role: string, requested?: string | null) {
   const path = safeInternalPath(requested);
   const pathname = new URL(path, "http://internal").pathname;
-  const customerPath = pathname === "/portal" || pathname.startsWith("/portal/");
-  return role === "client" ? (customerPath ? path : "/portal") : (customerPath ? "/" : path);
+  if (role === "client") return isClientPath(pathname) ? path : CLIENT_HOME;
+  // A team member asking for a client page is sent to their own workspace, not
+  // to the page they asked for. Every other request they may keep.
+  return isClientPath(pathname) ? ADMIN_HOME : (pathname === "/" ? ADMIN_HOME : path);
 }
 
 export function onboardingDestination(requested?: string | null) {
