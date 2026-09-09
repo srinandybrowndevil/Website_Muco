@@ -10,6 +10,8 @@ for (const [name, source] of [["login", login], ["signup", signup]]) {
     assert.match(source, /signInWithOAuth/);
     assert.match(source, /provider:\s*["']google["']/);
     assert.match(source, /\/auth\/callback\?next=/);
+    assert.match(source, /withTimeout/);
+    assert.match(source, /10000/);
   });
 }
 
