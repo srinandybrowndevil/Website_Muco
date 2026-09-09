@@ -34,18 +34,14 @@ WHATSAPP = "916381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
 PORTAL_DOMAIN = "https://portal.mucolabs.com"
-# The customer portal is deployed at portal.mucolabs.com. Keep sign-in
-# discoverable for returning customers; new enquiries still use the public
-# contact form and never require an account.
+# The customer portal is deployed at portal.mucolabs.com. Starting a project
+# intentionally enters the customer auth flow first; the requested destination
+# survives sign-in or sign-up and opens the new-request form.
 PORTAL_LIVE = True
 PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
-# The fragment matters. "Start a Project" is the primary CTA in the header of
-# every page and in the mobile menu, so it should land on the form rather than
-# the top of a page the visitor then has to scroll. #enquiry-form is the form's
-# own id and html{scroll-padding-top} offsets the sticky header.
-PORTAL_SIGNUP = "contact.html#enquiry-form"
-# New project CTAs intentionally remain account-free. Returning customers use
-# the separate sign-in link above.
+# Login exposes both Sign in and Create a customer account. The encoded next
+# path brings either route to the authenticated project-request form.
+PORTAL_SIGNUP = PORTAL_LOGIN + "?next=%2Fportal%2Frequests%2Fnew"
 PORTAL_SIGNUP_NOTE = ""
 NEWLINE = chr(10)
 PORTAL_LOGIN_LINK = "".join([
