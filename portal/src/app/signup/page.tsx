@@ -156,6 +156,7 @@ export default function Signup() {
             <li className={checks.letter ? "met" : ""}>A letter</li>
             <li className={checks.number ? "met" : ""}>A number</li>
             <li className={checks.symbol ? "met" : ""}>A symbol</li>
+            <li className={checks.uncommon ? "met" : ""}>Not a common or guessable password</li>
           </ul>
 
           <label htmlFor="signup-name">
