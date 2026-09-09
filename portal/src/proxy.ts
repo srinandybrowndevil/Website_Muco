@@ -4,7 +4,10 @@ import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } fro
 import { homeForRole, isAdminPath, isClientPath, isInternPath, workspaceDestination } from "@/lib/auth";
 import { primaryMembership } from "@/lib/membership";
 
-const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback"];
+// /verify is deliberately public: an employer checking a certificate has no
+// account here. The function behind it returns only the fields the
+// specification allows on that page.
+const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback","/verify"];
 const isPublic=(path:string)=>publicPaths.some(route=>path===route||path.startsWith(`${route}/`));
 
 export async function proxy(request:NextRequest){

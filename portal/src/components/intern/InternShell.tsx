@@ -10,6 +10,8 @@ import { LogoutButton } from "../auth/LogoutButton";
 // what is built rather than links to nothing.
 const NAV = [
   ["Internship", "/intern"],
+  ["Work log", "/intern/log"],
+  ["Certificate", "/intern/certificate"],
 ] as const;
 
 export function InternShell({
