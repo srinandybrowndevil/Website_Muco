@@ -63,6 +63,6 @@ Edit titles/categories in `learning_catalog.py`, the page content in `learning_p
 
 ## Release boundary
 
-The reviewed public Learning assets are now live: `/learning`, `/learning-portal` and `/assets/yogahari.png` each returned HTTP 200 after the main branch push. The separate `portal.mucolabs.com` deployment still serves the previous Magic Link UI, so the Google sign-in/sign-up code is committed but not yet live there. The portal host needs its own deployment trigger; Supabase Google provider configuration is also still required for an actual OAuth session.
+The reviewed public Learning assets are live: `/learning`, `/learning-portal`, `/assets/yogahari.webp` and the PNG fallback each return HTTP 200. The Way2Me founder portrait is delivered as WebP on modern browsers, reducing the image payload from about 1.7 MB to about 49 KB while preserving the supplied PNG fallback. The separate `portal.mucolabs.com` login exposes both customer sign-in and sign-up actions, and its Google OAuth flow now reaches Google account selection after the Supabase provider and OAuth callback were configured. A real account callback, membership routing and CRM request remain manual checks because this review does not use the owner's credentials or create records.
 
 The new Learning pages require no database migration, but earlier CRM/auth/storage changes have their own migration and live verification requirements. Rollback uses the prior public-site deployment; Way2Me data and accounts are unaffected by these public-page changes.
