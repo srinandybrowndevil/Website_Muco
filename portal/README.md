@@ -70,6 +70,7 @@ supabase/migrations/20261020000000_customer_request_files.sql
 supabase/migrations/20261021000000_profile_avatars.sql
 supabase/migrations/20261022000000_source_code_and_roles.sql
 supabase/migrations/20261023000000_security_lockdown.sql
+supabase/migrations/20261024000000_hot_path_indexes.sql
 ```
 
 3. Set only the public project values (and optionally the public app origin).
