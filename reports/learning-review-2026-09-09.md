@@ -63,6 +63,6 @@ Edit titles/categories in `learning_catalog.py`, the page content in `learning_p
 
 ## Release boundary
 
-The local result is ready to review at `http://localhost:8124/learning` while the preview server is running. Production deployment remains pending. The new Learning pages require no database migration, but earlier uncommitted CRM/auth/storage changes in this working tree have their own migration and live verification requirements. Do not treat those earlier changes as released or fully verified because this Learning review passed.
+The reviewed public Learning assets are now live: `/learning`, `/learning-portal` and `/assets/yogahari.png` each returned HTTP 200 after the main branch push. The separate `portal.mucolabs.com` deployment still serves the previous Magic Link UI, so the Google sign-in/sign-up code is committed but not yet live there. The portal host needs its own deployment trigger; Supabase Google provider configuration is also still required for an actual OAuth session.
 
-For release, publish the reviewed generated public assets through the existing site pipeline, then check `/learning`, `/learning-portal`, the supplied portrait, mobile navigation and the two Way2Me handoffs on the live domain. Rollback uses the prior public-site deployment; Way2Me data and accounts are unaffected by these public-page changes.
+The new Learning pages require no database migration, but earlier CRM/auth/storage changes have their own migration and live verification requirements. Rollback uses the prior public-site deployment; Way2Me data and accounts are unaffected by these public-page changes.
