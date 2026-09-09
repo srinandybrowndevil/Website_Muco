@@ -7,7 +7,11 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const portalDir = resolve(dirname(fileURLToPath(import.meta.url)), "..", "portal");
-const child = spawn(process.platform === "win32" ? "npm.cmd" : "npm", ["run", "dev"], {
+// Honour PORT so the preview launcher can move the portal off a port another
+// project already holds, instead of the two fighting over 3000.
+const port = process.env.PORT ?? process.argv[2];
+const args = port ? ["run", "dev", "--", "--port", String(port)] : ["run", "dev"];
+const child = spawn(process.platform === "win32" ? "npm.cmd" : "npm", args, {
   cwd: portalDir,
   stdio: "inherit",
   shell: process.platform === "win32",

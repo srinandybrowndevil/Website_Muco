@@ -96,7 +96,7 @@ export function LiveCustomer({ organizationId }: { organizationId: string }) {
       </section>
     )}
 
-    {data && !brandNew && data.rows.map((rows, index) => <section className="panel" id={index === 0 ? "projects" : undefined} key={index}><h2>{SECTIONS[index].heading}</h2>{!rows.length && <EmptyState compact icon={SECTIONS[index].icon} title={SECTIONS[index].title} body={SECTIONS[index].body} />}{rows.length === 100 && <p>Showing the latest 100 records.</p>}{rows.map(row => <article className="portalf" key={row.id}><div><b>{String(row.name ?? row.title ?? row.number)}</b><small>{label(row.status)}{index > 0 ? ` · ${currency(row.amount)}` : ` · ${Number(row.progress)}% complete`}</small>{index === 0 && <progress value={Number(row.progress)} max={100} aria-label={`${String(row.name)} progress`} />}</div></article>)}</section>)}
+    {data && !brandNew && data.rows.map((rows, index) => <section className="panel" id={index === 0 ? "projects" : undefined} key={index}><h2>{SECTIONS[index].heading}</h2>{!rows.length && <EmptyState compact icon={SECTIONS[index].icon} title={SECTIONS[index].title} body={SECTIONS[index].body} />}{rows.length === 100 && <p>Showing the latest 100 records.</p>}{rows.map(row => <article className="portalf" key={row.id}><div><b>{String(row.name ?? row.title ?? row.number)}</b><small>{label(row.status)}{index > 0 ? ` · ${currency(row.amount)}` : ` · ${Number(row.progress)}% complete`}</small>{index === 0 && <progress value={Number(row.progress)} max={100} aria-label={`${String(row.name)} progress`} />}</div>{index === 2 && <Link className="secondary compact" href={`/portal/invoices/${row.id}`}>View &amp; save</Link>}</article>)}</section>)}
 
     <LiveFiles organizationId={organizationId} customer />
   </>;

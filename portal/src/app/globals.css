@@ -2720,3 +2720,93 @@ td span small {
   .invitelink-row { flex-direction: column; }
   .invitelink-row .primary { width: 100%; }
 }
+
+/* Invoice / payment record ------------------------------------------------ */
+.invoice-actions { align-items: flex-start; }
+
+.invoicedoc { max-width: 780px; }
+
+.invoicedoc > header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.invoicedoc > header b { display: block; font-family: var(--font-serif); font-size: 20px; font-weight: 400; }
+.invoicedoc > header span { display: block; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+.invoicedoc-ref { text-align: right; }
+.invoicedoc-ref b { font-family: var(--font-mono, monospace) !important; font-size: 16px !important; margin: 4px 0 8px; }
+
+.invoicedoc-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px 0;
+}
+
+.invoicedoc-parties b { display: block; font-size: 15px; margin: 6px 0 4px; }
+.invoicedoc-parties span { display: block; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.invoicedoc-parties .eyebrow { color: var(--muted); }
+
+.invoicedoc-lines { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.invoicedoc-lines th, .invoicedoc-lines td { padding: 12px 0; text-align: left; font-size: 14px; }
+.invoicedoc-lines thead th { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+.invoicedoc-lines .right { text-align: right; }
+.invoicedoc-lines tfoot th, .invoicedoc-lines tfoot td { border-top: 1px solid var(--line); padding-top: 14px; font-size: 15px; }
+
+.invoicedoc > footer p { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 0 0 8px; }
+.invoicedoc-note { border-left: 2px solid var(--line); padding-left: 12px; }
+.invoicedoc-back { margin-top: 18px; font-size: 13px; }
+
+@media (max-width: 600px) {
+  .invoicedoc-parties { grid-template-columns: 1fr; }
+  .invoicedoc-ref { text-align: left; }
+  .invoice-actions .primary { width: 100%; justify-content: center; }
+}
+
+/* What the saved PDF looks like. The app chrome is furniture for navigating,
+   not part of the document, so it is dropped; the record prints on white at A4
+   because a dark page wastes a cartridge and reads badly on paper. */
+@media print {
+  @page { size: A4; margin: 16mm; }
+
+  .sidebar, .topbar, .scrim, .modalback, .clientportal header,
+  .invoice-actions, .invoicedoc-back, .demo, .live-tools { display: none !important; }
+
+  html, body, .shell, .mainarea, main, .page {
+    background: #fff !important;
+    color: #000 !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .invoicedoc {
+    max-width: none;
+    border: none !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+
+  /* The app gives table headers and footer rows a dark fill. Left alone they
+     print as solid black bars: ink wasted and the text inside unreadable. */
+  .invoicedoc table, .invoicedoc thead, .invoicedoc tbody, .invoicedoc tfoot,
+  .invoicedoc tr, .invoicedoc th, .invoicedoc td {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .invoicedoc .eyebrow, .invoicedoc span, .invoicedoc p, .invoicedoc td, .invoicedoc th { color: #000 !important; }
+  .invoicedoc > header, .invoicedoc-lines thead th, .invoicedoc-lines tfoot th,
+  .invoicedoc-lines tfoot td, .invoicedoc-note { border-color: #ccc !important; }
+  .invoicedoc .status { border: 1px solid #999 !important; background: none !important; color: #000 !important; }
+
+  /* Keep a record on one page rather than orphaning the total. */
+  .invoicedoc, .invoicedoc-lines { break-inside: avoid; }
+}
