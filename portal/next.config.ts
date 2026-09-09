@@ -28,6 +28,12 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // The repository contains a separate lockfile for the static marketing site.
+  // Pin Turbopack to this app so local and Vercel builds do not infer the
+  // parent workspace and emit a root warning.
+  turbopack: {
+    root: process.cwd(),
+  },
   async headers() {
     return [
       {

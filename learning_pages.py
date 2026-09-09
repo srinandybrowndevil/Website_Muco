@@ -73,7 +73,7 @@ def build_learning(services):
     </section>
     <section class="section-divider" id="way2me-founder" aria-labelledby="way2me-founder-title">
       <div class="container learning-founder-layout">
-        <figure class="learning-portrait"><img src="assets/yogahari.png" width="1086" height="1448" loading="lazy" decoding="async" alt="Yogahari Haran, founder and CEO of Way2Me" /><figcaption>{escape(WAY2ME_PROFILE['name'])} · {escape(WAY2ME_PROFILE['role'])}</figcaption></figure>
+        <figure class="learning-portrait"><picture><source srcset="assets/yogahari.webp" type="image/webp" /><img src="assets/yogahari.png" width="1086" height="1448" loading="lazy" decoding="async" alt="Yogahari Haran, founder and CEO of Way2Me" /></picture><figcaption>{escape(WAY2ME_PROFILE['name'])} · {escape(WAY2ME_PROFILE['role'])}</figcaption></figure>
         <div>
           <span class="eyebrow">Way2Me leadership</span>
           <h2 id="way2me-founder-title">{escape(WAY2ME_PROFILE['name'])}</h2>
