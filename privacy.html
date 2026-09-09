@@ -75,6 +75,15 @@
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mucolabs.com/"},{"@type":"ListItem","position":2,"name":"Privacy Policy","item":"https://mucolabs.com/privacy"}]}
 </script>
 <script src="analytics.js?v=3d7d3edf52" defer></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZZNRHGTEVJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-ZZNRHGTEVJ');
+</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -162,7 +171,7 @@
       <div class="container container-narrow">
         <span class="eyebrow">Legal</span>
         <h1>Privacy policy</h1>
-        <p class="lead">Last updated 2026-09-05.</p>
+        <p class="lead">Last updated 2026-09-09.</p>
       <div class="callout callout-warn mb-7">
         <p><strong>Please read.</strong> This page describes how MUCO LABS actually operates today and
         is written in plain language. It has not been reviewed by a lawyer and is not a substitute
@@ -172,11 +181,11 @@
 
       <div class="prose">
         <h2>What this website itself collects</h2>
-        <p>This site is a set of static pages with a small amount of server code: the endpoint that receives the enquiry form and a first-party analytics endpoint. There are no user accounts on this website.</p>
+        <p>This site is a set of static pages with a small amount of server code: the endpoint that receives the enquiry form, a first-party analytics endpoint and Google Analytics. There are no user accounts on this website.</p>
         <p>When you submit the enquiry form, what you typed is sent to our server for CRM recording and notification. The same details are also opened in WhatsApp or your email application so you can continue the conversation there if you want. The form shows an error and keeps the next step available if neither delivery path accepts the submission.</p>
         <p>Alongside your answers we record the page you submitted from, the site that referred you and any campaign tags in the link, so we know which of our pages are actually useful. Your IP address is recorded with the submission as a basic anti-abuse measure.</p>
-        <p>Our hosting provider, GitHub, records standard technical request logs such as IP address and browser type as part of serving the site. We do not control or have access to those logs. Everything else this site loads — stylesheets, scripts, typefaces and images — is served from this domain, so loading a page makes no request to any third party.</p>
-        <p>This site runs its own first-party operational analytics to count visits and see which pages and calls-to-action are useful. It does not use Google Analytics or any other third-party tracker, and it does not set cookies. For each visit it stores a random anonymous session identifier only in sessionStorage while the browser tab is open; the identifier is not linked to any name, email address, phone number or other personal information. The data collected is limited to the pages viewed, the site that referred you, any campaign tags in the link, and which links or forms were used. We use this only to understand which of our pages are useful and to respond to enquiries. Analytics data is retained for approximately 90 days and then deleted automatically. If your browser sends a Do Not Track signal or you have enabled Global Privacy Control, analytics events are not sent, and the site works exactly the same either way.</p>
+        <p>Our hosting provider, GitHub, records standard technical request logs such as IP address and browser type as part of serving the site. We do not control or have access to those logs. The Google Analytics script is loaded from Google when you visit a page; the rest of the site's stylesheets, scripts, typefaces and images are served from this domain.</p>
+        <p>This site runs its own first-party operational analytics to count visits and see which pages and calls-to-action are useful. It also uses Google Analytics to understand page visits, referrals, campaign links and interactions. Google Analytics may use cookies and process this information under Google's privacy terms. It does not receive the contents of your enquiry form. For our first-party analytics, the site stores a random anonymous session identifier only in sessionStorage while the browser tab is open; the identifier is not linked to any name, email address, phone number or other personal information. The data collected is limited to the pages viewed, the site that referred you, any campaign tags in the link, and which links or forms were used. We use this only to understand which of our pages are useful and to respond to enquiries. Our first-party analytics data is retained for approximately 90 days and then deleted automatically. If your browser sends a Do Not Track signal or you have enabled Global Privacy Control, our first-party analytics events are not sent; Google Analytics follows its own configuration and browser controls. The site works exactly the same either way.</p>
         <h2>What we collect when you contact us</h2>
         <p>When you message us on WhatsApp, email us, call us or send an enquiry, we receive whatever you chose to include: typically your name, business name, phone number, email address, location, the service you are interested in, your budget range, your timeline and a description of your project.</p>
         <p>We ask only for what we need to understand and quote your project. You are never required to give us financial details, identity documents or anything sensitive in order to make an enquiry.</p>
@@ -185,12 +194,12 @@
         <p>For an active project, to keep the records any working relationship needs: the agreed scope, milestones, invoices and correspondence.</p>
         <p>We do not sell your information, rent it, or share it with advertisers. We do not add you to a marketing list because you asked a question.</p>
         <h2>Where it is stored</h2>
-        <p>Enquiries, project correspondence and first-party analytics data live in our own Supabase project. They are not shared with advertisers, analytics vendors or other third parties. Access is limited to the people working on your project.</p>
+        <p>Enquiries, project correspondence and first-party analytics data live in our own Supabase project. Google Analytics data is processed by Google under its own privacy terms. We do not put enquiry form contents into Google Analytics, and access to our own records is limited to the people working on your project.</p>
         <p>WhatsApp messages and emails are stored in the respective services we use to communicate with you.</p>
         <p>Where a project requires a third-party service such as a payment gateway or email provider, that is stated in your project agreement along with who the provider is.</p>
         <h2>How long we keep it</h2>
         <p>Enquiries that do not become projects are kept while there is a realistic chance of the conversation continuing, and removed on request at any time.</p>
-        <p>First-party analytics data is retained for approximately 90 days and then deleted automatically.</p>
+        <p>First-party analytics data is retained for approximately 90 days and then deleted automatically. Google Analytics retention follows the settings of the Google Analytics property.</p>
         <p>Records relating to a project we delivered are kept for as long as we may need them for accounting, tax or contractual reasons.</p>
         <h2>Your choices</h2>
         <p>You can ask us what we hold about you, ask for it to be corrected, or ask us to delete it. Email <a href="mailto:founder@mucolabs.com">founder@mucolabs.com</a> and we will confirm what we have done. If deleting something would conflict with a legal or accounting obligation, we will tell you which part and why.</p>

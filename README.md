@@ -139,15 +139,18 @@ afterwards loses the click gesture and pop-up blockers eat the window.
 
 ## Analytics
 
-`analytics.js` is loaded on every page. It sends only first-party,
-allowlisted events to `/api/event`: `page_view`, `cta_click`, `contact_click`,
+`analytics.js` is loaded on every page. It sends first-party, allowlisted events
+to `/api/event`: `page_view`, `cta_click`, `contact_click`,
 `signup_click`, `form_start`, `lead_submit`, `whatsapp_click`, `phone_click`,
 `email_click`, `instagram_click`, `faq_open`, `project_detail_open`.
 
-No cookies, no third-party scripts, no fingerprinting, and no form field
-contents are ever collected. The visitor's browser stores a random anonymous
-session id in `sessionStorage`; it is not linked to any personal information.
-Do Not Track and Global Privacy Control signals are honoured.
+The site also loads Google Analytics with measurement ID `G-ZZNRHGTEVJ` for page,
+referral, campaign and interaction reporting. It does not send enquiry form
+contents to Google Analytics. Google Analytics may use cookies; its data
+retention and privacy controls are managed in the Google Analytics property.
+Our first-party analytics stores a random anonymous session id in
+`sessionStorage`, honours Do Not Track and Global Privacy Control, and is not
+linked to personal information.
 
 The endpoint is configured with `NEXT_PUBLIC_SUPABASE_URL` and
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Without them the endpoint returns a

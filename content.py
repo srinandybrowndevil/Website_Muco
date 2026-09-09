@@ -1849,6 +1849,9 @@ def build_pricing():
           <p><strong>Payment terms.</strong> 50% advance and 50% on completion, or milestone
           payments on larger projects. Domain registration and renewal are charged separately.
           Refund and cancellation terms are on the <a class="accent" href="refund.html">refund policy</a> page.</p>
+          <p class="mt-2"><strong>Timing.</strong> We plan around the customer’s real need. If a
+          clear first milestone is needed in five working days, allow another one or two working
+          days for review and adjustments; the written scope confirms the actual date.</p>
         </div>
       </div>
     </section>
@@ -2741,20 +2744,23 @@ def build_careers():
     )
 
 
-# The privacy page has to describe what the site actually does, so this text
-# follows GA_MEASUREMENT_ID rather than being written by hand and going stale.
+# The privacy page has to describe what the site actually does, so keep this
+# text beside the analytics configuration rather than letting it go stale.
 ANALYTICS_PRIVACY_TEXT = (
     "This site runs its own first-party operational analytics to count visits and see which "
-    "pages and calls-to-action are useful. It does not use Google Analytics or any other "
-    "third-party tracker, and it does not set cookies. For each visit it stores a random "
+    "pages and calls-to-action are useful. It also uses Google Analytics to understand page "
+    "visits, referrals, campaign links and interactions. Google Analytics may use cookies and "
+    "process this information under Google's privacy terms. It does not receive the contents of "
+    "your enquiry form. For our first-party analytics, the site stores a random "
     "anonymous session identifier only in sessionStorage while the browser tab is open; the "
     "identifier is not linked to any name, email address, phone number or other personal "
     "information. The data collected is limited to the pages viewed, the site that referred "
     "you, any campaign tags in the link, and which links or forms were used. We use this only "
-    "to understand which of our pages are useful and to respond to enquiries. Analytics data "
-    "is retained for approximately 90 days and then deleted automatically. If your browser "
-    "sends a Do Not Track signal or you have enabled Global Privacy Control, analytics events "
-    "are not sent, and the site works exactly the same either way."
+    "to understand which of our pages are useful and to respond to enquiries. Our first-party "
+    "analytics data is retained for approximately 90 days and then deleted automatically. If "
+    "your browser sends a Do Not Track signal or you have enabled Global Privacy Control, our "
+    "first-party analytics events are not sent; Google Analytics follows its own configuration "
+    "and browser controls. The site works exactly the same either way."
 )
 
 LEGAL_NOTICE = """      <div class="callout callout-warn mb-7">
@@ -2808,7 +2814,8 @@ def build_privacy():
         [
             ("What this website itself collects", [
                 "This site is a set of static pages with a small amount of server code: the "
-                "endpoint that receives the enquiry form and a first-party analytics endpoint. "
+                "endpoint that receives the enquiry form, a first-party analytics endpoint and "
+                "Google Analytics. "
                 "There are no user accounts on this website.",
                 "When you submit the enquiry form, what you typed is sent to our server for CRM "
                 "recording and notification. The same details are also opened in WhatsApp or your "
@@ -2821,9 +2828,9 @@ def build_privacy():
                 "anti-abuse measure.",
                 "Our hosting provider, GitHub, records standard technical request logs such as IP "
                 "address and browser type as part of serving the site. We do not control or have "
-                "access to those logs. Everything else this site loads \u2014 stylesheets, scripts, "
-                "typefaces and images \u2014 is served from this domain, so loading a page makes no "
-                "request to any third party.",
+                "access to those logs. The Google Analytics script is loaded from Google when you "
+                "visit a page; the rest of the site's stylesheets, scripts, typefaces and images "
+                "are served from this domain.",
                 ANALYTICS_PRIVACY_TEXT,
             ]),
             ("What we collect when you contact us", [
@@ -2845,8 +2852,9 @@ def build_privacy():
             ]),
             ("Where it is stored", [
                 "Enquiries, project correspondence and first-party analytics data live in our own "
-                "Supabase project. They are not shared with advertisers, analytics vendors or other "
-                "third parties. Access is limited to the people working on your project.",
+                "Supabase project. Google Analytics data is processed by Google under its own "
+                "privacy terms. We do not put enquiry form contents into Google Analytics, and "
+                "access to our own records is limited to the people working on your project.",
                 "WhatsApp messages and emails are stored in the respective services we use to "
                 "communicate with you.",
                 "Where a project requires a third-party service such as a payment gateway or "
@@ -2857,7 +2865,8 @@ def build_privacy():
                 "Enquiries that do not become projects are kept while there is a realistic chance "
                 "of the conversation continuing, and removed on request at any time.",
                 "First-party analytics data is retained for approximately 90 days and then deleted "
-                "automatically.",
+                "automatically. Google Analytics retention follows the settings of the Google "
+                "Analytics property.",
                 "Records relating to a project we delivered are kept for as long as we may need "
                 "them for accounting, tax or contractual reasons.",
             ]),
@@ -3281,16 +3290,22 @@ def build_vercel_json():
     measured. Generating it keeps the promise that the Measurement ID is the
     only thing you have to set.
     """
-    # First-party analytics posts to /api/event only; no third-party scripts or
-    # connect targets are emitted, so the policy stays tight.
+    # Keep the policy narrow while allowing the configured Google tag and its
+    # collection endpoints. The inline bootstrap is allowlisted by hash rather
+    # than enabling unsafe inline scripts globally.
     script_src = "'self'"
     connect_src = "'self'"
+    img_src = "'self' data:"
+    if GA_MEASUREMENT_ID:
+        script_src += " https://www.googletagmanager.com " + google_analytics_csp_hash()
+        connect_src += " https://www.google-analytics.com https://region1.google-analytics.com"
+        img_src += " https://www.google-analytics.com"
 
     csp = "; ".join([
         "default-src 'self'",
         "script-src " + script_src,
         "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data:",
+        "img-src " + img_src,
         "font-src 'self'",
         "connect-src " + connect_src,
         "form-action 'self'",
@@ -3485,15 +3500,18 @@ afterwards loses the click gesture and pop-up blockers eat the window.
 
 ## Analytics
 
-`analytics.js` is loaded on every page. It sends only first-party,
-allowlisted events to `/api/event`: `page_view`, `cta_click`, `contact_click`,
+`analytics.js` is loaded on every page. It sends first-party, allowlisted events
+to `/api/event`: `page_view`, `cta_click`, `contact_click`,
 `signup_click`, `form_start`, `lead_submit`, `whatsapp_click`, `phone_click`,
 `email_click`, `instagram_click`, `faq_open`, `project_detail_open`.
 
-No cookies, no third-party scripts, no fingerprinting, and no form field
-contents are ever collected. The visitor's browser stores a random anonymous
-session id in `sessionStorage`; it is not linked to any personal information.
-Do Not Track and Global Privacy Control signals are honoured.
+The site also loads Google Analytics with measurement ID `{ga_id}` for page,
+referral, campaign and interaction reporting. It does not send enquiry form
+contents to Google Analytics. Google Analytics may use cookies; its data
+retention and privacy controls are managed in the Google Analytics property.
+Our first-party analytics stores a random anonymous session id in
+`sessionStorage`, honours Do Not Track and Global Privacy Control, and is not
+linked to personal information.
 
 The endpoint is configured with `NEXT_PUBLIC_SUPABASE_URL` and
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Without them the endpoint returns a
@@ -3533,7 +3551,7 @@ DNS at the records Vercel gives you.
 No secret keys should be exposed in the browser bundle or in source. The portal
 Supabase project supplies the same public values.
 """.format(brand=BRAND, tagline=TAGLINE, founder=FOUNDER,
-           domain=DOMAIN, email=EMAIL, phone=PHONE)
+           domain=DOMAIN, email=EMAIL, phone=PHONE, ga_id=GA_MEASUREMENT_ID)
     with open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8") as f:
         f.write(txt)
     return len(txt)

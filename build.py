@@ -12,6 +12,7 @@ No dependencies. Writes the .html files, robots.txt and sitemap.xml into the
 repository root. Edit this file, re-run it, commit the generated HTML.
 """
 
+import base64
 import hashlib
 import json
 import os
@@ -88,19 +89,39 @@ SERVICE_CATALOG = [
 # date.today() on every build told crawlers every page changed today and put a
 # false revision date on the legal pages. Bump these by hand when the content
 # actually changes; PAGE_REVISED overrides SITE_REVISED for a single page.
-SITE_REVISED = "2026-09-05"   # last substantive content change anywhere on the site
-LEGAL_REVISED = "2026-09-05"  # privacy, terms and refund wording
+SITE_REVISED = "2026-09-09"   # last substantive content change anywhere on the site
+LEGAL_REVISED = "2026-09-09"  # privacy, terms and refund wording
 PAGE_REVISED = {}             # e.g. {"work.html": "2026-10-02"} — key "" is the home page
 
 # ---------------------------------------------------------------------------
-# Analytics (legacy field, unused)
+# Analytics
 # ---------------------------------------------------------------------------
-# The site now uses first-party analytics only: analytics.js is loaded on every
-# page and posts allowlisted, privacy-conscious events to /api/event. It does
-# not call Google Analytics or any other third-party tracker, so no Measurement
-# ID is required. This constant is kept for backward compatibility with tooling
-# that may read it; the build ignores it.
-GA_MEASUREMENT_ID = ""
+# analytics.js is loaded on every page and posts allowlisted events to our own
+# endpoint. Google Analytics is also enabled for the public site below.
+GA_MEASUREMENT_ID = "G-ZZNRHGTEVJ"
+GA_INLINE_SCRIPT = """  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '%s');""" % GA_MEASUREMENT_ID
+
+
+def google_analytics_tag():
+    """Return the Google tag and its inline initialisation script."""
+    if not GA_MEASUREMENT_ID:
+        return ""
+    return (
+        "<!-- Google tag (gtag.js) -->\n"
+        '<script async src="https://www.googletagmanager.com/gtag/js?id=%s"></script>\n'
+        "<script>\n%s\n</script>\n"
+        % (GA_MEASUREMENT_ID, GA_INLINE_SCRIPT)
+    )
+
+
+def google_analytics_csp_hash():
+    """Return the CSP hash required for the inline Google tag bootstrap."""
+    digest = hashlib.sha256(GA_INLINE_SCRIPT.encode("utf-8")).digest()
+    return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
 
 
 # ---------------------------------------------------------------------------
@@ -623,9 +644,8 @@ def render(slug, title, description, body, current=None, og_type="website",
            schema_blocks=None, noindex=False):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
     canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
-    # First-party analytics only: analytics.js posts allowlisted, bounded events
-    # to /api/event. No third-party scripts or cookies are emitted.
-    analytics = '<script src="%s" defer></script>\n' % asset_v("analytics.js")
+    analytics = '<script src="%s" defer></script>\n%s' % (
+        asset_v("analytics.js"), google_analytics_tag())
 
     body = band_sections(body)
 
