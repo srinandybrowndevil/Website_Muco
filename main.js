@@ -925,6 +925,7 @@
     var reset = document.getElementById('course-reset');
     var count = document.getElementById('course-count');
     var empty = document.getElementById('course-empty');
+    var emptyReset = document.getElementById('course-empty-reset');
     var cards = Array.from(grid.querySelectorAll('[data-course]'));
     document.querySelector('[data-course-controls]').hidden = false;
     function filter() {
@@ -947,6 +948,15 @@
       category.value = '';
       filter();
       search.focus();
+    });
+    if (emptyReset) emptyReset.addEventListener('click', function () { reset.click(); });
+    document.querySelectorAll('[data-course-suggestion]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        search.value = button.dataset.courseSuggestion || '';
+        category.value = '';
+        filter();
+        search.focus();
+      });
     });
     filter();
   }

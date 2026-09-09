@@ -2,8 +2,8 @@
 
 TUTOR_PROFILE = {
     "name": "Srinivash Mahalingam",
-    "role": "Founder & Tutor, MUCO Labs",
-    "bio": "MUCO Labs' founder and tutor, focused on practical technology learning, clear explanations and patient guidance that helps learners build confidence.",
+    "role": "Founder at MUCO Labs · Tutor at Way2Me",
+    "bio": "MUCO Labs' founder and a Way2Me tutor, focused on practical technology learning, clear explanations and patient guidance that helps learners build confidence.",
 }
 
 WAY2ME_PROFILE = {

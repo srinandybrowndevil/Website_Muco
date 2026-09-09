@@ -46,7 +46,7 @@ def build_learning(services):
         </div>
         <p id="course-count" role="status" aria-live="polite">{len(COURSE_GROUPS)} courses listed</p>
         <div class="learning-grid" id="course-grid">{cards}</div>
-        <div class="learning-empty" id="course-empty" hidden><h3>No matching courses.</h3><p>Try a broader search or clear the filters. You can also <a href="{CONTACT_URL}">ask Way2Me for guidance</a>.</p></div>
+        <div class="learning-empty" id="course-empty" hidden><div class="learning-empty-icon" aria-hidden="true">⌕</div><div><h3>No course matches yet.</h3><p>That’s okay. Try one of these popular searches or ask the tutor to point you in the right direction.</p><p class="learning-suggestions"><button type="button" data-course-suggestion="Python">Python</button><button type="button" data-course-suggestion="AI">AI</button><button type="button" data-course-suggestion="design">Design</button></p><div class="btn-group"><button class="btn btn-secondary" type="button" id="course-empty-reset">Clear filters</button><a class="btn btn-accent" href="{CONTACT_URL}">Ask Way2Me <span aria-hidden="true">↗</span></a></div></div></div>
         <p class="learning-source">Catalogue checked 9 September 2026. Listings describe published course topics; batch availability is confirmed by Way2Me.</p>
       </div>
     </section>
@@ -60,7 +60,7 @@ def build_learning(services):
     </section>
     <section class="section-divider" id="tutor-profile" aria-labelledby="learning-tutor-title">
       <div class="container learning-founder-layout">
-        <figure class="learning-portrait"><img src="assets/founder-560.jpg" width="560" height="747" loading="lazy" decoding="async" alt="Srinivash Mahalingam, founder and tutor at MUCO Labs" /><figcaption>{escape(TUTOR_PROFILE['name'])} · {escape(TUTOR_PROFILE['role'])}</figcaption></figure>
+        <figure class="learning-portrait"><img src="assets/founder-560.jpg" width="560" height="747" loading="lazy" decoding="async" alt="Srinivash Mahalingam, founder at MUCO Labs and tutor at Way2Me" /><figcaption>{escape(TUTOR_PROFILE['name'])}<br />Founder at MUCO Labs · Tutor at Way2Me</figcaption></figure>
         <div>
           <span class="eyebrow">Tutor profile · MUCO Labs</span>
           <h2 id="learning-tutor-title">{escape(TUTOR_PROFILE['name'])}</h2>

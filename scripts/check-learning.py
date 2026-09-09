@@ -66,6 +66,8 @@ def check():
     assert '27 responses' in learning and '4.7/5' in learning
     assert 'SOA / ITER' in learning
     assert 'Srinivash Mahalingam' in learning and 'Yogahari Haran' in learning
+    assert 'Founder at MUCO Labs' in learning and 'Tutor at Way2Me' in learning
+    assert 'data-course-suggestion="Python"' in learning
     for name in ['main.js', 'analytics.js']:
         subprocess.run(['node', '--check', str(ROOT / name)], check=True)
     print(json.dumps(results, indent=2))
