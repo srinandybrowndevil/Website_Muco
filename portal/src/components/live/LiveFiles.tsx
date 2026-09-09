@@ -2,6 +2,7 @@
 import { FormEvent, useCallback, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLiveQuery } from "@/lib/use-live-query";
+import { EmptyState } from "../EmptyState";
 import { CrmRow } from "@/lib/crm";
 
 export function LiveFiles({ organizationId, customer = false }: { organizationId: string; customer?: boolean }) {
@@ -54,7 +55,9 @@ export function LiveFiles({ organizationId, customer = false }: { organizationId
     {!customer && <form className="panel record-fields" ref={form} onSubmit={upload}><label>File (up to 10 MB)<input name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv,.docx,.xlsx" required /></label><label>Share with customer<select name="customer"><option value="">Staff only</option>{state.data?.customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label><button className="primary" disabled={busy}>{busy ? "Uploading…" : "Upload file"}</button></form>}
     {(error || state.error) && <p role="alert" className="error">{error || state.error}</p>}{state.loading && <p role="status">Loading files…</p>}
     {state.data?.files.map(file => <div className="portalf" key={file.id}><span className="fileicon">FILE</span><span><b>{String(file.name)}</b><small>{Math.ceil(Number(file.size_bytes) / 1024)} KB</small></span><button className="secondary" onClick={() => void download(file)}>Download</button></div>)}
-    {!state.loading && !state.error && !state.data?.files.length && <p>No files shared yet.</p>}
+    {!state.loading && !state.error && !state.data?.files.length && (customer
+      ? <EmptyState compact icon="folder" title="No files yet" body="Contracts, designs, exports and anything else we produce for you get shared here, and stay downloadable for as long as you need them." action={{ label: "Ask the team for a file", href: "/portal/contact" }} />
+      : <EmptyState compact icon="folder" title="No files shared yet" body="Upload a contract, design export or report above and choose whether it stays internal or is shared with a customer." />)}
     <div className="live-tools"><button className="secondary" disabled={!page} onClick={() => setPage(p => p - 1)}>Previous</button><span>Page {page + 1}</span><button className="secondary" disabled={(page + 1) * 25 >= (state.data?.count ?? 0)} onClick={() => setPage(p => p + 1)}>Next</button></div>
   </section>;
 }

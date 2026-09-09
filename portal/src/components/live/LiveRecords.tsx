@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { crmSections, CrmRow, currency, label, recordPayload } from "@/lib/crm";
 import { useLiveQuery } from "@/lib/use-live-query";
+import { EmptyState } from "../EmptyState";
 
 export function LiveRecords({ section, organizationId }: { section: string; organizationId: string }) {
   const config = crmSections[section];
@@ -63,7 +64,9 @@ export function LiveRecords({ section, organizationId }: { section: string; orga
     {notice && <p role="status">{notice}</p>}
     {state.error && <div className="panel error" role="alert">{state.error}</div>}
     {state.loading && <p role="status">Loading records…</p>}
-    {!state.loading && !state.error && !state.data?.count && <div className="panel empty"><h2>{query ? "No matching records" : `No ${section} yet`}</h2><p>{query ? "Try another search." : `Add your first ${config.singular} to get started.`}</p></div>}
+    {!state.loading && !state.error && !state.data?.count && <div className="panel">{query
+      ? <EmptyState compact icon="search" title="No matching records" body={`Nothing in ${section} matches “${query}”. Search runs on ${config.primary} only, so try a shorter term or clear it to see everything.`} action={{ label: "Clear search", onClick: () => setSearch("") }} />
+      : <EmptyState icon={config.icon} title={`No ${section} yet`} body={config.emptyBody} action={{ label: `Add the first ${config.singular}`, onClick: () => open() }} />}</div>}
     {!!state.data?.rows.length && <div className="tablewrap"><table><caption className="visually-hidden">{config.title}</caption><thead><tr>{columns.map(f => <th key={f.key}>{f.label}</th>)}<th>Action</th></tr></thead><tbody>{state.data.rows.map(row => <tr key={row.id}>{columns.map(f => <td key={f.key}>{f.type === "customer" ? state.data?.customers.find(c => c.id === row[f.key])?.name ?? "—" : /amount|budget|value/.test(f.key) ? currency(row[f.key]) : label(row[f.key])}</td>)}<td><button className="secondary compact" onClick={() => open(row)} aria-label={`Edit ${label(row[config.primary])}`}>Edit</button></td></tr>)}</tbody></table></div>}
     <div className="live-tools"><span>{state.data?.count ?? 0} records · Page {page + 1}</span><button className="secondary" disabled={!page} onClick={() => setPage(p => p - 1)}>Previous</button><button className="secondary" disabled={(page + 1) * 25 >= (state.data?.count ?? 0)} onClick={() => setPage(p => p + 1)}>Next</button></div>
     <dialog ref={dialog} className="record-dialog" onCancel={event => { if (busy) event.preventDefault(); }}><form onSubmit={save}><div className="panelhead"><h2>{editing ? "Edit" : "New"} {config.singular}</h2><button type="button" className="secondary" disabled={busy} onClick={() => dialog.current?.close()}>Close</button></div>

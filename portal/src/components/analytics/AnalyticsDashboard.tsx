@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
+import { EmptyState } from "@/components/EmptyState";
 import type { AnalyticsSummary } from "@/lib/analytics";
 
 function formatDate(iso: string | null | undefined) {
@@ -73,9 +74,13 @@ export function AnalyticsDashboard({
             <h1>Website analytics.</h1>
           </div>
         </div>
-        <div className="panel empty">
-          <h2>No data available</h2>
-          <p>Analytics will appear once events have been recorded.</p>
+        <div className="panel">
+          <EmptyState
+            icon="chart"
+            title="No visits recorded yet"
+            body="Page views, referrers and campaign links from mucolabs.com collect here as first-party events. If the site is live and this stays empty, the analytics script is not reaching the recorder."
+            note="Google Analytics reports separately and will show its own totals."
+          />
         </div>
       </div>
     );
@@ -168,7 +173,7 @@ export function AnalyticsDashboard({
               <tbody>
                 {summary.top_paths.length === 0 && (
                   <tr>
-                    <td colSpan={2}>No path data yet.</td>
+                    <td colSpan={2}>No page views recorded in this period yet.</td>
                   </tr>
                 )}
                 {summary.top_paths.map((p) => (
@@ -197,7 +202,7 @@ export function AnalyticsDashboard({
               <tbody>
                 {summary.utm_breakdown.length === 0 && (
                   <tr>
-                    <td colSpan={4}>No campaign data yet.</td>
+                    <td colSpan={4}>No tagged campaign links have been visited yet.</td>
                   </tr>
                 )}
                 {summary.utm_breakdown.map((u, i) => (

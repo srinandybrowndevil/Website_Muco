@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { EmptyState } from "@/components/EmptyState";
 import {
   statusLabel,
   statusOrder,
@@ -140,13 +141,15 @@ export function EnquiriesClient({
       )}
 
       {filtered.length === 0 && !error && (
-        <div className="panel empty">
-          <h2>No enquiries found</h2>
-          <p>
-            {isConfigured
-              ? "New enquiries will appear here after visitors submit the contact form."
-              : "Connect Supabase to see real enquiries."}
-          </p>
+        <div className="panel">
+          <EmptyState
+            icon="inbox"
+            title="No enquiries yet"
+            body={isConfigured
+              ? "Contact actions on mucolabs.com now run through portal sign-in, so most enquiries arrive as project requests instead. Anything captured outside that flow shows up here."
+              : "Connect Supabase and real enquiries will appear here instead of this placeholder."}
+            action={isConfigured ? { label: "Open project requests", href: "/requests" } : undefined}
+          />
         </div>
       )}
 

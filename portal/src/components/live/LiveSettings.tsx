@@ -2,6 +2,7 @@
 import { FormEvent, useCallback, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLiveQuery } from "@/lib/use-live-query";
+import { EmptyState } from "../EmptyState";
 import { CrmRow, label } from "@/lib/crm";
 
 export function LiveSettings({ organizationId, role, automation = false }: { organizationId: string; role: string; automation?: boolean }) {
@@ -53,7 +54,7 @@ export function LiveSettings({ organizationId, role, automation = false }: { org
       {role === "admin" && <form onSubmit={invite} className="panel record-fields"><label>Email<input name="email" type="email" required /></label><label>Role<select name="role"><option value="member">Member</option><option value="admin">Admin</option></select></label><button className="primary" disabled={busy}>{busy ? "Creating…" : "Create invitation link"}</button></form>}
       {inviteUrl && <div className="panel"><p role="status">Invitation created. Share this private link with the invited person. No email has been sent.</p><label>Invitation link<input readOnly value={inviteUrl} onFocus={e => e.currentTarget.select()} /></label></div>}
       <section className="panel"><h2>Workspace members</h2>{state.data?.members.map(member => <div className="portalf" key={member.user_id}><b>{member.profiles?.full_name || "Unnamed member"}</b><span>{label(member.role)}</span></div>)}</section>
-      {role === "admin" && <section className="panel"><h2>Recent invitations</h2>{state.data?.invitations.map(invite => <div className="portalf" key={invite.id}><b>{String(invite.email)}</b><span>{invite.accepted_at ? "Accepted" : new Date(String(invite.expires_at)) < new Date() ? "Expired" : "Pending"} · {label(invite.role)}</span></div>)}{!state.data?.invitations.length && <p>No invitations yet.</p>}</section>}
+      {role === "admin" && <section className="panel"><h2>Recent invitations</h2>{state.data?.invitations.map(invite => <div className="portalf" key={invite.id}><b>{String(invite.email)}</b><span>{invite.accepted_at ? "Accepted" : new Date(String(invite.expires_at)) < new Date() ? "Expired" : "Pending"} · {label(invite.role)}</span></div>)}{!state.data?.invitations.length && <EmptyState compact icon="mail" title="No invitations sent" body="Invite a teammate and their pending, accepted and expired invitations are listed here." />}</section>}
     </>}
   </div>;
 }

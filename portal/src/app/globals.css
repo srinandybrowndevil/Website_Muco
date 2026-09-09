@@ -2468,3 +2468,88 @@ td span small {
 .panel.notice { border-left: 3px solid var(--accent, currentColor); margin-bottom: 20px; }
 .panel.notice p { margin: 0 0 10px; }
 .panel.notice p + p { color: var(--muted); font-size: 14px; }
+
+/* Empty states. A new account meets these before it meets any data, so they
+   are built like a small piece of the product rather than a shrug: an icon to
+   anchor it, a heading in the workspace's own voice, one line of what belongs
+   here, and the action worth taking now. */
+.emptystate {
+  display: grid;
+  justify-items: start;
+  gap: 0;
+  padding: 34px 30px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(198, 130, 82, 0.06), transparent 60%),
+    var(--panel);
+  max-width: 620px;
+}
+
+.emptystate-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  color: var(--copper);
+  background: rgba(198, 130, 82, 0.12);
+  border: 1px solid rgba(198, 130, 82, 0.22);
+}
+
+.emptystate h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0 0 8px;
+}
+
+.emptystate > p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 46ch;
+}
+
+.emptystate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.emptystate-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 18px 0 0;
+  max-width: 46ch;
+  opacity: 0.85;
+}
+
+/* Inside a panel that already has its own heading and border. */
+.emptystate.compact {
+  padding: 22px;
+  border: none;
+  background: none;
+  max-width: none;
+}
+
+.emptystate.compact .emptystate-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+}
+
+.emptystate.compact h3 { font-size: 17px; }
+.emptystate.compact > p { font-size: 13px; }
+.emptystate.compact .emptystate-actions { margin-top: 16px; }
+
+@media (max-width: 600px) {
+  .emptystate { padding: 26px 20px; }
+  .emptystate h3 { font-size: 19px; }
+  .emptystate-actions { width: 100%; }
+  .emptystate-actions > * { flex: 1 1 auto; justify-content: center; }
+}

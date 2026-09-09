@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CustomerShell } from "@/components/portal/CustomerShell";
+import { EmptyState } from "@/components/EmptyState";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
@@ -74,10 +75,14 @@ function CustomerRequests() {
       )}
 
       {!loading && !error && requests.length === 0 && (
-        <div className="panel empty">
-          <h2>No requests yet</h2>
-          <p>Submit your first project request and the team will review it within one business day.</p>
-          <Link className="primary" href="/portal/requests/new">Submit a request</Link>
+        <div className="panel">
+          <EmptyState
+            icon="bolt"
+            title="You have not sent a request yet"
+            body="Describe what you want built and we read it ourselves. Everything after that -- our questions, the scope, the proposal and the work itself -- stays attached to the request so nothing gets lost in a chat thread."
+            action={{ label: "Submit your first request", href: "/portal/requests/new" }}
+            secondary={{ label: "Ask a question first", href: "/portal/contact" }}
+          />
         </div>
       )}
 

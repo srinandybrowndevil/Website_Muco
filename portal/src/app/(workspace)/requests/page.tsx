@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { EmptyState } from "@/components/EmptyState";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
@@ -113,9 +114,14 @@ export default async function RequestsInboxPage() {
         )}
 
         {!error && requests.length === 0 && (
-          <div className="panel empty">
-            <h2>No requests yet</h2>
-            <p>Customer requests will appear here after they submit through the portal.</p>
+          <div className="panel">
+            <EmptyState
+              icon="inbox"
+              title="The inbox is clear"
+              body="Every project request a customer submits from their portal lands here with their brief, budget, timeline and files, ready to review and set a status on."
+              action={{ label: "Check enquiries", href: "/enquiries" }}
+              note="Contact actions on mucolabs.com now require sign-in, so requests arrive attached to a real customer account."
+            />
           </div>
         )}
 
