@@ -144,10 +144,11 @@ to `/api/event`: `page_view`, `cta_click`, `contact_click`,
 `signup_click`, `form_start`, `lead_submit`, `whatsapp_click`, `phone_click`,
 `email_click`, `instagram_click`, `faq_open`, `project_detail_open`.
 
-The site also loads Google Analytics with measurement ID `G-ZZNRHGTEVJ` for page,
-referral, campaign and interaction reporting. It does not send enquiry form
-contents to Google Analytics. Google Analytics may use cookies; its data
-retention and privacy controls are managed in the Google Analytics property.
+The site also loads Google Analytics with measurement ID `G-ZZNRHGTEVJ` and Google
+Tag Manager with container ID `GTM-W2XZ8QNQ` for page, referral, campaign and
+interaction reporting. It does not send enquiry form contents to Google
+Analytics. Google Analytics may use cookies; its data retention and privacy
+controls are managed in the Google Analytics property.
 Our first-party analytics stores a random anonymous session id in
 `sessionStorage`, honours Do Not Track and Global Privacy Control, and is not
 linked to personal information.

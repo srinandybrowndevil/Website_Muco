@@ -104,6 +104,12 @@ GA_INLINE_SCRIPT = """  window.dataLayer = window.dataLayer || [];
   gtag('js', new Date());
 
   gtag('config', '%s');""" % GA_MEASUREMENT_ID
+GTM_CONTAINER_ID = "GTM-W2XZ8QNQ"
+GTM_INLINE_SCRIPT = """(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','%s');""" % GTM_CONTAINER_ID
 
 
 def google_analytics_tag():
@@ -121,6 +127,37 @@ def google_analytics_tag():
 def google_analytics_csp_hash():
     """Return the CSP hash required for the inline Google tag bootstrap."""
     digest = hashlib.sha256(GA_INLINE_SCRIPT.encode("utf-8")).digest()
+    return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
+
+
+def google_tag_manager_head():
+    """Return the Google Tag Manager script for the document head."""
+    if not GTM_CONTAINER_ID:
+        return ""
+    return (
+        "<!-- Google Tag Manager -->\n"
+        "<script>\n%s\n</script>\n"
+        "<!-- End Google Tag Manager -->\n"
+        % GTM_INLINE_SCRIPT
+    )
+
+
+def google_tag_manager_noscript():
+    """Return the Google Tag Manager fallback iframe for the document body."""
+    if not GTM_CONTAINER_ID:
+        return ""
+    return (
+        "<!-- Google Tag Manager (noscript) -->\n"
+        '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=%s"\n'
+        'height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>\n'
+        "<!-- End Google Tag Manager (noscript) -->\n"
+        % GTM_CONTAINER_ID
+    )
+
+
+def google_tag_manager_csp_hash():
+    """Return the CSP hash required for the inline GTM bootstrap."""
+    digest = hashlib.sha256(GTM_INLINE_SCRIPT.encode("utf-8")).digest()
     return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
 
 
@@ -630,9 +667,9 @@ SHELL = """<!DOCTYPE html>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
 <link rel="stylesheet" href="{css}" />
-{schema}{analytics}</head>
+{schema}{analytics}{gtm_head}</head>
 <body>
-{header}
+{gtm_body}{header}
   <main id="main">
 {body}
   </main>
@@ -666,6 +703,8 @@ def render(slug, title, description, body, current=None, og_type="website",
         tagline=TAGLINE,
         schema=schema,
         analytics=analytics,
+        gtm_head=google_tag_manager_head(),
+        gtm_body=google_tag_manager_noscript(),
         header=header_html(current or slug, key),
         body=body,
         footer=footer_html(),
