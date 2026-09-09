@@ -9,13 +9,20 @@ import { primaryMembership } from "@/lib/membership";
 // only change when a migration runs, and a migration means a redeploy, which
 // resets this. A failed check is deliberately never cached, so an incomplete
 // migration keeps failing loudly instead of being masked until the TTL runs out.
+const REQUIRED_SCHEMA_VERSION = 8;
 const SCHEMA_TTL_MS = 5 * 60 * 1000;
 let schemaVerifiedAt = 0;
 
 async function assertSchema(client: NonNullable<Awaited<ReturnType<typeof createClient>>>) {
   if (Date.now() - schemaVerifiedAt < SCHEMA_TTL_MS) return;
   const version = await client.rpc("crm_schema_version");
-  if (version.error || version.data !== 8) throw new Error("Live CRM setup is incomplete. Apply the live workspace and analytics retention migrations before continuing.");
+  // A minimum, not an exact match. Requiring equality made every migration a
+  // coordinated outage: applying it broke the running deploy until the new code
+  // shipped, and shipping first broke until the migration ran. A newer schema is
+  // additive, so it stays compatible with code that asks for less.
+  if (version.error || typeof version.data !== "number" || version.data < REQUIRED_SCHEMA_VERSION) {
+    throw new Error("Live CRM setup is incomplete. Apply the outstanding database migrations before continuing.");
+  }
   schemaVerifiedAt = Date.now();
 }
 

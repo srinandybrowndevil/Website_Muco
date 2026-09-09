@@ -12,6 +12,8 @@ export function CustomerProfile() {
   const [instagram, setInstagram] = useState("");
   const [photo, setPhoto] = useState("");
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [pendingPhoto, setPendingPhoto] = useState<Blob | null>(null);
+  const [photoRemoved, setPhotoRemoved] = useState(false);
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
   const [loadFailed, setLoadFailed] = useState(false);
@@ -42,6 +44,8 @@ export function CustomerProfile() {
     })().catch(() => { setError("Unable to load your profile. Refresh to try again."); setLoadFailed(true); setLoading(false); });
   }, []);
 
+  useEffect(() => () => { if (photo.startsWith("blob:")) URL.revokeObjectURL(photo); }, [photo]);
+
   async function choosePhoto(file?: File) {
     if (!file) return;
     setError(null);
@@ -56,7 +60,12 @@ export function CustomerProfile() {
       canvas.width = canvas.height = 256;
       canvas.getContext("2d")!.drawImage(bitmap, (bitmap.width-size)/2, (bitmap.height-size)/2, size, size, 0, 0, 256, 256);
       bitmap.close();
-      setPhoto(canvas.toDataURL("image/jpeg", 0.8));
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/jpeg", 0.82));
+      if (!blob) { setError("This image could not be prepared. Choose a different photo."); return; }
+      setPendingPhoto(blob);
+      // Preview from the cropped blob. Revoked on replace and on unmount so a
+      // few photo changes in one sitting do not leak object URLs.
+      setPhoto(previous => { if (previous.startsWith("blob:")) URL.revokeObjectURL(previous); return URL.createObjectURL(blob); });
     } catch { setError("This image could not be opened. Choose a different photo."); }
     finally { setPhotoBusy(false); }
   }
@@ -80,11 +89,27 @@ export function CustomerProfile() {
     if (!user) { setError("Your session has expired. Sign in again."); setSaving(false); return; }
     const { error: syncError } = await client.rpc("complete_customer_onboarding", { p_org_slug: "muco-labs", p_full_name: cleanName, p_phone: phone.trim(), p_company: company.trim(), p_location: location.trim() });
     if (syncError) { setError("Your customer details could not be saved. Please retry."); setSaving(false); return; }
-    const { data: saved, error: profileError } = await client.from("profiles").update({ full_name: cleanName, avatar_url: photo || null }).eq("id", user.id).select("id").single();
+    let avatarUrl: string | null = photo && !photo.startsWith("blob:") ? photo : null;
+    if (pendingPhoto) {
+      const path = `${user.id}/avatar.jpg`;
+      const upload = await client.storage.from("avatars").upload(path, pendingPhoto, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
+      if (upload.error) {
+        setError("Your photo could not be uploaded. If this keeps happening the avatars storage bucket may not be created yet.");
+        setSaving(false); return;
+      }
+      const { data: pub } = client.storage.from("avatars").getPublicUrl(path);
+      avatarUrl = `${pub.publicUrl}?v=${Date.now()}`;
+    } else if (photoRemoved) {
+      await client.storage.from("avatars").remove([`${user.id}/avatar.jpg`]);
+      avatarUrl = null;
+    }
+    const { data: saved, error: profileError } = await client.from("profiles").update({ full_name: cleanName, avatar_url: avatarUrl }).eq("id", user.id).select("id").single();
     if (profileError || !saved) { setError("Your profile could not be saved. Please retry."); setSaving(false); return; }
     const { error: authError } = await client.auth.updateUser({ data: { full_name: cleanName, phone: phone.trim(), linkedin: linkedin.trim(), instagram: instagram.trim() } });
     if (authError) { setError("Name and photo saved. Contact and social details were not saved; please retry."); }
     else { setMessage("Your profile was updated."); }
+    setPendingPhoto(null); setPhotoRemoved(false);
+    if (avatarUrl) setPhoto(previous => { if (previous.startsWith("blob:")) URL.revokeObjectURL(previous); return avatarUrl; });
     window.dispatchEvent(new Event("muco-profile-updated"));
     } catch { setError("Could not finish saving. Check your connection and retry."); }
     finally { setSaving(false); }
@@ -97,12 +122,12 @@ export function CustomerProfile() {
       <div className="profileintro"><span className="avatar large">{name ? name.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase() : "CP"}</span><div><h2>Account details</h2><p>Your email is used for sign-in and cannot be changed here.</p></div></div>
       <form className="record-fields profileform" onSubmit={save}>
         <div className="profile-photo-field">
-          {/* User-selected photos are already resized locally; no remote image optimizer is needed. */}
+          {/* Cropped to 256x256 before upload and served straight from storage, so there is nothing for an image optimizer to do. src is a blob: preview before saving and a storage URL after. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {photo && <img src={photo} alt="Your profile preview" width="96" height="96" className="profile-photo" />}
           <label>Profile picture<input type="file" accept="image/jpeg,image/png,image/webp" disabled={saving || photoBusy} onChange={event => void choosePhoto(event.target.files?.[0])} /></label>
-          <p>1:1 square, displayed as a circle. Photos are centre-cropped to 256 × 256. JPG, PNG or WebP, up to 5 MB. Preview before saving.</p>
-          {photo && <button type="button" className="secondary" onClick={() => setPhoto("")}>Remove photo</button>}
+          <p>1:1 square, displayed as a circle. Photos are centre-cropped to 256 × 256 in your browser before upload. JPG, PNG or WebP, up to 5 MB. The preview above is what will be saved.</p>
+          {photo && <button type="button" className="secondary" onClick={() => { setPhoto(previous => { if (previous.startsWith("blob:")) URL.revokeObjectURL(previous); return ""; }); setPendingPhoto(null); setPhotoRemoved(true); }}>Remove photo</button>}
         </div>
         <label htmlFor="customer-profile-name">Full name<input id="customer-profile-name" value={name} onChange={event => setName(event.target.value)} autoComplete="name" required /></label>
         <label htmlFor="customer-profile-email">Sign-in email<input id="customer-profile-email" value={email} readOnly disabled /></label>
