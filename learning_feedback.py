@@ -1,9 +1,15 @@
 """Anonymised tutor profile and feedback themes prepared from the supplied sheet."""
 
 TUTOR_PROFILE = {
-    "name": "S. Yoga hari karan",
-    "role": "Founder & Tutor, Way2Me",
-    "bio": "A practical technology educator who helps learners build confidence through clear explanations, hands-on work and patient guidance.",
+    "name": "Srinivash Mahalingam",
+    "role": "Founder & Tutor, MUCO Labs",
+    "bio": "MUCO Labs' founder and tutor, focused on practical technology learning, clear explanations and patient guidance that helps learners build confidence.",
+}
+
+WAY2ME_PROFILE = {
+    "name": "Yogahari Haran",
+    "role": "Founder & CEO, Way2Me",
+    "bio": "Way2Me's founder and CEO. Way2Me owns the course catalogue, learner accounts, batches and enrolment process.",
 }
 
 FEEDBACK_SUMMARY = {
@@ -21,4 +27,3 @@ FEEDBACK_THEMES = [
     "Linux guidance, hands-on tasks and interview confidence were repeatedly called out as useful outcomes.",
     "One improvement request was to allow more time for deeper explanations and practice in some sessions.",
 ]
-

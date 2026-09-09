@@ -2,7 +2,7 @@
 from html import escape
 from build import render, page_header, ORG_JSONLD, breadcrumbs
 from learning_catalog import COURSE_GROUPS, SOURCE_URL, CONTACT_URL, DASHBOARD_URL, REGISTRATION_URL, LMS_COURSE_URL
-from learning_feedback import TUTOR_PROFILE, FEEDBACK_SUMMARY, FEEDBACK_THEMES
+from learning_feedback import TUTOR_PROFILE, WAY2ME_PROFILE, FEEDBACK_SUMMARY, FEEDBACK_THEMES
 
 
 def build_learning(services):
@@ -31,7 +31,7 @@ def build_learning(services):
           <a href="learning-portal.html" class="btn btn-secondary btn-lg">Learning portal <span aria-hidden="true">→</span></a>
         </div>
         <nav class="learning-jumps" aria-label="Learning page sections">
-          <a href="#courses">Way2Me courses</a><a href="#muco-services">MUCO services</a><a href="#way2me-founder">Meet the founder</a>
+          <a href="#courses">Way2Me courses</a><a href="#muco-services">MUCO services</a><a href="#tutor-profile">Meet the tutor</a>
         </nav>''')
     body += f'''
     <section class="section-divider" id="courses" aria-labelledby="courses-title">
@@ -58,16 +58,28 @@ def build_learning(services):
         <div class="learning-grid">{service_cards}</div>
       </div>
     </section>
-    <section class="section-divider" id="way2me-founder" aria-labelledby="learning-founder-title">
+    <section class="section-divider" id="tutor-profile" aria-labelledby="learning-tutor-title">
       <div class="container learning-founder-layout">
-        <figure class="learning-portrait"><img src="assets/yogahari.png" width="1086" height="1448" loading="lazy" decoding="async" alt="S. Yoga hari karan, founder and tutor at Way2Me" /><figcaption>{escape(TUTOR_PROFILE['name'])} · {escape(TUTOR_PROFILE['role'])}</figcaption></figure>
+        <figure class="learning-portrait"><img src="assets/founder-560.jpg" width="560" height="747" loading="lazy" decoding="async" alt="Srinivash Mahalingam, founder and tutor at MUCO Labs" /><figcaption>{escape(TUTOR_PROFILE['name'])} · {escape(TUTOR_PROFILE['role'])}</figcaption></figure>
         <div>
-          <span class="eyebrow">Tutor profile · Way2Me</span>
-          <h2 id="learning-founder-title">{escape(TUTOR_PROFILE['name'])}</h2>
+          <span class="eyebrow">Tutor profile · MUCO Labs</span>
+          <h2 id="learning-tutor-title">{escape(TUTOR_PROFILE['name'])}</h2>
           <p>{escape(TUTOR_PROFILE['bio'])}</p>
           <p>Explore technology and practical skills with Way2Me. Its public programmes span AI, programming, design, engineering and professional development.</p>
-          <p>For course guidance, current batches and admission questions, continue directly to the Way2Me team.</p>
-          <div class="btn-group mt-5"><a href="{CONTACT_URL}" class="btn btn-accent learning-enquiry">Enquire at Way2Me <span aria-hidden="true">↗</span></a><a href="https://way2me.in/about/" class="btn btn-secondary">About Way2Me</a></div>
+          <p>For learning guidance from the tutor, use the Way2Me enquiry route below.</p>
+          <div class="btn-group mt-5"><a href="{CONTACT_URL}" class="btn btn-accent learning-enquiry">Enquire at Way2Me <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </div>
+    </section>
+    <section class="section-divider" id="way2me-founder" aria-labelledby="way2me-founder-title">
+      <div class="container learning-founder-layout">
+        <figure class="learning-portrait"><img src="assets/yogahari.png" width="1086" height="1448" loading="lazy" decoding="async" alt="Yogahari Haran, founder and CEO of Way2Me" /><figcaption>{escape(WAY2ME_PROFILE['name'])} · {escape(WAY2ME_PROFILE['role'])}</figcaption></figure>
+        <div>
+          <span class="eyebrow">Way2Me leadership</span>
+          <h2 id="way2me-founder-title">{escape(WAY2ME_PROFILE['name'])}</h2>
+          <p>{escape(WAY2ME_PROFILE['bio'])}</p>
+          <p>For current batches, course availability, fees and admission questions, continue directly to the Way2Me team.</p>
+          <div class="btn-group mt-5"><a href="{CONTACT_URL}" class="btn btn-accent learning-enquiry">Contact Way2Me <span aria-hidden="true">↗</span></a><a href="https://way2me.in/about/" class="btn btn-secondary">About Way2Me</a></div>
         </div>
       </div>
     </section>

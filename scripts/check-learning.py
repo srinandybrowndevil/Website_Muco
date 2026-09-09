@@ -54,7 +54,9 @@ def check():
         for img in page.images:
             assert img.get('alt'), f'{name}: image missing alt'
             assert (ROOT / img['src']).is_file(), f'{name}: image missing'
-        assert 'yogahari.png' in source if name == 'learning.html' else True
+        if name == 'learning.html':
+            assert 'yogahari.png' in source
+            assert 'founder-560.jpg' in source
         assert 'https://mucolabs.com/' + name.removesuffix('.html') in source
         results[name] = {'courses': page.courses, 'services': page.services, 'links_checked': len(page.links), 'enquiries_checked': len(page.enquiries)}
     assert results['learning.html']['courses'] == 65
@@ -63,6 +65,7 @@ def check():
     assert 'learner-feedback' in learning
     assert '27 responses' in learning and '4.7/5' in learning
     assert 'SOA / ITER' in learning
+    assert 'Srinivash Mahalingam' in learning and 'Yogahari Haran' in learning
     for name in ['main.js', 'analytics.js']:
         subprocess.run(['node', '--check', str(ROOT / name)], check=True)
     print(json.dumps(results, indent=2))
