@@ -10,7 +10,7 @@ The live customer portal is `portal.mucolabs.com/login`. The domain `portal.mego
 
 ## Confirmed portal boundary
 
-The portal currently uses Supabase Auth for password and Google OAuth, Supabase SSR cookies in `src/proxy.ts`, and Supabase `memberships` plus row-level security to decide whether a user is a customer or staff member. CRM records such as leads, customers, requests and files are protected by that Supabase identity. The existing source and live production portal both contain **Continue with Google** on sign-in and **Sign up with Google** on customer registration. The Supabase Auth settings endpoint currently reports `external.google: false`, and the authorize endpoint returns `Unsupported provider: provider is not enabled`.
+The portal currently uses Supabase Auth for password and Google OAuth, Supabase SSR cookies in `src/proxy.ts`, and Supabase `memberships` plus row-level security to decide whether a user is a customer or staff member. CRM records such as leads, customers, requests and files are protected by that Supabase identity. The existing source and live production portal both contain **Continue with Google** on sign-in and **Sign up with Google** on customer registration. The Supabase Auth settings endpoint now reports `external.google: true`, and the authorize endpoint redirects to Google successfully.
 
 ## Why a direct Firebase swap would be unsafe
 
@@ -26,8 +26,8 @@ If Firebase must become the identity provider, the project needs a designed serv
 
 - Confirm whether `portal.megolance.com` is an intended domain or a typo for `portal.mucolabs.com`.
 - Choose **Supabase Auth + Firebase project unused for portal login (recommended)** or approve a Firebase-to-Supabase bridge/full migration design.
-- Configure the Google OAuth client secret in the Supabase dashboard if Supabase Auth remains the boundary. Do not send that secret here.
-- Redeploy the portal after configuration and test a new customer signup, existing customer login, membership routing, logout and CRM read/write permissions.
+- Keep the Google OAuth client secret configured only in the Supabase dashboard. Do not send that secret here.
+- Confirm the production portal deployment has the latest source, then test a new customer signup, existing customer login, membership routing, logout and CRM read/write permissions.
 
 No numeric service prices, case-study outcomes, customer testimonials, or booking URL were invented. Until the owner supplies approved proof or a calendar link, the public site should use request-a-quote copy, authored founder guidance, and WhatsApp/contact enquiry actions.
 
