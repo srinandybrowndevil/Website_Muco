@@ -2668,9 +2668,13 @@ def build_careers():
 ANALYTICS_PRIVACY_TEXT = (
     "This site runs its own first-party operational analytics to count visits and see which "
     "pages and calls-to-action are useful. It also loads Google Analytics and Google Tag Manager "
-    "for page visits, referrals, campaign links and interactions. Google Analytics may use "
-    "cookies and process this information under Google's privacy terms. It does not receive the "
-    "contents of your enquiry form. For our first-party analytics, the site stores a random "
+    "for page visits, referrals, campaign links and interactions, and through Google Tag Manager "
+    "it loads Microsoft Clarity. Clarity records how pages are used &mdash; pointer movement, "
+    "clicks, scrolling and the content of the pages you view &mdash; and replays those sessions "
+    "to us so we can see where a page is confusing. Clarity is operated by Microsoft and "
+    "processes this information under Microsoft's privacy terms. Google Analytics may use "
+    "cookies and process this information under Google's privacy terms. Neither Google nor Microsoft receives the "
+    "contents of an enquiry you send from your customer account. For our first-party analytics, the site stores a random "
     "anonymous session identifier only in sessionStorage while the browser tab is open; the "
     "identifier is not linked to any name, email address, phone number or other personal "
     "information. The data collected is limited to the pages viewed, the site that referred "
@@ -2735,12 +2739,12 @@ def build_privacy():
         [
             ("What this website itself collects", [
                 "This site is a set of static pages with a small amount of server code: the "
-                "endpoint that receives the enquiry form, a first-party analytics endpoint, "
-                "Google Analytics and Google Tag Manager. "
-                "There are no user accounts on this website.",
-                "When you submit the enquiry form, what you typed is sent to our server for CRM "
-                "recording and notification. The same details are also opened in WhatsApp or your "
-                "email application so you can continue the conversation there if you want. The "
+                "endpoint that receives an enquiry, a first-party analytics endpoint, "
+                "Google Analytics, Google Tag Manager and Microsoft Clarity. "
+                "There are no user accounts on this website; enquiries are made from a signed-in "
+                "customer account on the portal.",
+                "When you send an enquiry from your customer account, what you typed is stored "
+                "against that account so you and we can both refer back to it. The "
                 "form shows an error and keeps the next step available if neither delivery path "
                 "accepts the submission.",
                 "Alongside your answers we record the page you submitted from, the site that "
@@ -2750,7 +2754,8 @@ def build_privacy():
                 "Our hosting provider, GitHub, records standard technical request logs such as IP "
                 "address and browser type as part of serving the site. We do not control or have "
                 "access to those logs. The Google Analytics and Google Tag Manager scripts are "
-                "loaded from Google when you visit a page; the rest of the site's stylesheets, "
+                "loaded from Google, and Microsoft Clarity from Microsoft, when you visit a page; "
+                "the rest of the site's stylesheets, "
                 "scripts, typefaces and images are served from this domain.",
                 ANALYTICS_PRIVACY_TEXT,
             ]),
@@ -2774,7 +2779,7 @@ def build_privacy():
             ("Where it is stored", [
                 "Enquiries, project correspondence and first-party analytics data live in our own "
                 "Supabase project. Google Analytics data is processed by Google under its own "
-                "privacy terms. We do not put enquiry form contents into Google Analytics, and "
+                "privacy terms. We do not put enquiry contents into Google Analytics or Clarity, and "
                 "access to our own records is limited to the people working on your project.",
                 "WhatsApp messages and emails are stored in the respective services we use to "
                 "communicate with you.",
@@ -3223,6 +3228,15 @@ def build_vercel_json():
         img_src += " https://www.google-analytics.com"
     if GTM_CONTAINER_ID:
         script_src += " " + google_tag_manager_csp_hash()
+    if CLARITY_ENABLED:
+        # Clarity is loaded by the GTM container, so the policy has to admit
+        # both the tag script and the endpoints it uploads sessions to. It is a
+        # session recorder: it captures pointer movement, clicks, scrolling and
+        # page content, which is why it is named in the privacy policy rather
+        # than folded into "analytics".
+        script_src += " https://www.clarity.ms"
+        connect_src += " https://*.clarity.ms https://c.bing.com"
+        img_src += " https://c.bing.com"
 
     csp = "; ".join([
         "default-src 'self'",

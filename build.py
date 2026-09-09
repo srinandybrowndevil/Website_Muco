@@ -104,6 +104,12 @@ GA_INLINE_SCRIPT = """  window.dataLayer = window.dataLayer || [];
 
   gtag('config', '%s');""" % GA_MEASUREMENT_ID
 GTM_CONTAINER_ID = "GTM-W2XZ8QNQ"
+# Microsoft Clarity is loaded by the GTM container, not by a tag in this repo,
+# so nothing here can switch it off -- that is done in Tag Manager. This flag
+# only decides whether the Content-Security-Policy admits it. Leave it True
+# while the tag is in the container: with it False the browser blocks Clarity
+# silently, which looks like Clarity being broken rather than blocked.
+CLARITY_ENABLED = True
 GTM_INLINE_SCRIPT = """(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
