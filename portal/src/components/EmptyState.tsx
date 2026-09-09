@@ -10,6 +10,11 @@ import { Icon } from "./Icon";
 // is empty right now, and the one thing worth doing next. `action` is not
 // optional by accident; a surface with genuinely nothing to do should say so
 // in `note` instead, rather than leaving the reader stranded.
+//
+// `celebrate` marks the other kind of empty. An inbox that is empty because
+// the reader cleared it is not the same screen as one that has never had
+// anything in it, and it should not feel like a shrug -- it is the state they
+// were working towards.
 
 type Action = { label: string; href: string } | { label: string; onClick: () => void };
 
@@ -21,6 +26,7 @@ export function EmptyState({
   secondary,
   note,
   compact = false,
+  celebrate = false,
 }: {
   icon?: string;
   title: string;
@@ -29,9 +35,11 @@ export function EmptyState({
   secondary?: Action;
   note?: string;
   compact?: boolean;
+  /** Empty because the reader cleared it, not because nothing ever arrived. */
+  celebrate?: boolean;
 }) {
   return (
-    <div className={`emptystate${compact ? " compact" : ""}`}>
+    <div className={`emptystate${compact ? " compact" : ""}${celebrate ? " celebrate" : ""}`}>
       <span className="emptystate-icon" aria-hidden="true"><Icon name={icon} size={compact ? 20 : 26} /></span>
       <h3>{title}</h3>
       <p>{body}</p>

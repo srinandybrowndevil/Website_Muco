@@ -67,6 +67,13 @@ export function EnquiriesClient({
   const [busy, setBusy] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
 
+  // "Cleared" only counts when the filter is one of the states that mean
+  // "still needs me". Filtering to Closed and finding none is not an
+  // achievement, it just means nothing has been closed.
+  const openStatuses: WebsiteEnquiryStatus[] = ["new", "contacted", "qualified"];
+  const cleared = items.length > 0 && !q.trim()
+    && statusFilter !== "All" && openStatuses.includes(statusFilter);
+
   const filtered = useMemo(() => {
     return items.filter((e) => {
       const matchesStatus = statusFilter === "All" || e.status === statusFilter;
@@ -142,14 +149,37 @@ export function EnquiriesClient({
 
       {filtered.length === 0 && !error && (
         <div className="panel">
-          <EmptyState
-            icon="inbox"
-            title="No enquiries yet"
-            body={isConfigured
-              ? "Contact actions on mucolabs.com now run through portal sign-in, so most enquiries arrive as project requests instead. Anything captured outside that flow shows up here."
-              : "Connect Supabase and real enquiries will appear here instead of this placeholder."}
-            action={isConfigured ? { label: "Open project requests", href: "/requests" } : undefined}
-          />
+          {/* Three different empties, and they should not read the same.
+              Never had one is onboarding. Filtered to nothing is a dead end
+              unless it offers the way back. Cleared every open enquiry is an
+              achievement, and worth saying so. */}
+          {items.length === 0 ? (
+            <EmptyState
+              icon="inbox"
+              title="No enquiries yet"
+              body={isConfigured
+                ? "Contact actions on mucolabs.com now run through portal sign-in, so most enquiries arrive as project requests instead. Anything captured outside that flow shows up here."
+                : "Connect Supabase and real enquiries will appear here instead of this placeholder."}
+              action={isConfigured ? { label: "Open project requests", href: "/requests" } : undefined}
+            />
+          ) : cleared ? (
+            <EmptyState
+              celebrate
+              icon="check"
+              title="Inbox zero."
+              body={`Every one of the ${items.length} ${items.length === 1 ? "enquiry" : "enquiries"} here has been handled. Nothing is waiting on you.`}
+              action={{ label: "Show all enquiries", onClick: () => setStatusFilter("All") }}
+              secondary={{ label: "Open project requests", href: "/requests" }}
+            />
+          ) : (
+            <EmptyState
+              compact
+              icon="search"
+              title="Nothing matches these filters"
+              body={`You have ${items.length} ${items.length === 1 ? "enquiry" : "enquiries"} in total, but none match${q.trim() ? ` “${q.trim()}”` : ""}${statusFilter !== "All" ? ` in ${statusLabel[statusFilter]}` : ""}.`}
+              action={{ label: "Clear filters", onClick: () => { setQ(""); setStatusFilter("All"); } }}
+            />
+          )}
         </div>
       )}
 

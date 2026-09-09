@@ -2553,3 +2553,147 @@ td span small {
   .emptystate-actions { width: 100%; }
   .emptystate-actions > * { flex: 1 1 auto; justify-content: center; }
 }
+
+/* An inbox emptied on purpose is not the same screen as one that never had
+   anything. This one is warmer, and the mark lands rather than just sitting
+   there -- the video's point that clearing the last item should feel like
+   reaching something. */
+.emptystate.celebrate {
+  border-style: solid;
+  border-color: rgba(122, 184, 147, 0.3);
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(122, 184, 147, 0.1), transparent 62%),
+    var(--panel);
+}
+
+.emptystate.celebrate .emptystate-icon {
+  color: var(--green, #7ab893);
+  background: rgba(122, 184, 147, 0.14);
+  border-color: rgba(122, 184, 147, 0.3);
+  animation: emptystate-land 460ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+@keyframes emptystate-land {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Getting started checklist. The video asks for step-by-step onboarding; this
+   is the non-blocking version -- it marks off what is done and links only the
+   step that is next, so anyone who already knows the product can ignore it. */
+.gettingstarted {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.gettingstarted > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.gettingstarted h3 {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 400;
+  margin: 0 0 4px;
+}
+
+.gettingstarted > header p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.gettingstarted-count {
+  flex: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.gettingstarted-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.gettingstarted-steps li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.gettingstarted-steps li.next {
+  background: rgba(198, 130, 82, 0.07);
+}
+
+.gettingstarted-marker {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.gettingstarted-steps li.done .gettingstarted-marker {
+  color: var(--green, #7ab893);
+  border-color: rgba(122, 184, 147, 0.4);
+  background: rgba(122, 184, 147, 0.12);
+}
+
+.gettingstarted-steps li.next .gettingstarted-marker {
+  color: var(--accent-ink);
+  background: var(--copper);
+  border-color: var(--copper);
+}
+
+.gettingstarted-steps b {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gettingstarted-steps li.done b {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(122, 184, 147, 0.5);
+}
+
+.gettingstarted-steps small {
+  display: block;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin-top: 2px;
+}
+
+.gettingstarted-cta {
+  margin-top: 12px;
+}
+
+@media (max-width: 600px) {
+  .gettingstarted-steps li { padding: 12px 8px; gap: 11px; }
+  .gettingstarted-cta { width: 100%; justify-content: center; }
+}
+
+/* Motion here is decoration; anyone who has asked for less should not get it. */
+@media (prefers-reduced-motion: reduce) {
+  .emptystate.celebrate .emptystate-icon { animation: none; }
+}

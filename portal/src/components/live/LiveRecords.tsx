@@ -57,6 +57,17 @@ export function LiveRecords({ section, organizationId }: { section: string; orga
     } catch (error) { setSaveError(error instanceof Error ? error.message : "Could not save. Please retry."); }
     finally { setBusy(false); }
   }
+  // "No results" is a dead end. "No results for purple shoes -- search purple
+  // instead" keeps the reader moving, so offer the widest term that is still
+  // shorter than what they typed: the first word, or a trimmed stem.
+  const broader = (() => {
+    const term = query.trim();
+    if (!term) return "";
+    const firstWord = term.split(/\s+/)[0];
+    if (firstWord.length >= 3 && firstWord !== term) return firstWord;
+    if (term.length > 4) return term.slice(0, Math.max(3, Math.ceil(term.length / 2)));
+    return "";
+  })();
   const columns = config.fields.filter(f => f.type !== "textarea").slice(0, 6);
   return <div className="page live-records">
     <div className="pagehead"><div><p className="eyebrow">Workspace / {section}</p><h1>{config.title}</h1><p>Saved records from your workspace.</p></div><button className="primary record-add" onClick={() => open()}>+ New {config.singular}</button></div>
@@ -65,7 +76,18 @@ export function LiveRecords({ section, organizationId }: { section: string; orga
     {state.error && <div className="panel error" role="alert">{state.error}</div>}
     {state.loading && <p role="status">Loading records…</p>}
     {!state.loading && !state.error && !state.data?.count && <div className="panel">{query
-      ? <EmptyState compact icon="search" title="No matching records" body={`Nothing in ${section} matches “${query}”. Search runs on ${config.primary} only, so try a shorter term or clear it to see everything.`} action={{ label: "Clear search", onClick: () => setSearch("") }} />
+      ? <EmptyState
+          compact
+          icon="search"
+          title={`No ${section} match “${query}”`}
+          body={broader
+            ? `Search looks at ${config.primary} only. “${broader}” is a wider term and may find it.`
+            : `Search looks at ${config.primary} only, so a full sentence rarely matches. Clear it to see everything.`}
+          action={broader
+            ? { label: `Search “${broader}” instead`, onClick: () => setSearch(broader) }
+            : { label: "Clear search", onClick: () => setSearch("") }}
+          secondary={broader ? { label: "Clear search", onClick: () => setSearch("") } : undefined}
+        />
       : <EmptyState icon={config.icon} title={`No ${section} yet`} body={config.emptyBody} action={{ label: `Add the first ${config.singular}`, onClick: () => open() }} />}</div>}
     {!!state.data?.rows.length && <div className="tablewrap"><table><caption className="visually-hidden">{config.title}</caption><thead><tr>{columns.map(f => <th key={f.key}>{f.label}</th>)}<th>Action</th></tr></thead><tbody>{state.data.rows.map(row => <tr key={row.id}>{columns.map(f => <td key={f.key}>{f.type === "customer" ? state.data?.customers.find(c => c.id === row[f.key])?.name ?? "—" : /amount|budget|value/.test(f.key) ? currency(row[f.key]) : label(row[f.key])}</td>)}<td><button className="secondary compact" onClick={() => open(row)} aria-label={`Edit ${label(row[config.primary])}`}>Edit</button></td></tr>)}</tbody></table></div>}
     <div className="live-tools"><span>{state.data?.count ?? 0} records · Page {page + 1}</span><button className="secondary" disabled={!page} onClick={() => setPage(p => p - 1)}>Previous</button><button className="secondary" disabled={(page + 1) * 25 >= (state.data?.count ?? 0)} onClick={() => setPage(p => p + 1)}>Next</button></div>
