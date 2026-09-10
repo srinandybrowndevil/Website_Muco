@@ -22,13 +22,15 @@ Every finding raised against the code itself is now fixed and re-tested. F-01, F
 | F-02 | Trigger function exposed on the public API surface | S3 | backend | vulnerability | Backend | Yes | Fixed this loop |
 | F-03 | Link text "Read more" gives no destination | S3 | frontend | accessibility | Frontend | Yes | Fixed this loop |
 | F-04 | Sole administrator credential is known-exposed | S1 | process | vulnerability | Founder | Yes, by the account holder only | Open |
-| F-05 | Leaked-password protection disabled | S2 | infra | vulnerability | Founder | Yes, with a paid plan | Open |
+| F-05 | Leaked-password protection disabled | S3 | infra | vulnerability | Founder | Mitigated in the application | Mitigated, re-rated from S2 |
 | F-06 | Enquiry endpoint deployed with no caller | S3 | backend | reliability | Backend | Yes | Fixed this loop |
 | F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | data | perf | Backend | Yes | Fixed this loop |
 | F-08 | 21 foreign keys without a covering index | S3 | data | perf | Backend | Yes | Fixed this loop |
 | F-09 | Administrator interface never rendered signed in | S3 | process | docs | Founder | Partial | Partly closed |
 | F-10 | Crawl file excludes a page that is not built | S4 | growth | docs | Frontend | Yes | Fixed this loop |
 | F-11 | Intern certificate rendered without the holder's name | S2 | frontend | bug | Frontend | Yes | Fixed this loop |
+| F-12 | Onboarding could create a second customer record | S3 | data | bug | Backend | Yes | Fixed this loop |
+| F-13 | Query errors discarded in eight places | S3 | frontend | reliability | Frontend | Yes | Fixed this loop |
 
 ---
 
@@ -142,11 +144,19 @@ Every finding raised against the code itself is now fixed and re-tested. F-01, F
 
 **E. Impact.** New and changed passwords are not checked against known breach corpora, so a person can choose a password already published in a breach. Combined with a portal holding client contact details, invoices and compensation, this is the standard path for credential-stuffing. Severity S2, likelihood common — password reuse is the norm, not the exception.
 
-**F. Fixable.** Yes, with a plan upgrade.
+**F. Fixable.** Yes. Done in the application; the platform setting still needs a plan.
 
-**G. How to fix.** Preferred: upgrade to the paid plan and enable the check; this also unlocks point-in-time recovery, which closes a separate gap in the backup story. Acceptable interim: the portal already refuses common and predictable passwords in `portal/src/lib/auth.ts`, which catches obvious cases but not breach corpora.
+**G. How to fix.** Applied where it counts. The portal now checks every password it sets against the public breach corpus itself, which is the same job the paid feature does.
 
-**H. Proof.** Advisor output will clear once enabled.
+The password never leaves the browser. It is hashed there, and only the first five characters of that hash are sent; every corpus entry sharing those five characters comes back — over two thousand of them — and the comparison happens locally. Neither this server nor the corpus service can tell which entry was of interest. The lookup is proxied through the portal rather than called from the browser directly, so the content security policy stays limited to the portal and Supabase, and the visitor's address is never handed to a third party on the page where they are typing a password.
+
+The check runs at submit, when the password is final, on both sign-up and password recovery. If the corpus cannot be reached the account is still created: the local rules — length, character classes, and the common and predictable lists — always apply, and refusing to let anyone sign up because a third party is unreachable would be the worse failure.
+
+**Residual, and why this is S3 rather than closed.** This covers the two flows the portal owns. A password set through a platform-level path the portal does not render would not pass through it. The paid plan closes that remainder, and still brings point-in-time recovery, which is a separate gap in the backup story.
+
+**H. Proof.** Verified against the live corpus. `password` is refused, reported 52,372,427 times and returned among 2,125 candidates. `Qwerty123!` is refused too — it satisfies every local rule and would have been accepted before, which is exactly the gap this closes. A strong unique passphrase passes. Malformed input to the endpoint is refused with 400, a GET with 405. The whole path was exercised in the browser under the portal's own content security policy.
+
+One defect was found and fixed while testing this: the proxy sent the endpoint to the sign-in page, because the pages that call it belong to people who are not signed in. Left there, the check would have reported itself unavailable forever and nothing would have said so.
 
 **I. Prevent.** Re-check the advisor after any plan change.
 
@@ -258,6 +268,44 @@ That check found F-11, a real defect on a page that had never been opened with d
 
 ---
 
+### F-12 — Onboarding could create a second customer record — S3, fixed
+
+**A. What.** `complete_customer_onboarding()` and `portal/src/app/complete-profile/page.tsx`.
+
+**B. How to see.** Both look for an existing customer before creating one. Neither holds a lock between looking and creating, and no constraint backed either. The page also discarded the error from its own lookup, so a transient failure read as "no customer yet".
+
+**C. Why.** Check-then-insert without a constraint is an invariant hoped for rather than enforced. Two requests arriving together — a double-tapped button, a retry after a timeout — could both find nothing and both proceed.
+
+**E. Impact.** A duplicate customer record splits one person's projects, invoices and files across two rows, and the row-level policies key on that record. Severity S3, likelihood rare: it needs a race, or an error at one specific moment. No duplicates exist today; this was checked before the fix.
+
+**G. How to fix.** Applied. `customers.auth_user_id` now carries a unique constraint, which cannot be raced. NULL stays unconstrained by design, because a customer record the founder creates before that person has an account has no account attached and there may be many. The application checks stay, since they give a better message than a constraint violation, but the guarantee no longer rests on them. The page now reads the error from its own lookup and stops rather than continuing.
+
+**J. Who.** Backend owns.
+
+---
+
+### F-13 — Query errors discarded in eight places — S3, fixed
+
+**A. What.** Eight server and page components destructured a query result for its data and ignored the error beside it.
+
+**B. How to see.** Search the portal for a query result taken as `data` alone. Eleven were found; eight needed changing.
+
+**C. Why.** The same habit that produced F-11. When only `data` is taken, a failed query is indistinguishable from a query that found nothing, and the code proceeds on the second reading.
+
+**E. Impact.** It varies by site, which is why each was judged rather than swept. The administrator authorisation checks failed closed, so nobody gained access they should not have — but they reported "you do not have access" when the truth was "the check could not run", sending the reader off to fix an account that was never the problem. The workspace router sent an existing customer to the onboarding form as though their account did not exist. The intern work log rendered a form whose every submission would be refused with no explanation. Severity S3, likelihood rare — each needs a query to fail.
+
+**F. Fixable.** Yes.
+
+**G. How to fix.** Applied to eight. A failed check now says so, distinctly from a refusal.
+
+Three were deliberately left, because falling back is the right behaviour there and changing it would be worse: the proxy treats an unreadable session as signed-out and sends the visitor to sign in, which is the correct direction to fail; the customer shell falls through a chain to the account email for a display name; the workspace refresh poller simply retries. Each is a considered fallback, not an ignored error.
+
+**I. Prevent.** The pattern to watch for is a Supabase result destructured for `data` with `error` left beside it. It reads as harmless, and it is how both F-11 and F-12 became possible.
+
+**J. Who.** Frontend owns.
+
+---
+
 ## Growth and organic-lead assessment
 
 The digital growth gate passes.
@@ -276,7 +324,7 @@ Evidence exists for: functional smoke on the shipped features, critical-path acc
 
 Evidence does not exist for: cross-browser rendering, real-device and screen-reader behaviour, client performance budget, load behaviour, and the administrator interface rendered with real data.
 
-The bar is not met because F-04 (S1) and F-05 (S2) are open. Neither is a defect in the shipped code. F-04 closes with a password change. F-05 closes with a plan upgrade, or with the founder accepting the risk in writing, at which point the gate would pass with a single S3 item — the live render of the administrator screens, which only the founder can perform.
+The bar is not met because F-04 (S1) is open. F-05 is re-rated S3: the risk it described is now closed in the application, with a stated residual that only a plan upgrade removes. Neither is a defect in the shipped code. F-04 closes with a password change. F-05 closes with a plan upgrade, or with the founder accepting the risk in writing, at which point the gate would pass with a single S3 item — the live render of the administrator screens, which only the founder can perform.
 
 Every other finding raised in this loop, including F-11 which was found while closing F-09, is fixed and re-tested.
 

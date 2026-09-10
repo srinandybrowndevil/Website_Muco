@@ -20,8 +20,13 @@ export default async function Root() {
   const { data: { user } } = await client.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: rows } = await client.from("memberships")
+  const { data: rows, error: membershipError } = await client.from("memberships")
     .select("organization_id, role").eq("user_id", user.id);
+  // A failed lookup is not the same as having no workspace. Without this, a
+  // transient error sent an existing customer, intern or employee to the
+  // onboarding form as though their account did not exist.
+  if (membershipError) throw new Error("Your workspace could not be opened. Refresh and try again.");
+
   const membership = primaryMembership(rows);
   if (!membership) redirect("/complete-profile");
 

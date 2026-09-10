@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { AuthShell, AuthStatus } from "@/components/auth/AuthShell";
 import { appOrigin, isStrongPassword, passwordRequirements, workspaceDestination } from "@/lib/auth";
+import { checkPasswordBreached, breachMessage } from "@/lib/breached-password";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -53,6 +54,16 @@ export default function Signup() {
       setErrors(validation);
       return;
     }
+    // Finding F-05. The breach corpus is consulted once, at submit, when the
+    // password is final -- not on every keystroke. If the check cannot run the
+    // account is still created: the local rules above always apply, and
+    // refusing sign-up because a third party is unreachable would be worse.
+    const breached = breachMessage(await checkPasswordBreached(password));
+    if (breached) {
+      setErrors([breached]);
+      return;
+    }
+
     setLoading("form");
 
     if (!isSupabaseConfigured) {

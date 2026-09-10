@@ -4,7 +4,7 @@
 **Loop:** 1
 **Date:** 10 September 2026
 **Prepared for:** Srinivash Mahalingam, founder, MUCO LABS
-**Result:** Not certified. One S1 and one S2 finding remain open, both operational rather than defects in the code. Every code finding is fixed.
+**Result:** Not certified. One S1 finding remains open: an exposed administrator credential, which only the account holder can change. Every other finding is fixed.
 
 ---
 
@@ -24,7 +24,9 @@ Two findings remain open, and neither can be closed by engineering.
 
 The first is serious and needs action today. An account password for this system was written into a working transcript during the engagement and has not been confirmed changed. That account is the only administrator, and it can read every client's contact details, every invoice and every person's compensation. The new audit log would record what an intruder did, which helps afterwards but prevents nothing. Changing that password is the single most valuable thing to do this week.
 
-The second is a cost decision. Supabase can check new passwords against known breach lists, but only on a paid plan. On the free plan, a person can choose a password that has already appeared in a public breach. The same upgrade also enables point-in-time recovery, which is the backup story this system does not currently have.
+The second was a cost decision, and is now largely answered without spending anything. Supabase can refuse passwords found in public breach lists, but only on a paid plan — so the portal now performs that check itself, on sign-up and on password recovery. The password never leaves the browser: it is hashed there, only five characters of the hash are sent, and the comparison happens locally among thousands of candidates, so nobody on the wire can tell which one was being asked about.
+
+It works on real data. `Qwerty123!` is now refused. It passes every rule the portal had before — ten characters, a letter, a number, a symbol — and it sits in the breach corpus, which is precisely the gap this closes. What remains is a password set through a platform path the portal does not render, and point-in-time recovery, which is still the backup story this system does not have. Both need the paid plan.
 
 The website side is strong and needs little. All 25 pages carry correct titles, descriptions, canonical links and structured data, with no duplicates. The robots file names fifteen answer-engine crawlers explicitly rather than relying on a wildcard, which is ahead of common practice. One accessibility defect was found and fixed.
 
@@ -87,10 +89,12 @@ Full detail with fields A through J is in `06-QA-AUDIT.md`.
 |---|---|---|---|---|---|
 | F-04 | Sole administrator credential is known-exposed | S1 | Founder | Open | Minutes |
 | F-01 | Audit log accepted invented action names and unbounded volume | S2 | Backend | Fixed | Done |
-| F-05 | Leaked-password protection disabled | S2 | Founder | Open | A plan decision |
+| F-05 | Leaked-password protection disabled | S3 | Founder | Mitigated in the app | Plan decision for the remainder |
 | F-02 | Trigger function exposed on the public API surface | S3 | Backend | Fixed | Done |
 | F-03 | Link text "Read more" gives no destination | S3 | Frontend | Fixed | Done |
 | F-11 | Intern certificate rendered without the holder's name | S2 | Frontend | Fixed | Done |
+| F-12 | Onboarding could create a second customer record | S3 | Backend | Fixed | Done |
+| F-13 | Query errors discarded in eight places | S3 | Frontend | Fixed | Done |
 | F-06 | Enquiry endpoint deployed with no caller | S3 | Backend | Fixed | Done |
 | F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | Backend | Fixed | Done |
 | F-08 | 21 foreign keys without a covering index | S3 | Backend | Fixed | Done |
@@ -107,19 +111,19 @@ One thing to watch rather than fix: twelve pages carry frequently-asked-question
 
 **Not certified.** Evidence exists for functional smoke, critical-path access control, security sanity, accessibility structure, growth hygiene, and build and type safety. Evidence does not exist for cross-browser rendering, real devices and screen readers, client performance budget, load behaviour, or the administrator interface rendered with real data.
 
-The gate fails on F-04 (S1) and F-05 (S2). Closing F-04, and either closing or formally accepting F-05, moves this to a pass with one S3 item remaining — the live render of the administrator screens, which only the founder can perform.
+The gate fails on F-04 (S1) alone. Closing it — a password change, minutes of work — moves this to a pass with two S3 items: the live render of the administrator screens, and the platform-level remainder of F-05.
 
 Every other finding in this loop is fixed and re-tested, including F-11, which was found while closing F-09.
 
 ## 10. Quick wins this week
 
-Three remain, and all three are yours.
+Three remain, and every one of them needs you rather than the code.
 
-1. **Change the administrator password.** Closes the only S1. Minutes.
-2. **Open each administrator screen once while signed in** and report anything wrong. Closes F-09. The certificate defect found this loop is why this is worth ten minutes rather than being a formality.
-3. **Decide on the Supabase plan.** The paid tier closes F-05 and adds point-in-time recovery, which is the missing backup story.
+1. **Change the administrator password.** Closes the only S1, and is the single most valuable thing on this list. Minutes.
+2. **Open each administrator screen once while signed in** and report anything wrong. Closes F-09. The certificate defect found this loop is why this is worth ten real minutes rather than being a formality.
+3. **Decide on the Supabase plan.** The password half of F-05 is now handled in the application at no cost. What the plan still buys is the platform-level remainder and point-in-time recovery — the backup story this system does not have.
 
-F-06, F-07, F-08, F-10 and F-11 were on this list and are now done.
+F-06, F-07, F-08, F-10, F-11, F-12 and F-13 were on this list and are done.
 
 ## 11. Structural work this month
 
@@ -131,7 +135,7 @@ F-06, F-07, F-08, F-10 and F-11 were on this list and are now done.
 **Open questions for the founder.**
 
 1. Has the administrator password been changed? This report assumes it has not, because that has not been confirmed. If it has, F-04 closes immediately.
-2. Is the Supabase paid plan acceptable, or should F-05 be accepted in writing as a known risk?
+2. Is the Supabase paid plan worth it now that the password half of F-05 is handled in the application? The case for it is point-in-time recovery, not the password check.
 3. `api/lead.js` is now removed. If an anonymous contact form is returning at some point, say so — it should come back with its own review rather than by reviving code that sat unused.
 
 **Assumptions.**

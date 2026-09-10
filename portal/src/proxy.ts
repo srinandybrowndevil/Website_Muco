@@ -7,7 +7,12 @@ import { primaryMembership } from "@/lib/membership";
 // /verify is deliberately public: an employer checking a certificate has no
 // account here. The function behind it returns only the fields the
 // specification allows on that page.
-const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback","/verify"];
+// /api/password-breach is public because the pages that call it -- signing up
+// and recovering an account -- are reached by people who are not signed in. It
+// exposes nothing: it accepts five characters of a hash and returns rows from
+// a public corpus. Without it here the proxy sends the call to /login, and the
+// breach check silently reports itself unavailable forever.
+const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback","/verify","/api/password-breach"];
 const isPublic=(path:string)=>publicPaths.some(route=>path===route||path.startsWith(`${route}/`));
 
 export async function proxy(request:NextRequest){

@@ -23,7 +23,7 @@ export default async function AnalyticsPage() {
         redirect("/login?next=/analytics");
       }
 
-      const { data: membership } = await supabase
+      const { data: membership, error: membershipError } = await supabase
         .from("memberships")
         .select("organization_id, role")
         .eq("user_id", user.id)
@@ -32,7 +32,9 @@ export default async function AnalyticsPage() {
         .limit(1)
         .maybeSingle();
 
-      if (!membership) {
+      if (membershipError) {
+        error = "Your access could not be checked. Refresh and try again.";
+      } else if (!membership) {
         error = "You do not have access to analytics.";
       } else {
         const { data, error: rpcError } = await supabase.rpc(

@@ -35,11 +35,21 @@ export default function CompleteProfile() {
       const supabase = createClient()!;
       setState("loading");
 
-      const { data: existingCustomer } = await supabase
+      const { data: existingCustomer, error: existingError } = await supabase
         .from("customers")
         .select("id")
         .eq("auth_user_id", uid)
         .maybeSingle();
+
+      // A failed lookup used to read as "no customer yet", so a transient
+      // error here sent someone through onboarding a second time. The database
+      // now refuses a second record outright; this stops before that point and
+      // says something true rather than relying on a constraint violation.
+      if (existingError) {
+        setState("error");
+        setMessage("We could not check whether your account is already set up. Refresh and try again.");
+        return;
+      }
 
       if (existingCustomer) {
         setState("done");

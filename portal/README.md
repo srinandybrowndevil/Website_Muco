@@ -78,6 +78,7 @@ supabase/migrations/20261028000000_staff_compensation_and_grants.sql
 supabase/migrations/20261029000000_audit_log_and_tier_packs.sql
 supabase/migrations/20261030000000_audit_action_vocabulary.sql
 supabase/migrations/20261031000000_rls_initplan_and_fk_indexes.sql
+supabase/migrations/20261101000000_one_customer_record_per_account.sql
 ```
 
 3. Set only the public project values (and optionally the public app origin).

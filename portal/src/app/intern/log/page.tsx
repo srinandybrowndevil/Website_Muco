@@ -15,8 +15,13 @@ export default async function WorkLogPage() {
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening the work log.");
 
-  const { data: profile } = await client.from("intern_profiles")
+  // The identifier this page writes against. If the read fails and the
+  // failure is swallowed, the form still renders and every entry it
+  // submits is refused with no explanation -- the same shape as the
+  // certificate bug.
+  const { data: profile, error: profileError } = await client.from("intern_profiles")
     .select("id").eq("user_id", userId).maybeSingle();
+  if (profileError) throw new Error("Your internship record could not be read, so the work log cannot be opened.");
   const { data: entries, error } = await client.from("intern_work_logs")
     .select("id, logged_on, summary, hours")
     .order("logged_on", { ascending: false })

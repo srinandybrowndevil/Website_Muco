@@ -23,7 +23,7 @@ export default async function EnquiriesPage() {
         redirect("/login?next=/enquiries");
       }
 
-      const { data: membership } = await supabase
+      const { data: membership, error: membershipError } = await supabase
         .from("memberships")
         .select("organization_id, role")
         .eq("user_id", user.id)
@@ -32,7 +32,9 @@ export default async function EnquiriesPage() {
         .limit(1)
         .maybeSingle();
 
-      if (!membership) {
+      if (membershipError) {
+        error = "Your access could not be checked. Refresh and try again.";
+      } else if (!membership) {
         error = "You do not have access to enquiries.";
       } else {
         const { data, error: fetchError } = await supabase

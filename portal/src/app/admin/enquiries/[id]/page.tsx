@@ -40,7 +40,7 @@ export default async function EnquiryDetailPage({
     redirect(`/login?next=${encodeURIComponent(`/enquiries/${id}`)}`);
   }
 
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("memberships")
     .select("organization_id, role")
     .eq("user_id", user.id)
@@ -48,6 +48,11 @@ export default async function EnquiryDetailPage({
     .order("organization_id")
     .limit(1)
     .maybeSingle();
+
+  // A failed check is not a refusal. Saying "you do not have access"
+  // when the question could not be asked sends the reader off to fix
+  // an account that was never the problem.
+  if (membershipError) throw new Error("Your access could not be checked. Refresh and try again.");
 
   if (!membership) {
     return (
