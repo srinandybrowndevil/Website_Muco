@@ -30,6 +30,12 @@ jobs:
       - name: Fail if the build left the tree dirty
         run: git diff --exit-code -- . ':!package-lock.json'
 
+      # What a browser will never complain about: a page with no description,
+      # two pages claiming the same title, an image with no alt text, a heading
+      # level skipped, a photograph shipped at two megabytes.
+      - name: Audit every page
+        run: python scripts/site-audit.py
+
       - run: npm ci
       - run: npm test
 

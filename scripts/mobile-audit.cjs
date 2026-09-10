@@ -16,13 +16,22 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const SITE = process.argv[2] || "http://localhost:8123";
-const PORTAL = process.argv[3] || "http://localhost:3000";
+// 3100 to match .claude/launch.json and the Playwright webServer. It was
+// 3000, which is nothing now, so every portal check reported a connection
+// refusal and the run looked like twenty-one layout failures.
+const PORTAL = process.argv[3] || "http://localhost:3100";
 const WIDTHS = [320, 390, 768];
 const SHOT_WIDTH = 390;
 const TARGETS = [
   ["site", SITE, ["/", "/contact", "/learning", "/services"]],
+  // The team screens moved under /admin when the four workspaces split; these
+  // were still the old flat paths. Signed-out routes redirect to /login, and
+  // the recorded url shows which did, so a redirect is not read as a pass.
   ["portal", PORTAL, ["/login", "/signup", "/portal", "/portal/profile",
-                      "/portal/requests/new", "/requests", "/customers"]],
+                      "/portal/invoices", "/portal/requests/new",
+                      "/admin/requests", "/admin/customers", "/admin/people",
+                      "/admin/certificates", "/admin/grants", "/admin/compensation",
+                      "/intern/profile", "/intern/help", "/staff/profile", "/staff/mentees"]],
 ];
 
 function loadPlaywright() {
