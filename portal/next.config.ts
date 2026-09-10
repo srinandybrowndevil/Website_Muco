@@ -40,9 +40,16 @@ const nextConfig: NextConfig = {
     const moved = ["leads", "customers", "tasks", "projects", "proposals",
                    "invoices", "files", "reports", "automation", "settings",
                    "enquiries", "requests", "analytics"];
+    // Not on a workspace address. Each of those serves one workspace and
+    // writes its paths without the prefix, so on client.mucolabs.com a bare
+    // /requests is the customer's own request list -- sending it to
+    // /admin/requests would hand a customer a team URL and then refuse them.
+    const notAWorkspaceAddress = [
+      { type: "host" as const, value: "(admin|client|intern|employee)\..*" },
+    ];
     return moved.flatMap(section => [
-      { source: `/${section}`, destination: `/admin/${section}`, permanent: true },
-      { source: `/${section}/:path*`, destination: `/admin/${section}/:path*`, permanent: true },
+      { source: `/${section}`, destination: `/admin/${section}`, permanent: true, missing: notAWorkspaceAddress },
+      { source: `/${section}/:path*`, destination: `/admin/${section}/:path*`, permanent: true, missing: notAWorkspaceAddress },
     ]);
   },
 

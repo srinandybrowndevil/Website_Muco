@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CrmRow, currency, label } from "@/lib/crm";

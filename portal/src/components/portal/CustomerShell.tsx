@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -60,7 +60,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           <span className="brandmark">
             <Image src="/logo-mark.svg" alt="" width={32} height={32} priority />
           </span>
-          <b>MUCO LABS</b>
+          <b>MUCO LABS</b><span className="brandws">Client</span>
         </Link>
 
         <button
@@ -110,7 +110,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
               <span className="brandmark">
                 <Image src="/logo-mark.svg" alt="" width={32} height={32} priority />
               </span>
-              <b>MUCO LABS</b>
+              <b>MUCO LABS</b><span className="brandws">Client</span>
               <button
                 className="iconbtn close"
                 onClick={() => setOpen(false)}

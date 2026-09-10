@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { customers, documents, leads, money, projects, tasks as seedTasks } from "@/lib/data";
 import { Icon } from "./Icon";
 

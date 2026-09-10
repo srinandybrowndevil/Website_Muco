@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import Image from "next/image";
 import { LogoutButton } from "../auth/LogoutButton";
 
@@ -13,7 +13,7 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
       <header>
         <Link className="authbrand" href="/staff" aria-label="Staff workspace home">
           <Image src="/logo-mark.svg" alt="" width={26} height={26} priority />
-          <b>MUCO LABS</b>
+          <b>MUCO LABS</b><span className="brandws">Staff</span>
         </Link>
         <nav className="portaldesktop" aria-label="Staff workspace">
           {NAV.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}

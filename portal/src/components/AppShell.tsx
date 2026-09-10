@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
@@ -100,7 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Image src="/logo-mark.svg" alt="" width={34} height={34} priority />
           </span>
           <div>
-            <b>MUCO LABS</b>
+            <b>MUCO LABS</b><span className="brandws">Admin</span>
             <small>TEAM WORKSPACE</small>
           </div>
           <button

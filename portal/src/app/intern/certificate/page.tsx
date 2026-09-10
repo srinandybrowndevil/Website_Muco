@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { requireIntern } from "@/lib/intern";
 import { recordView } from "@/lib/audit";
 import { createClient } from "@/lib/supabase/server";

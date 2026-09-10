@@ -55,6 +55,8 @@
   --line-strong: rgba(242, 237, 230, 0.20);
   --muted: #968d82;
   --copper: #cf9061;
+  /* Accent as channels, so every translucent tint follows the workspace. */
+  --accent-rgb: 207, 144, 97;
   --copper2: #e0a578;
   --green: #6ec08a;
   --amber: #d6a55c;
@@ -115,7 +117,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--copper);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 3px;
 }
@@ -125,7 +127,7 @@ a {
   left: 12px;
   top: -60px;
   z-index: 999;
-  background: var(--copper);
+  background: var(--accent);
   color: var(--accent-ink);
   font-weight: 600;
   font-size: 14px;
@@ -219,12 +221,12 @@ a {
 }
 
 .sidebar nav a.active {
-  box-shadow: inset 2px 0 var(--copper);
+  box-shadow: inset 2px 0 var(--accent);
 }
 
 .sidebar nav em {
   margin-left: auto;
-  background: var(--copper);
+  background: var(--accent);
   color: var(--accent-ink);
   border-radius: 20px;
   padding: 1px 6px;
@@ -273,7 +275,7 @@ a {
   display: inline-grid !important;
   place-items: center;
   background: #35302a;
-  color: var(--copper2);
+  color: var(--accent-bright);
   font-size: 10px;
   font-weight: 600;
   flex: none;
@@ -345,8 +347,8 @@ a {
   text-transform: uppercase;
   padding: 6px 9px;
   border: 1px solid var(--line-strong);
-  color: var(--copper2);
-  background: rgba(207, 144, 97, 0.08);
+  color: var(--accent-bright);
+  background: rgba(var(--accent-rgb), 0.08);
   border-radius: 30px;
 }
 
@@ -382,13 +384,15 @@ a {
 }
 
 .primary {
-  background: var(--copper);
-  border-color: var(--copper);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-ink);
 }
 
+/* Lighten on hover rather than darken: the accent differs in every
+   workspace, and only lightening reads the same way in all four. */
 .primary:hover {
-  background: #b87b4e;
+  background: var(--accent-bright);
 }
 
 .primary.compact {
@@ -417,7 +421,7 @@ a {
   font-family: var(--font-mono);
   font-size: 9px !important;
   letter-spacing: 0.14em;
-  color: var(--copper2) !important;
+  color: var(--accent-bright) !important;
   margin-bottom: 9px;
   text-transform: uppercase;
 }
@@ -516,7 +520,7 @@ a {
 
 .panelhead a {
   font-size: 10px;
-  color: var(--copper);
+  color: var(--accent);
 }
 
 .funnel > div {
@@ -531,8 +535,8 @@ a {
 .funnel i {
   position: absolute;
   inset: 0 auto 0 0;
-  background: linear-gradient(90deg, rgba(207, 144, 97, 0.35), rgba(207, 144, 97, 0.12));
-  border-left: 2px solid var(--copper);
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.35), rgba(var(--accent-rgb), 0.12));
+  border-left: 2px solid var(--accent);
   border-radius: 0 3px 3px 0;
 }
 
@@ -573,7 +577,7 @@ a {
   font-size: 9px;
   display: inline-grid;
   place-items: center;
-  color: var(--copper2);
+  color: var(--accent-bright);
 }
 
 .focus > span,
@@ -639,7 +643,7 @@ a {
   background: var(--surface-2);
   display: grid;
   place-items: center;
-  color: var(--copper);
+  color: var(--accent);
   font-size: 11px;
 }
 
@@ -675,7 +679,7 @@ a {
 }
 
 .searchbox:focus-within {
-  border-color: var(--copper);
+  border-color: var(--accent);
 }
 
 .tabs {
@@ -739,7 +743,7 @@ a {
 }
 
 .dot.qualified {
-  background: var(--copper);
+  background: var(--accent);
 }
 
 .dot.proposal {
@@ -778,7 +782,7 @@ a {
 
 .leadcard > b {
   font-size: 12px;
-  color: var(--copper2);
+  color: var(--accent-bright);
 }
 
 .leadcard footer {
@@ -934,7 +938,7 @@ td span small {
 .progress i {
   display: block;
   height: 100%;
-  background: var(--copper);
+  background: var(--accent);
   border-radius: 2px;
 }
 
@@ -955,7 +959,7 @@ td span small {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--copper2);
+  color: var(--accent-bright);
   gap: 7px;
   margin-bottom: 18px;
   border-radius: 4px;
@@ -1013,14 +1017,14 @@ td span small {
 .portalf button {
   border: 0;
   background: none;
-  color: var(--copper);
+  color: var(--accent);
 }
 
 .fileicon {
   width: 38px;
   height: 38px;
   background: var(--surface-2);
-  color: var(--copper);
+  color: var(--accent);
   display: grid;
   place-items: center;
   font: 8px var(--font-mono);
@@ -1092,7 +1096,7 @@ td span small {
 .source i {
   display: block;
   height: 100%;
-  background: var(--copper);
+  background: var(--accent);
   border-radius: 3px;
 }
 
@@ -1113,8 +1117,8 @@ td span small {
   height: 45px;
   display: grid;
   place-items: center;
-  background: rgba(207, 144, 97, 0.12);
-  color: var(--copper2);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent-bright);
   border-radius: 4px;
 }
 
@@ -1172,7 +1176,7 @@ td span small {
 }
 
 .toggle.on {
-  background: var(--copper);
+  background: var(--accent);
 }
 
 .toggle.on i {
@@ -1281,7 +1285,7 @@ td span small {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 70% 30%, rgba(207, 144, 97, 0.12), transparent 35%),
+    radial-gradient(circle at 70% 30%, rgba(var(--accent-rgb), 0.12), transparent 35%),
     radial-gradient(circle at 30% 80%, rgba(120, 100, 255, 0.08), transparent 30%);
   pointer-events: none;
 }
@@ -1310,7 +1314,7 @@ td span small {
 }
 
 .authstory h1 i {
-  color: var(--copper2);
+  color: var(--accent-bright);
   font-style: italic;
 }
 
@@ -1381,7 +1385,7 @@ td span small {
 }
 
 .authform input:focus-visible {
-  outline: 2px solid var(--copper);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -1394,7 +1398,7 @@ td span small {
   position: absolute;
   right: 12px;
   top: 21px;
-  color: var(--copper);
+  color: var(--accent);
   font-size: 9px;
   background: transparent;
   border: 0;
@@ -1488,7 +1492,7 @@ td span small {
 
 .portalhero small {
   font-size: 8px;
-  color: var(--copper2);
+  color: var(--accent-bright);
   letter-spacing: 0.12em;
 }
 
@@ -1616,7 +1620,7 @@ td span small {
 .authback {
   display: inline-block;
   margin-top: 22px;
-  color: var(--copper);
+  color: var(--accent);
   font-size: 13px;
 }
 
@@ -1659,7 +1663,7 @@ td span small {
 .invitecard > span {
   font-size: 9px;
   letter-spacing: 0.18em;
-  color: var(--copper);
+  color: var(--accent);
   text-transform: uppercase;
 }
 
@@ -1693,7 +1697,7 @@ td span small {
   width: 34px;
   height: 34px;
   border: 2px solid var(--line);
-  border-top-color: var(--copper);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1925,7 +1929,7 @@ td span small {
 }
 
 .clientportal header nav a.active {
-  box-shadow: inset 0 -2px 0 var(--copper);
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 
 .portaldesktop {
@@ -1962,7 +1966,7 @@ td span small {
 .portalsidebar nav a.active {
   background: var(--surface-3);
   color: #fff;
-  box-shadow: inset 2px 0 var(--copper);
+  box-shadow: inset 2px 0 var(--accent);
 }
 
 .customerhead {
@@ -2025,7 +2029,7 @@ td span small {
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--copper2);
+  color: var(--accent-bright);
   border: 1px solid var(--line-strong);
   padding: 6px 10px;
   border-radius: 20px;
@@ -2111,8 +2115,8 @@ td span small {
 .requestform input:focus-visible,
 .requestform select:focus-visible,
 .requestform textarea:focus-visible {
-  border-color: var(--copper);
-  outline: 2px solid var(--copper);
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -2262,12 +2266,12 @@ td span small {
 
 .statusactions button:hover {
   color: var(--ink);
-  border-color: var(--copper);
+  border-color: var(--accent);
 }
 
 .statusactions button.selected {
-  background: var(--copper);
-  border-color: var(--copper);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--accent-ink);
   font-weight: 600;
 }
@@ -2304,8 +2308,8 @@ td span small {
 
 .authform select:focus-visible,
 .authform textarea:focus-visible {
-  border-color: var(--copper);
-  outline: 2px solid var(--copper);
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -2374,7 +2378,7 @@ td span small {
   border-radius: 50%;
   background: var(--surface);
   border: 1px solid var(--line);
-  color: var(--copper);
+  color: var(--accent);
   flex-shrink: 0;
 }
 .metrics .metricicon + div span {
@@ -2481,7 +2485,7 @@ td span small {
   border: 1px dashed var(--line);
   border-radius: 6px;
   background:
-    radial-gradient(120% 100% at 0% 0%, rgba(198, 130, 82, 0.06), transparent 60%),
+    radial-gradient(120% 100% at 0% 0%, rgba(var(--accent-rgb), 0.06), transparent 60%),
     var(--panel);
   max-width: 620px;
 }
@@ -2493,9 +2497,9 @@ td span small {
   height: 46px;
   margin-bottom: 16px;
   border-radius: 50%;
-  color: var(--copper);
-  background: rgba(198, 130, 82, 0.12);
-  border: 1px solid rgba(198, 130, 82, 0.22);
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
 }
 
 .emptystate h3 {
@@ -2636,7 +2640,7 @@ td span small {
 }
 
 .gettingstarted-steps li.next {
-  background: rgba(198, 130, 82, 0.07);
+  background: rgba(var(--accent-rgb), 0.07);
 }
 
 .gettingstarted-marker {
@@ -2660,8 +2664,8 @@ td span small {
 
 .gettingstarted-steps li.next .gettingstarted-marker {
   color: var(--accent-ink);
-  background: var(--copper);
-  border-color: var(--copper);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .gettingstarted-steps b {
@@ -2820,7 +2824,7 @@ td span small {
   padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(198, 130, 82, 0.07);
+  background: rgba(var(--accent-rgb), 0.07);
 }
 
 .daysleft b { font-family: var(--font-serif); font-size: 26px; font-weight: 400; line-height: 1; }
@@ -2859,7 +2863,7 @@ td span small {
 
 .filterbar .chip.active {
   border-color: var(--accent);
-  background: rgba(207, 144, 97, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
   color: var(--text);
 }
 
@@ -2879,3 +2883,75 @@ td span small {
 
 /* The figure on the staff compensation page. */
 .compamount { font-family: var(--font-serif); font-size: 32px; font-weight: 400; line-height: 1.1; margin: 10px 0 4px; }
+
+
+/* ---------------------------------------------------------------------------
+   One palette per workspace.
+
+   Each workspace has its own address, and its own colour, so a person always
+   knows which one they are in without reading anything. The base stays the
+   same dark ground: these are four rooms in one studio, not four products, and
+   four unrelated designs would say the opposite.
+
+   Only the accent moves. Every tint, border and highlight already follows
+   --accent-rgb, so one line per workspace repaints the whole surface.
+
+   Applied from the hostname in the root layout, so it is decided on the server
+   and never flickers on load.
+   --------------------------------------------------------------------------- */
+
+/* Admin keeps the studio's own copper. It is the founder's room, and MUCO LABS
+   is copper everywhere else it appears. */
+:root[data-workspace="admin"] {
+  --accent: var(--copper);
+  --accent-bright: var(--copper2);
+  --accent-rgb: 207, 144, 97;
+  --accent-ink: #1a0f07;
+}
+
+/* Clients get a cooler, quieter blue. This is the one workspace people outside
+   the studio see, and it should feel calm and administrative rather than warm
+   and internal. */
+:root[data-workspace="client"] {
+  --accent: #7fa6cc;
+  --accent-bright: #9dbfe0;
+  --accent-rgb: 127, 166, 204;
+  --accent-ink: #07121c;
+}
+
+/* Interns get green: growth, and the same colour already used for progress and
+   success across the product, so it reads as encouragement rather than as a
+   fifth brand. */
+:root[data-workspace="intern"] {
+  --accent: #6ec08a;
+  --accent-bright: #8ad3a3;
+  --accent-rgb: 110, 192, 138;
+  --accent-ink: #05150c;
+}
+
+/* Employees get violet. It is the one hue not already carrying a meaning in
+   this product -- copper is the brand, green is success, amber is warning, red
+   is failure -- so it can mean this workspace and nothing else. */
+:root[data-workspace="employee"] {
+  --accent: #a48fd0;
+  --accent-bright: #bda9e4;
+  --accent-rgb: 164, 143, 208;
+  --accent-ink: #100a1c;
+}
+
+/* The workspace name beside the mark. The logo stays constant; the word after
+   it changes, which is what makes it a lockup rather than four logos. */
+.brandws {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.10);
+  color: var(--accent-bright);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}

@@ -1,6 +1,6 @@
 import { CustomerShell } from "@/components/portal/CustomerShell";
 import { requireWorkspace } from "@/lib/workspace";
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 
 export default async function ContactPage() {
   await requireWorkspace(true);

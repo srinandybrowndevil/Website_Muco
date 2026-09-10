@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { notFound } from "next/navigation";
 import { CustomerShell } from "@/components/portal/CustomerShell";
 import { PrintButton } from "@/components/portal/PrintButton";

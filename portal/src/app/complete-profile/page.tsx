@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { useRouter, useSearchParams } from "next/navigation";
 import { workspaceDestination } from "@/lib/auth";
 import { FormEvent, useCallback, useEffect, useState } from "react";

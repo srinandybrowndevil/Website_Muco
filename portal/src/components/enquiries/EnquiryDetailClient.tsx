@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
