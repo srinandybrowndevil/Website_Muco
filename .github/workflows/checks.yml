@@ -54,6 +54,17 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      # Types prove the code agrees with itself. This proves it agrees with the
+      # database: every column and foreign key named in a select has to exist
+      # in the migrations. It is what would have caught a certificate printing
+      # "Not recorded" because an embed named a foreign key that was ambiguous,
+      # and a staff page rendering "Unnamed project" for months.
+      - name: Check every query against the schema
+        run: python scripts/schema-check.py
+
       - run: npm --prefix portal ci
       - name: Typecheck
         working-directory: portal

@@ -5,6 +5,7 @@ import { requireWorkspace } from "@/lib/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { homeForRole } from "@/lib/auth";
 import { IssueCertificate } from "@/components/admin/IssueCertificate";
+import { readSettings } from "@/lib/settings";
 
 // Checklist 6.9: certificates waiting on the founder.
 //
@@ -42,7 +43,7 @@ export default async function CertificatesPage() {
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening certificates.");
 
-  const [interns, certificates] = await Promise.all([
+  const [interns, certificates, settings] = await Promise.all([
     client.from("intern_profiles")
       .select("id, track, starts_at, ends_at, status, mentor_recommended_at, mentor_note, person:profiles!intern_profiles_user_id_fkey(full_name), mentor:profiles!intern_profiles_mentor_id_fkey(full_name)")
       .eq("organization_id", organizationId)
@@ -50,6 +51,7 @@ export default async function CertificatesPage() {
     client.from("intern_certificates")
       .select("intern_id, serial, issued_on, tools, approver:profiles!intern_certificates_approved_by_fkey(full_name)")
       .eq("organization_id", organizationId),
+    readSettings(organizationId),
   ]);
 
   const issued = new Map(
@@ -77,6 +79,15 @@ export default async function CertificatesPage() {
   });
 
   const waiting = rows.filter(r => r.waiting);
+
+  // Attendance is computed from the work log rather than stored, and it is
+  // read only for the internships actually awaiting a decision -- there is no
+  // reason to measure somebody whose certificate was issued last month.
+  const attendance = new Map(await Promise.all(waiting.map(async row => {
+    const { data } = await client.rpc("intern_attendance", { p_intern: row.id });
+    const first = Array.isArray(data) ? data[0] : data;
+    return [row.id, first as { days_logged: number; working_days: number; percent: number } | null] as const;
+  })));
   const done = rows.filter(r => r.certificate);
   const running = rows.filter(r => !r.waiting && !r.certificate);
   const failed = interns.error || certificates.error;
@@ -109,8 +120,21 @@ export default async function CertificatesPage() {
                 <b>{row.name}</b>
                 <small>{row.track} · ended {formatDate(row.endsAt)} · {row.status}</small>
               </div>
-              <IssueCertificate internId={row.id} name={row.name} mentorName={row.mentorName}
-                mentorNote={row.mentorNote} recommendedAt={row.recommendedAt} />
+              <div className="issuewrap">
+                {(() => {
+                  const seen = attendance.get(row.id);
+                  if (!seen || seen.working_days === 0) return null;
+                  const short = seen.percent < settings.attendanceThreshold;
+                  return (
+                    <p className={short ? "attendance short" : "attendance"}>
+                      <b>{seen.percent}%</b> attendance — {seen.days_logged} of {seen.working_days} working days logged
+                      {short ? ` · below your ${settings.attendanceThreshold}% threshold` : ""}
+                    </p>
+                  );
+                })()}
+                <IssueCertificate internId={row.id} name={row.name} mentorName={row.mentorName}
+                  mentorNote={row.mentorNote} recommendedAt={row.recommendedAt} />
+              </div>
             </article>
           ))}
         </section>

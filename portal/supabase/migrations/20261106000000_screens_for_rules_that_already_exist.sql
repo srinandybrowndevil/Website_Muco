@@ -424,3 +424,60 @@ create policy "staff read granted project files" on public.files for select
 
 create index if not exists project_grants_project_user_idx
   on public.project_grants (project_id, user_id);
+
+-- ---------------------------------------------------------- attendance
+-- Checklist 6.12 names an attendance threshold. Added as a setting, it would
+-- have been a number nothing reads -- a field satisfying a checklist row
+-- rather than a rule, which is the failure the checklist itself warns about.
+--
+-- It already had a consumer waiting. intern_work_logs carries one entry per
+-- intern per day, and the comment on that constraint says why: "the attendance
+-- percentage the certificate depends on is only meaningful if a day cannot be
+-- counted twice". So the percentage is computed from the log rather than
+-- recorded anywhere, and the threshold is what it is measured against.
+--
+-- Weekends are excluded. Counting Saturdays against an intern who was never
+-- expected on a Saturday would make every attendance figure wrong in the same
+-- direction, which is worse than not showing one.
+create or replace function public.intern_attendance(p_intern uuid)
+returns table (days_logged integer, working_days integer, percent integer)
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_org uuid; v_user uuid; v_mentor uuid; v_start date; v_end date;
+  v_logged integer; v_working integer;
+begin
+  select organization_id, user_id, mentor_id, starts_at, least(ends_at, current_date)
+    into v_org, v_user, v_mentor, v_start, v_end
+  from public.intern_profiles where id = p_intern;
+  if not found then return; end if;
+
+  -- SECURITY DEFINER reads past row-level security, so entitlement is checked
+  -- here instead: the studio, the mentor of record, or the intern themselves.
+  if not (public.is_org_staff(v_org)
+          or v_mentor = auth.uid()
+          or v_user = auth.uid()) then
+    raise exception 'Not your internship to look at.' using errcode = 'insufficient_privilege';
+  end if;
+
+  select count(*)::integer into v_working
+  from generate_series(v_start, v_end, interval '1 day') as day
+  where extract(isodow from day) < 6;
+
+  select count(*)::integer into v_logged
+  from public.intern_work_logs w
+  where w.intern_id = p_intern
+    and w.logged_on between v_start and v_end
+    and extract(isodow from w.logged_on) < 6;
+
+  days_logged := coalesce(v_logged, 0);
+  working_days := coalesce(v_working, 0);
+  percent := case when coalesce(v_working, 0) = 0 then 0
+                  else round(100.0 * coalesce(v_logged, 0) / v_working)::integer end;
+  return next;
+end $$;
+
+revoke all on function public.intern_attendance(uuid) from public, anon;
+grant execute on function public.intern_attendance(uuid) to authenticated;
+
+comment on function public.intern_attendance(uuid) is
+  'Attendance computed from the work log rather than stored, measured against organization_settings.attendance_threshold. Weekdays only.';
