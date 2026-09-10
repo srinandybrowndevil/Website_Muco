@@ -101,6 +101,9 @@ export const nav = [
   ["Reports", "/admin/reports", "chart"],
   ["Automation", "/admin/automation", "bolt"],
   ["People", "/admin/people", "user"],
+  ["Certificates", "/admin/certificates", "file"],
+  ["Grants", "/admin/grants", "shield"],
+  ["Compensation", "/admin/compensation", "receipt"],
   ["Audit log", "/admin/audit", "shield"],
   ["Team", "/admin/settings", "users"],
 ] as const;

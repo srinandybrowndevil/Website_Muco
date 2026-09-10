@@ -5,6 +5,8 @@ import { LogoutButton } from "../auth/LogoutButton";
 const NAV = [
   ["Projects", "/staff"],
   ["My compensation", "/staff/compensation"],
+  ["My mentees", "/staff/mentees"],
+  ["Profile", "/staff/profile"],
 ] as const;
 
 export function StaffShell({ children }: { children: React.ReactNode }) {

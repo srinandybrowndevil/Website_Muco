@@ -23,6 +23,11 @@ const LEVEL_LABEL: Record<string, string> = {
   write: "Can view and change",
 };
 
+const TRACK_LABEL: Record<string, string> = {
+  intern_frontend: "Frontend", intern_backend: "Backend", intern_mobile: "Mobile",
+  intern_design: "Design", intern_qa: "QA", intern_seo: "SEO",
+};
+
 function formatDate(value: string) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("en-IN", {
     day: "numeric", month: "long", year: "numeric",
@@ -30,12 +35,27 @@ function formatDate(value: string) {
 }
 
 export default async function InternHome() {
-  const { access, readOnly } = await requireIntern();
+  const { access, readOnly, userId } = await requireIntern();
 
   const client = await createClient();
   const permissions = client
     ? (await client.rpc("intern_permissions")).data as { module: string; level: string }[] | null
     : null;
+
+  // Checklist 2.1 lists more than a countdown: the track somebody is on, when
+  // they started, who their mentor is, and where their certificate stands.
+  // Leaving those off meant an intern had to ask a person for facts the
+  // workspace already held about them.
+  const internship = client
+    ? (await client.from("intern_profiles")
+        .select("id, track, starts_at, status, mentor:profiles!intern_profiles_mentor_id_fkey(full_name)")
+        .eq("user_id", userId).maybeSingle()).data
+    : null;
+  const certificate = client && internship
+    ? (await client.from("intern_certificates")
+        .select("serial, issued_on").eq("intern_id", internship.id).maybeSingle()).data
+    : null;
+  const mentorName = (internship?.mentor as unknown as { full_name: string | null } | null)?.full_name;
 
   return (
     <InternShell readOnly={readOnly}>
@@ -56,6 +76,24 @@ export default async function InternHome() {
           </span>
         )}
       </div>
+
+      <section className="panel">
+        <h2>Your internship</h2>
+        <dl className="detaillist">
+          <div><dt>Track</dt><dd>{TRACK_LABEL[String(internship?.track)] ?? "Not set"}</dd></div>
+          <div><dt>Started</dt><dd>{internship?.starts_at ? formatDate(internship.starts_at) : "Not set"}</dd></div>
+          <div><dt>Ends</dt><dd>{formatDate(access.ends_at)}</dd></div>
+          <div><dt>Mentor</dt><dd>{mentorName || "Not assigned yet"}</dd></div>
+          <div>
+            <dt>Certificate</dt>
+            <dd>
+              {certificate
+                ? `Issued ${formatDate(String(certificate.issued_on))} · ${certificate.serial}`
+                : "Not issued yet. It appears once the founder approves it."}
+            </dd>
+          </div>
+        </dl>
+      </section>
 
       {permissions && permissions.length > 0 && (
         <section className="panel">

@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { requireWorkspace } from "@/lib/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { PersonAccess } from "@/components/admin/PersonAccess";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 
 // Specification 11.2, item 2: one list of everyone, filterable by actor type.
 // It reads memberships as the source of truth for who exists and what they are,
@@ -21,8 +22,26 @@ function formatDate(value: string | null) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default async function PeoplePage() {
+// Checklist 6.2: filterable by actor type.
+//
+// The filter is a link, not a piece of component state, so a filtered view can
+// be sent to somebody or kept in a tab. "Everyone" stays first because the
+// default should be the whole truth, not a slice of it.
+const FILTERS = [
+  ["", "Everyone"],
+  ["admin", "Founders and admins"],
+  ["member", "Team members"],
+  ["employee", "Employees"],
+  ["intern", "Interns"],
+  ["client", "Clients"],
+  ["off", "Switched off"],
+] as const;
+
+export default async function PeoplePage(
+  { searchParams }: { searchParams: Promise<{ type?: string }> },
+) {
   const { organizationId, userId } = await requireWorkspace();
+  const filter = (await searchParams).type ?? "";
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening people.");
 
@@ -58,6 +77,16 @@ export default async function PeoplePage() {
     };
   }).sort((a, b) => a.role.localeCompare(b.role) || a.name.localeCompare(b.name));
 
+  const shown = people.filter(person =>
+    filter === "" ? true
+    : filter === "off" ? Boolean(person.disabledAt)
+    : person.role === filter && !person.disabledAt);
+
+  const countFor = (value: string) =>
+    value === "" ? people.length
+    : value === "off" ? people.filter(p => p.disabledAt).length
+    : people.filter(p => p.role === value && !p.disabledAt).length;
+
   return (
     <AppShell>
       <div className="page">
@@ -71,8 +100,18 @@ export default async function PeoplePage() {
 
         {failed && <div className="panel error" role="alert">Some records could not be loaded. Refresh before making changes.</div>}
 
+        <nav className="filterbar" aria-label="Filter people by type">
+          {FILTERS.map(([value, title]) => (
+            <Link key={value || "all"} href={value ? `/admin/people?type=${value}` : "/admin/people"}
+              className={filter === value ? "chip active" : "chip"}
+              aria-current={filter === value ? "page" : undefined}>
+              {title} <span>{countFor(value)}</span>
+            </Link>
+          ))}
+        </nav>
+
         <div className="panel">
-          {people.length === 0 ? (
+          {shown.length === 0 ? (
             <EmptyState icon="users" title="No one listed"
               body="Everyone who can sign in appears here with the workspace their account belongs to. If this stays empty, the membership query is being blocked rather than returning nobody." />
           ) : (
@@ -83,7 +122,7 @@ export default async function PeoplePage() {
                   <tr><th scope="col">Name</th><th scope="col">Workspace</th><th scope="col">Details</th><th scope="col">Status</th><th scope="col">Access</th></tr>
                 </thead>
                 <tbody>
-                  {people.map(person => (
+                  {shown.map(person => (
                     <tr key={person.id} className={person.disabledAt ? "person-off" : ""}>
                       <td>{person.name}</td>
                       <td>{ROLE_LABEL[person.role] ?? person.role}</td>

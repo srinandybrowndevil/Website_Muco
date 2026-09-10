@@ -3,6 +3,7 @@ import { recordView } from "@/lib/audit";
 import { createClient } from "@/lib/supabase/server";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { EmptyState } from "@/components/EmptyState";
+import { WorkspaceLink as Link } from "@/components/WorkspaceHost";
 
 const ENGAGEMENT: Record<string, string> = {
   retainer_monthly: "Monthly retainer",
@@ -67,7 +68,7 @@ export default async function CompensationPage() {
               <div className="tablewrap">
                 <table>
                   <caption className="visually-hidden">Payments against this engagement</caption>
-                  <thead><tr><th scope="col">Amount</th><th scope="col">Due</th><th scope="col">Paid</th><th scope="col">Status</th></tr></thead>
+                  <thead><tr><th scope="col">Amount</th><th scope="col">Due</th><th scope="col">Paid</th><th scope="col">Status</th><th scope="col">Advice</th></tr></thead>
                   <tbody>
                     {payments.map(payment => (
                       <tr key={payment.id}>
@@ -75,6 +76,11 @@ export default async function CompensationPage() {
                         <td>{formatDate(payment.due_on)}</td>
                         <td>{formatDate(payment.paid_on)}</td>
                         <td>{payment.status}</td>
+                        <td>
+                          <Link className="secondary compact" href={`/staff/compensation/${payment.id}`}>
+                            Open
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

@@ -109,6 +109,40 @@ test.describe("an account that has been switched off", () => {
   });
 });
 
+test.describe("the screens built for the roles checklist", () => {
+  // Every one of these covers a rule that was already enforced in the database
+  // and had no screen, so the founder did the job in SQL. What is checked here
+  // is the thing a route can be checked for without a session: that it exists,
+  // that it is protected, and that it does not quietly 404 -- a page that
+  // returns "not found" is indistinguishable from one that was never built.
+  const GUARDED = [
+    ["/intern/profile", "%2Fintern%2Fprofile"],
+    ["/intern/help", "%2Fintern%2Fhelp"],
+    ["/staff/profile", "%2Fstaff%2Fprofile"],
+    ["/staff/mentees", "%2Fstaff%2Fmentees"],
+    ["/admin/certificates", "%2Fadmin%2Fcertificates"],
+    ["/admin/grants", "%2Fadmin%2Fgrants"],
+    ["/admin/compensation", "%2Fadmin%2Fcompensation"],
+    ["/portal/invoices", "%2Fportal%2Finvoices"],
+  ];
+
+  for (const [path, encoded] of GUARDED) {
+    test(`${path} exists and asks for sign-in`, async ({ page }) => {
+      const response = await page.goto(`http://localhost:3100${path}`, { waitUntil: "commit" });
+      expect(response?.status(), `${path} should not be a 404`).toBeLessThan(400);
+      await page.waitForURL(/\/login/);
+      expect(page.url(), `${path} should remember where it was going`).toContain(`next=${encoded}`);
+    });
+  }
+
+  test("the client invoice list is reachable at its own address", async ({ page }) => {
+    // /portal/invoices/<id> has always worked while /portal/invoices itself
+    // 404d, so anybody who bookmarked the parent got a broken product.
+    const response = await page.goto("http://localhost:3100/portal/invoices", { waitUntil: "commit" });
+    expect(response?.status()).toBeLessThan(400);
+  });
+});
+
 test.describe("sign-up", () => {
   test("refuses a breached password without creating an account", async ({ page }) => {
     const errors = consoleErrors(page);

@@ -1,9 +1,11 @@
 "use client";
-import { FormEvent, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLiveQuery } from "@/lib/use-live-query";
 import { EmptyState } from "../EmptyState";
 import { CrmRow, label } from "@/lib/crm";
+import { InvitePerson } from "@/components/admin/InvitePerson";
+import { WorkspaceSettings } from "@/components/admin/WorkspaceSettings";
 
 export function LiveSettings({ organizationId, role, automation = false }: { organizationId: string; role: string; automation?: boolean }) {
   const [busy, setBusy] = useState(false);
@@ -41,17 +43,6 @@ export function LiveSettings({ organizationId, role, automation = false }: { org
     return { rules: [] as CrmRow[], members: (members.data ?? []) as unknown as { user_id: string; role: string; profiles: { full_name: string | null } | null }[], invitations: (invitations.data ?? []) as CrmRow[] };
   }, [organizationId, role, automation]);
   const state = useLiveQuery(automation ? "automations" : "memberships,invitations", load, organizationId);
-  async function invite(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setBusy(true); setError(null); setInviteUrl("");
-    const form = event.currentTarget;
-    const values = new FormData(form);
-    try {
-      const { data, error } = await createClient()!.rpc("create_invitation", { invite_organization_id: organizationId, invite_email: String(values.get("email")).trim(), invite_role: values.get("role") });
-      if (error) throw new Error(error.message);
-      setInviteUrl(`${window.location.origin}/accept-invite?token=${encodeURIComponent(String(data))}`); form.reset(); await state.refresh();
-    } catch (err) { setError(err instanceof Error ? err.message : "Could not create invitation."); }
-    finally { setBusy(false); }
-  }
   async function toggle() {
     setBusy(true); setError(null);
     const rule = state.data?.rules[0];
@@ -67,7 +58,8 @@ export function LiveSettings({ organizationId, role, automation = false }: { org
   return <div className="page"><div className="pagehead"><div><p className="eyebrow">Workspace / {automation ? "Automation" : "Team"}</p><h1>{automation ? "Follow-up automation" : "Team & invitations"}</h1><p>{automation ? "Create a next-day follow-up task when a lead is added." : "Actual workspace members and secure invitation links."}</p></div></div>
     {(error || state.error) && <p role="alert" className="error">{error || state.error}</p>}{state.loading && !state.data && <p role="status">Loading…</p>}
     {automation ? <div className="panel"><h2>New lead → follow-up task</h2><p>The task is created once, when a new lead is saved. Existing leads are not changed. This rule does not send messages.</p><button className="primary" disabled={busy || role !== "admin" || state.loading || !!state.error} onClick={() => void toggle()}>{busy ? "Saving…" : !state.data ? "Checking rule…" : state.data.rules[0]?.enabled ? "Disable rule" : "Enable rule"}</button>{role !== "admin" && <p>Only an administrator can change rules.</p>}</div> : <>
-      {role === "admin" && <form onSubmit={invite} className="panel record-fields"><label>Email<input name="email" type="email" required /></label><label>Role<select name="role"><option value="member">Member</option><option value="admin">Admin</option></select></label><button className="primary" disabled={busy}>{busy ? "Creating…" : "Create invitation link"}</button></form>}
+      {role === "admin" && <InvitePerson organizationId={organizationId} onCreated={url => { setInviteUrl(url); void state.refresh(); }} />}
+      {role === "admin" && <WorkspaceSettings organizationId={organizationId} />}
       {inviteUrl && <div className="panel invitelink"><p role="status">Invitation created. Share this private link with the invited person. No email has been sent.</p>
         <label htmlFor="invite-url">Invitation link</label>
         <div className="invitelink-row">

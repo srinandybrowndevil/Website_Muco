@@ -12,6 +12,12 @@ export async function requireStaff() {
 
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) redirect("/login");
+  // Checklist 9.6. Enforced here rather than trusted to a setting in the
+  // Supabase dashboard: a rule that lives only in a console somewhere can be
+  // switched off by accident and nothing in this repository would notice.
+  // Google sign-in arrives already confirmed, so this only stops an address
+  // nobody has proved they can read.
+  if (!user.email_confirmed_at) redirect("/verify-email");
 
   const { data: rows, error: membershipError } = await client.from("memberships")
     .select("organization_id, role, disabled_at").eq("user_id", user.id);

@@ -12,6 +12,8 @@ const NAV = [
   ["Internship", "/intern"],
   ["Work log", "/intern/log"],
   ["Certificate", "/intern/certificate"],
+  ["Your details", "/intern/profile"],
+  ["Help", "/intern/help"],
 ] as const;
 
 export function InternShell({

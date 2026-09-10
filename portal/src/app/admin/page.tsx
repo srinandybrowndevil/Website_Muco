@@ -5,6 +5,7 @@ import { requireWorkspace } from "@/lib/workspace";
 import { LiveOverview } from "@/components/live/LiveOverview";
 import { DueFollowUps } from "@/components/live/DueFollowUps";
 import { WrongWorkspaceNotice } from "@/components/WrongWorkspaceNotice";
+import { WorkspaceCounts } from "@/components/admin/WorkspaceCounts";
 export default async function Page({searchParams}:{searchParams:Promise<{wrongworkspace?:string}>}){
   if (!isSupabaseConfigured) return <AppShell><Dashboard/></AppShell>;
   const [workspace, query] = await Promise.all([requireWorkspace(), searchParams]);
@@ -13,6 +14,9 @@ export default async function Page({searchParams}:{searchParams:Promise<{wrongwo
     {/* Above the totals on purpose. What is late is more urgent than what
         is large, and a number you have to interpret should not sit above a
         promise you already made. */}
+    {/* Checklist 6.1. Above the CRM totals for the same reason the follow-ups
+        are: these three are people waiting on you, and money is not. */}
+    <WorkspaceCounts organizationId={workspace.organizationId}/>
     <DueFollowUps organizationId={workspace.organizationId}/>
     <LiveOverview organizationId={workspace.organizationId}/>
   </AppShell>;

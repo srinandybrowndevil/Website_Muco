@@ -29,27 +29,35 @@ const SECTIONS = [
   },
 ];
 
-type Loaded = { rows: CrmRow[][]; requests: number; profileComplete: boolean };
+type Loaded = { rows: CrmRow[][]; requests: number; profileComplete: boolean; milestones: CrmRow[]; handover: string };
 
 export function LiveCustomer({ organizationId }: { organizationId: string }) {
   const load = useCallback(async (): Promise<Loaded> => {
     const client = createClient()!;
-    const [projects, proposals, invoices, requests, customer] = await Promise.all([
+    const [projects, proposals, invoices, requests, customer, milestones, settings] = await Promise.all([
       ...["projects", "proposals", "invoices"].map(table =>
         client.from(table).select("*").eq("organization_id", organizationId).order("created_at", { ascending: false }).limit(100)),
       client.from("project_requests").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
       client.from("customers").select("phone").eq("organization_id", organizationId).limit(1).maybeSingle(),
+      // Checklist 7.3. Ordered so that anything waiting on the client sits at
+      // the top: the point of this list is the next move, not the history.
+      client.from("project_milestones").select("id, project_id, title, detail, status, due_on, position")
+        .eq("organization_id", organizationId).order("position", { ascending: true }).limit(200),
+      client.from("organization_settings").select("handover_note")
+        .eq("organization_id", organizationId).maybeSingle(),
     ]);
     for (const result of [projects, proposals, invoices, requests]) if (result.error) throw new Error(result.error.message);
     return {
       rows: [projects, proposals, invoices].map(result => (result.data ?? []) as CrmRow[]),
       requests: requests.count ?? 0,
+      milestones: (milestones.data ?? []) as CrmRow[],
+      handover: (settings.data as { handover_note?: string } | null)?.handover_note ?? "",
       // customer may legitimately be missing while onboarding is mid-flight;
       // that reads as "profile not complete", which is the truthful answer.
       profileComplete: Boolean((customer.data as { phone?: string } | null)?.phone),
     };
   }, [organizationId]);
-  const state = useLiveQuery("projects,proposals,invoices,project_requests", load, organizationId);
+  const state = useLiveQuery("projects,proposals,invoices,project_requests,project_milestones", load, organizationId);
 
   // A brand new account has all three sections empty. Repeating "nothing here"
   // three times says nothing useful; one welcome that explains how the whole
@@ -96,8 +104,32 @@ export function LiveCustomer({ organizationId }: { organizationId: string }) {
       </section>
     )}
 
-    {data && !brandNew && data.rows.map((rows, index) => <section className="panel" id={index === 0 ? "projects" : undefined} key={index}><h2>{SECTIONS[index].heading}</h2>{!rows.length && <EmptyState compact icon={SECTIONS[index].icon} title={SECTIONS[index].title} body={SECTIONS[index].body} />}{rows.length === 100 && <p>Showing the latest 100 records.</p>}{rows.map(row => <article className="portalf" key={row.id}><div><b>{String(row.name ?? row.title ?? row.number)}</b><small>{label(row.status)}{index > 0 ? ` · ${currency(row.amount)}` : ` · ${Number(row.progress)}% complete`}</small>{index === 0 && <progress value={Number(row.progress)} max={100} aria-label={`${String(row.name)} progress`} />}</div>{index === 2 && <Link className="secondary compact" href={`/portal/invoices/${row.id}`}>View &amp; save</Link>}</article>)}</section>)}
+    {data && !brandNew && data.milestones.length > 0 && (() => {
+      const waiting = data.milestones.filter(m => m.status === "blocked_on_client");
+      const rest = data.milestones.filter(m => m.status !== "blocked_on_client");
+      return <section className="panel milestones">
+        <h2>Where things stand</h2>
+        {waiting.length > 0 && <div className="blockedon">
+          <h3>Waiting on you</h3>
+          <p>Work on these has stopped until you come back to us. Nothing else is held up by them.</p>
+          {waiting.map(m => <article className="milestone blocked" key={String(m.id)}>
+            <div><b>{String(m.title)}</b>{m.detail ? <small>{String(m.detail)}</small> : null}</div>
+            {m.due_on ? <span className="due">by {String(m.due_on)}</span> : null}
+          </article>)}
+        </div>}
+        {rest.map(m => <article className={"milestone " + String(m.status)} key={String(m.id)}>
+          <div><b>{String(m.title)}</b>{m.detail ? <small>{String(m.detail)}</small> : null}</div>
+          <span className="milestonestate">{label(m.status)}</span>
+        </article>)}
+      </section>;
+    })()}
+    {data && !brandNew && data.rows.map((rows, index) => <section className="panel" id={index === 0 ? "projects" : undefined} key={index}><h2>{SECTIONS[index].heading}</h2>{!rows.length && <EmptyState compact icon={SECTIONS[index].icon} title={SECTIONS[index].title} body={SECTIONS[index].body} />}{rows.length === 100 && <p>Showing the latest 100 records.</p>}{rows.map(row => <article className="portalf" key={row.id}><div><b>{String(row.name ?? row.title ?? row.number)}</b><small>{label(row.status)}{index > 0 ? ` · ${currency(row.amount)}` : ` · ${Number(row.progress)}% complete`}</small>{index === 0 && <progress value={Number(row.progress)} max={100} aria-label={`${String(row.name)} progress`} />}{index === 0 && (row.preview_url || row.staging_url) ? <span className="previewlinks">{row.preview_url ? <a href={String(row.preview_url)} target="_blank" rel="noreferrer noopener">See it running</a> : null}{row.staging_url ? <a href={String(row.staging_url)} target="_blank" rel="noreferrer noopener">Staging</a> : null}</span> : null}</div>{index === 2 && <Link className="secondary compact" href={`/portal/invoices/${row.id}`}>View &amp; save</Link>}</article>)}</section>)}
 
     <LiveFiles organizationId={organizationId} customer />
+
+    {/* Checklist 7.10. Said here rather than buried in a proposal, because the
+        question "do I actually own this when I have paid" is the one clients
+        are most reluctant to ask out loud. */}
+    {data?.handover ? <p className="handover">{data.handover}</p> : null}
   </>;
 }

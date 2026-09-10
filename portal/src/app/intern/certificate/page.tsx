@@ -5,13 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import { InternShell } from "@/components/intern/InternShell";
 import { EmptyState } from "@/components/EmptyState";
 import { PrintButton } from "@/components/portal/PrintButton";
+import { readSettings } from "@/lib/settings";
 
 function formatDate(value: string) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 
 export default async function CertificatePage() {
-  const { userId, readOnly } = await requireIntern();
+  const { userId, readOnly, organizationId } = await requireIntern();
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening the certificate.");
 
@@ -59,6 +60,17 @@ export default async function CertificatePage() {
   // is the honest moment to record.
   await recordView("certificate.view", "intern_certificate", null, { serial: certificate.serial });
 
+  // Checklist 2.12: the signature belongs to the template, not to whoever
+  // happens to print it. It lives in the private files bucket, so the page
+  // asks for a short-lived signed link rather than making the image public --
+  // a founder signature on an open URL is a founder signature anybody can put
+  // on anything. A missing or unreadable file falls back to the typed name
+  // below, which is what this page has always shown.
+  const settings = await readSettings(organizationId);
+  const signature = settings.signaturePath
+    ? (await client.storage.from("crm-files").createSignedUrl(settings.signaturePath, 300)).data?.signedUrl ?? null
+    : null;
+
   return (
     <InternShell readOnly={readOnly}>
       <div className="pagehead invoice-actions">
@@ -93,7 +105,16 @@ export default async function CertificatePage() {
         </div>
 
         <footer>
-          <p><b>Srinivash Mahalingam</b><br />Founder and Chairman, MUCO LABS</p>
+          <p className="signatureblock">
+            {/* A signed storage URL expires in minutes, which the image
+                optimizer would cache past its own lifetime and then fail to
+                re-fetch, so this stays a plain img. */}
+            {signature && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="signature" src={signature} alt="" width={180} height={60} />
+            )}
+            <b>Srinivash Mahalingam</b><br />Founder and Chairman, MUCO LABS
+          </p>
           <p className="invoicedoc-note">
             Issued {formatDate(certificate.issued_on)}. This document is not an employment offer.
             It can be checked at mucolabs.com/verify/{certificate.serial}.
