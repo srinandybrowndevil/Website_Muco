@@ -31,7 +31,7 @@ function formatDate(value: string | null) {
 
 type Certificate = {
   intern_id: string; serial: string; issued_on: string; tools: string[] | null;
-  approver: { full_name: string | null } | null;
+  approved_by_name: string;
 };
 
 export default async function CertificatesPage() {
@@ -49,7 +49,7 @@ export default async function CertificatesPage() {
       .eq("organization_id", organizationId)
       .order("ends_at", { ascending: true }),
     client.from("intern_certificates")
-      .select("intern_id, serial, issued_on, tools, approver:profiles!intern_certificates_approved_by_fkey(full_name)")
+      .select("intern_id, serial, issued_on, tools, approved_by_name")
       .eq("organization_id", organizationId),
     readSettings(organizationId),
   ]);
@@ -176,7 +176,7 @@ export default async function CertificatesPage() {
                       <td>{row.name}</td>
                       <td className="mono">{row.certificate?.serial}</td>
                       <td>{formatDate(row.certificate?.issued_on ?? null)}</td>
-                      <td>{row.certificate?.approver?.full_name || "—"}</td>
+                      <td>{row.certificate?.approved_by_name || "—"}</td>
                       <td>{(row.certificate?.tools ?? []).join(", ") || "—"}</td>
                     </tr>
                   ))}

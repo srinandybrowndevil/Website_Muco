@@ -83,6 +83,7 @@ supabase/migrations/20261102000000_admin_only_document_serials.sql
 supabase/migrations/20261104000000_disable_a_person_immediately.sql
 supabase/migrations/20261105000000_disabling_is_recorded_and_never_locks_you_out.sql
 supabase/migrations/20261106000000_screens_for_rules_that_already_exist.sql
+supabase/migrations/20261107000000_deleting_a_person.sql
 ```
 
 3. Set only the public project values (and optionally the public app origin).

@@ -23,6 +23,7 @@ type AuditRow = {
   detail: Record<string, unknown> | null;
   occurred_at: string;
   actor_id: string | null;
+  actor_email: string | null;
   profiles: { full_name: string | null } | null;
 };
 
@@ -104,7 +105,7 @@ export default async function AuditPage({
   if (!client) throw new Error("Configure Supabase before opening the audit log.");
 
   let query = client.from("audit_events")
-    .select("id, action, resource_type, resource_id, detail, occurred_at, actor_id, profiles(full_name)")
+    .select("id, action, resource_type, resource_id, detail, occurred_at, actor_id, actor_email, profiles(full_name)")
     .order("occurred_at", { ascending: false })
     .limit(PAGE_SIZE);
   if (active !== "all") query = query.in("action", FILTER_ACTIONS[active]);
@@ -183,7 +184,7 @@ export default async function AuditPage({
                   {rows.map(row => (
                     <tr key={row.id}>
                       <td className="nowrap">{when(row.occurred_at)}</td>
-                      <td>{row.profiles?.full_name ?? nameOf(row.actor_id)}</td>
+                      <td>{row.profiles?.full_name ?? row.actor_email ?? nameOf(row.actor_id)}</td>
                       <td>{describe(row, nameOf)}</td>
                     </tr>
                   ))}
