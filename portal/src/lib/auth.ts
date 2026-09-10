@@ -3,6 +3,7 @@
 export const ADMIN_HOME = "/admin";
 export const CLIENT_HOME = "/portal";
 export const INTERN_HOME = "/intern";
+export const STAFF_HOME = "/staff";
 
 export const DEFAULT_AUTHENTICATED_PATH = ADMIN_HOME;
 
@@ -18,10 +19,17 @@ export function isInternPath(pathname: string) {
   return pathname === INTERN_HOME || pathname.startsWith(`${INTERN_HOME}/`);
 }
 
+export function isStaffPath(pathname: string) {
+  return pathname === STAFF_HOME || pathname.startsWith(`${STAFF_HOME}/`);
+}
+
 /** The workspace a role owns. One place, so no guard invents its own answer. */
 export function homeForRole(role: string) {
   if (role === "client") return CLIENT_HOME;
   if (role === "intern") return INTERN_HOME;
+  if (role === "employee") return STAFF_HOME;
+  // admin and member both run the studio; the difference between them is what
+  // they may do inside /admin, not which workspace they belong to.
   return ADMIN_HOME;
 }
 
@@ -38,7 +46,8 @@ export function workspaceDestination(role: string, requested?: string | null) {
   const ownsRequest =
     role === "client" ? isClientPath(pathname)
     : role === "intern" ? isInternPath(pathname)
-    : !isClientPath(pathname) && !isInternPath(pathname) && pathname !== "/";
+    : role === "employee" ? isStaffPath(pathname)
+    : !isClientPath(pathname) && !isInternPath(pathname) && !isStaffPath(pathname) && pathname !== "/";
 
   return ownsRequest ? path : home;
 }

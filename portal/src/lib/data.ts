@@ -100,6 +100,7 @@ export const nav = [
   ["Files", "/admin/files", "folder"],
   ["Reports", "/admin/reports", "chart"],
   ["Automation", "/admin/automation", "bolt"],
+  ["People", "/admin/people", "user"],
   ["Team", "/admin/settings", "users"],
 ] as const;
 

@@ -74,6 +74,7 @@ supabase/migrations/20261024000000_hot_path_indexes.sql
 supabase/migrations/20261025000000_clients_never_see_source.sql
 supabase/migrations/20261026000000_intern_workspace.sql
 supabase/migrations/20261027000000_intern_logs_and_certificates.sql
+supabase/migrations/20261028000000_staff_compensation_and_grants.sql
 ```
 
 3. Set only the public project values (and optionally the public app origin).

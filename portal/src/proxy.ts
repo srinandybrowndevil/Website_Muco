@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
-import { homeForRole, isAdminPath, isClientPath, isInternPath, workspaceDestination } from "@/lib/auth";
+import { homeForRole, isAdminPath, isClientPath, isInternPath, isStaffPath, workspaceDestination } from "@/lib/auth";
 import { primaryMembership } from "@/lib/membership";
 
 // /verify is deliberately public: an employer checking a certificate has no
@@ -57,6 +57,7 @@ export async function proxy(request:NextRequest){
   // the router and is left alone.
   const owner = isClientPath(path) ? "/portal"
     : isInternPath(path) ? "/intern"
+    : isStaffPath(path) ? "/staff"
     : isAdminPath(path) ? "/admin"
     : null;
 
@@ -64,7 +65,10 @@ export async function proxy(request:NextRequest){
     // A path inside someone else's workspace says so, because landing
     // elsewhere reads as a broken link rather than the wrong account.
     // A path in no workspace at all is simply gone, and goes home quietly.
-    const reason = owner === "/portal" ? "customer" : owner === "/intern" ? "intern" : owner ? "team" : null;
+    const reason = owner === "/portal" ? "customer"
+      : owner === "/intern" ? "intern"
+      : owner === "/staff" ? "staff"
+      : owner ? "team" : null;
     return redirect(reason ? `${home}?wrongworkspace=${reason}` : home);
   }
   return response;
