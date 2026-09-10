@@ -26,7 +26,9 @@ The first is serious and needs action today. An account password for this system
 
 The second was a cost decision, and is now largely answered without spending anything. Supabase can refuse passwords found in public breach lists, but only on a paid plan — so the portal now performs that check itself, on sign-up and on password recovery. The password never leaves the browser: it is hashed there, only five characters of the hash are sent, and the comparison happens locally among thousands of candidates, so nobody on the wire can tell which one was being asked about.
 
-It works on real data. `Qwerty123!` is now refused. It passes every rule the portal had before — ten characters, a letter, a number, a symbol — and it sits in the breach corpus, which is precisely the gap this closes. What remains is a password set through a platform path the portal does not render, and point-in-time recovery, which is still the backup story this system does not have. Both need the paid plan.
+It works on real data, and the useful test was not "does it refuse a bad password" — the existing rules already refuse the obvious ones. The question is whether anything slips past those rules and is still known to attackers. Seven of eight candidates did: `Liverpool1!`, `Chocolate1!`, `Manchester1!`, `Tinkerbell1!`, `Rainbow123!`, `Blessed@2020` and `Butterfly9!` each satisfy every requirement the portal already enforced, and each appears in the breach corpus — `Liverpool1!` nearly twenty-three thousand times. All are now refused. Submitted through the real form, the check also stops before any account is created rather than after.
+
+What remains is a password set through a platform path the portal does not render, and point-in-time recovery, which is still the backup story this system does not have. Both need the paid plan.
 
 The website side is strong and needs little. All 25 pages carry correct titles, descriptions, canonical links and structured data, with no duplicates. The robots file names fifteen answer-engine crawlers explicitly rather than relying on a wildcard, which is ahead of common practice. One accessibility defect was found and fixed.
 

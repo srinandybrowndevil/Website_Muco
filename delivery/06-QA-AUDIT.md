@@ -154,7 +154,24 @@ The check runs at submit, when the password is final, on both sign-up and passwo
 
 **Residual, and why this is S3 rather than closed.** This covers the two flows the portal owns. A password set through a platform-level path the portal does not render would not pass through it. The paid plan closes that remainder, and still brings point-in-time recovery, which is a separate gap in the backup story.
 
-**H. Proof.** Verified against the live corpus. `password` is refused, reported 52,372,427 times and returned among 2,125 candidates. `Qwerty123!` is refused too — it satisfies every local rule and would have been accepted before, which is exactly the gap this closes. A strong unique passphrase passes. Malformed input to the endpoint is refused with 400, a GET with 405. The whole path was exercised in the browser under the portal's own content security policy.
+**H. Proof.** Verified against the live corpus, and then end to end through the real sign-up form.
+
+The measurement that matters is not "is a bad password refused" — the local rules already refuse obvious ones. It is whether anything gets past those rules and is still known to attackers. Seven of eight candidates tested did exactly that: every local requirement satisfied, and present in the corpus.
+
+| Password | Local rules | Times in corpus | Refused by |
+|---|---|---|---|
+| `Qwerty123!` | rejected | 184,730 | the local rules, before this feature |
+| `Liverpool1!` | accepted | 22,898 | the corpus check |
+| `Chocolate1!` | accepted | 13,931 | the corpus check |
+| `Manchester1!` | accepted | 9,825 | the corpus check |
+| `Tinkerbell1!` | accepted | 5,412 | the corpus check |
+| `Rainbow123!` | accepted | 3,628 | the corpus check |
+| `Blessed@2020` | accepted | 3,265 | the corpus check |
+| `Butterfly9!` | accepted | 912 | the corpus check |
+
+Submitting `Liverpool1!` through the real form with every other field valid produced the breach message and, importantly, no attempt to create an account at all — the check runs before the account call, not after it. A strong unique passphrase passes. Malformed input to the endpoint is refused with 400, a GET with 405. The whole path was exercised in the browser under the portal's own content security policy.
+
+**A correction to the record.** An earlier draft of this finding cited `Qwerty123!` as the example of a password that satisfied every local rule and would previously have been accepted. That was wrong, and was asserted without being tested: it reduces to a root beginning "qwerty", which the existing common-password list already catches. The table above replaces it with cases that were measured rather than assumed.
 
 One defect was found and fixed while testing this: the proxy sent the endpoint to the sign-in page, because the pages that call it belong to people who are not signed in. Left there, the check would have reported itself unavailable forever and nothing would have said so.
 
