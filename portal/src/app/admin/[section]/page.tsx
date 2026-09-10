@@ -7,6 +7,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { requireWorkspace } from "@/lib/workspace";
 import { crmSections } from "@/lib/crm";
 import { LiveRecords } from "@/components/live/LiveRecords";
+import { LeadsSection } from "@/components/live/LeadsSection";
 import { LiveOverview } from "@/components/live/LiveOverview";
 import { LiveFiles } from "@/components/live/LiveFiles";
 import { LiveSettings } from "@/components/live/LiveSettings";
@@ -17,7 +18,8 @@ export default async function Page({params}:{params:Promise<{section:string}>}) 
   if(!valid.includes(section)) notFound();
   if (isSupabaseConfigured) {
     const {organizationId, role} = await requireWorkspace();
-    const page = crmSections[section] ? <LiveRecords key={section} section={section} organizationId={organizationId} role={role}/>
+    const page = section === "leads" ? <LeadsSection organizationId={organizationId} role={role}/>
+      : crmSections[section] ? <LiveRecords key={section} section={section} organizationId={organizationId} role={role}/>
       : section === "reports" ? <LiveOverview organizationId={organizationId} reports/>
       : section === "files" ? <LiveFiles organizationId={organizationId}/>
       : <LiveSettings organizationId={organizationId} role={role} automation={section === "automation"}/>;

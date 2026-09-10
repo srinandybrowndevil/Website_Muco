@@ -2956,3 +2956,106 @@ td span small {
   text-transform: uppercase;
   vertical-align: middle;
 }
+
+/* ---------------------------------------------------------------------------
+   The pipeline board.
+
+   Columns scroll sideways as a group and each column scrolls on its own, so a
+   long stage never pushes the whole page out of shape. Won and lost are
+   present but recede: they are outcomes, not work in progress, and a board
+   that hides them only ever tells you what is pending.
+   --------------------------------------------------------------------------- */
+.board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 1fr);
+  gap: 12px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.boardcol {
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+/* The column under the pointer says so, or a drop is a guess. */
+.boardcol.over {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.06);
+}
+
+.boardcol.closed { opacity: 0.72; }
+
+.boardcol-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--line);
+}
+.boardcol-head b { font-size: 13px; text-transform: capitalize; }
+.boardcol-head span {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent-bright);
+  font-size: 11px;
+  text-align: center;
+}
+.boardcol-head small { width: 100%; color: var(--text-dim); font-size: 11px; }
+
+.boardcol-body {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.boardcol-empty { color: var(--text-dim); font-size: 12px; margin: 2px 3px; }
+
+.leadcard {
+  display: grid;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  cursor: grab;
+}
+.leadcard:active { cursor: grabbing; }
+.leadcard.busy { opacity: 0.55; pointer-events: none; }
+.leadcard b { font-size: 13px; }
+.leadcard span { color: var(--text-2); font-size: 12px; }
+.leadcard-value { color: var(--accent-bright) !important; font-weight: 500; }
+.leadcard small { color: var(--text-dim); font-size: 11px; }
+
+/* The same move as the drag, for anyone not using a pointer. */
+.leadcard-move select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 5px 7px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  text-transform: capitalize;
+}
+.leadcard-move select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+@media (max-width: 700px) {
+  /* One column at a time on a phone, at a width that still reads. */
+  .board { grid-auto-columns: minmax(78vw, 1fr); }
+  .boardcol-body { max-height: none; }
+}
