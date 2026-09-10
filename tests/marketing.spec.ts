@@ -160,6 +160,17 @@ test.describe("marketing site", () => {
       await expect(page.locator("#lead-name")).toHaveAttribute("aria-invalid", "true");
     });
 
+    // One suite run posts twice here, desktop and mobile, against an endpoint
+    // that allows five per minute per address. That is comfortably inside the
+    // limit for a single run and for CI.
+    //
+    // It is not inside the limit if you run the suite several times in one
+    // minute, or run it while poking the form by hand. A 429 then is the guard
+    // in api/lead.js working exactly as intended, not a defect in the form --
+    // wait a minute and run it again. It is deliberately not excused here the
+    // way the analytics 429 is, because unlike analytics, a real visitor being
+    // refused would be a genuine fault and this test is the thing that would
+    // catch it.
     test("sends a complete enquiry and confirms it", async ({ page }) => {
       let sent: Record<string, unknown> | null = null;
       await page.route("**/api/lead", async route => {
@@ -195,7 +206,12 @@ test.describe("marketing site", () => {
     });
 
     test("the honeypot is unreachable by keyboard and hidden from view", async ({ page }) => {
-      await page.goto(OPEN);
+      // domcontentloaded, not load: this asserts two attributes on an element
+      // in the markup and needs nothing that arrives later. Waiting for fonts,
+      // images and the analytics beacon took about thirty seconds under a
+      // parallel run and intermittently blew the sixty-second budget, which
+      // made a passing check look like a failing one.
+      await page.goto(OPEN, { waitUntil: "domcontentloaded" });
       const trap = page.locator("#lead-company-website");
       await expect(trap).toHaveAttribute("tabindex", "-1");
       await expect(trap).not.toBeInViewport();
@@ -245,5 +261,56 @@ test.describe("marketing site", () => {
       return results;
     });
     expect(small, "controls smaller than 24x24").toEqual([]);
+  });
+});
+
+test.describe("contrast on the actions people press", () => {
+  // The mobile menu sets a colour on every anchor inside it, and that selector
+  // outranks the accent button's own. The primary call to action in the phone
+  // menu was rendering ivory on copper at 2.31:1, under the 4.5:1 WCAG AA asks
+  // for text that size, while the same button elsewhere measured 7.01:1. One
+  // variant of three, and the one people reach on a phone.
+  function contrast(a: number[], b: number[]) {
+    const lum = (c: number[]) => {
+      const [r, g, bl] = c.map(v => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+    };
+    const [l1, l2] = [lum(a), lum(b)];
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+  }
+
+  test("every button and link in the mobile menu meets WCAG AA", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("http://localhost:8123/index.html");
+    await page.evaluate(() => document.querySelector(".mobile-menu")?.classList.add("open"));
+
+    const measured = await page.evaluate(() => {
+      const menu = document.querySelector(".mobile-menu");
+      if (!menu) return [];
+      const menuBg = getComputedStyle(menu).backgroundColor;
+      return [...menu.querySelectorAll("a, button")]
+        .filter(el => el.textContent?.trim())
+        .map(el => {
+          const s = getComputedStyle(el);
+          const transparent = s.backgroundColor.includes("rgba(0, 0, 0, 0)");
+          const size = parseFloat(s.fontSize);
+          return {
+            text: (el.textContent || "").trim().slice(0, 30),
+            fg: (s.color.match(/[\d.]+/g) || []).slice(0, 3).map(Number),
+            bg: ((transparent ? menuBg : s.backgroundColor).match(/[\d.]+/g) || []).slice(0, 3).map(Number),
+            large: size >= 24 || (size >= 18.66 && parseInt(s.fontWeight) >= 700),
+          };
+        });
+    });
+
+    expect(measured.length, "the mobile menu should have items to measure").toBeGreaterThan(5);
+    for (const item of measured) {
+      const ratio = contrast(item.fg, item.bg);
+      const needed = item.large ? 3 : 4.5;
+      expect(ratio, `"${item.text}" contrast`).toBeGreaterThanOrEqual(needed);
+    }
   });
 });

@@ -942,6 +942,21 @@ header nav {
   border-bottom: none;
 }
 
+/* The mobile menu sets `color: var(--text)` on every anchor inside it, and
+   `.mobile-menu a` (0,1,1) outranks `.btn-accent` (0,1,0). So the primary
+   call to action in the phone menu was rendering ivory on copper at 2.31:1,
+   under the 4.5:1 WCAG AA needs for text that size -- while the same button
+   at btn-sm and btn-lg, which do not sit under that selector, measured
+   7.01:1. One variant of three had the wrong text colour, and it was the one
+   people reach on a phone.
+
+   The rule above already existed to undo the menu's border on buttons. It
+   simply never undid the colour. */
+.mobile-menu .btn-accent,
+.mobile-menu .btn-primary {
+  color: var(--accent-ink);
+}
+
 .mobile-menu-nav {
   display: flex;
   flex-direction: column;
