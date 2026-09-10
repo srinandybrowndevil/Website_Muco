@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { requireWorkspace } from "@/lib/workspace";
 import { createClient } from "@/lib/supabase/server";
+import { PersonAccess } from "@/components/admin/PersonAccess";
 
 // Specification 11.2, item 2: one list of everyone, filterable by actor type.
 // It reads memberships as the source of truth for who exists and what they are,
@@ -21,12 +22,14 @@ function formatDate(value: string | null) {
 }
 
 export default async function PeoplePage() {
-  const { organizationId } = await requireWorkspace();
+  const { organizationId, userId } = await requireWorkspace();
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening people.");
 
   const [memberships, interns, staff] = await Promise.all([
-    client.from("memberships").select("user_id, role, profiles(full_name)").eq("organization_id", organizationId),
+    client.from("memberships")
+      .select("user_id, role, disabled_at, disabled_reason, profiles(full_name)")
+      .eq("organization_id", organizationId),
     client.from("intern_profiles").select("user_id, track, tier, starts_at, ends_at, status").eq("organization_id", organizationId),
     client.from("staff_profiles").select("user_id, roles, is_mentor, status").eq("organization_id", organizationId),
   ]);
@@ -50,6 +53,8 @@ export default async function PeoplePage() {
               .filter(Boolean).join(" · ")
           : "",
       status: intern?.status ?? staffRow?.status ?? "",
+      disabledAt: (m.disabled_at as string | null) ?? null,
+      disabledReason: (m.disabled_reason as string | null) ?? null,
     };
   }).sort((a, b) => a.role.localeCompare(b.role) || a.name.localeCompare(b.name));
 
@@ -75,15 +80,25 @@ export default async function PeoplePage() {
               <table>
                 <caption className="visually-hidden">People with access</caption>
                 <thead>
-                  <tr><th scope="col">Name</th><th scope="col">Workspace</th><th scope="col">Details</th><th scope="col">Status</th></tr>
+                  <tr><th scope="col">Name</th><th scope="col">Workspace</th><th scope="col">Details</th><th scope="col">Status</th><th scope="col">Access</th></tr>
                 </thead>
                 <tbody>
                   {people.map(person => (
-                    <tr key={person.id}>
+                    <tr key={person.id} className={person.disabledAt ? "person-off" : ""}>
                       <td>{person.name}</td>
                       <td>{ROLE_LABEL[person.role] ?? person.role}</td>
                       <td>{person.detail || "—"}</td>
                       <td>{person.status || "—"}</td>
+                      <td>
+                        <PersonAccess
+                          organizationId={organizationId}
+                          userId={person.id}
+                          name={person.name}
+                          disabledAt={person.disabledAt}
+                          disabledReason={person.disabledReason}
+                          isSelf={person.id === userId}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>

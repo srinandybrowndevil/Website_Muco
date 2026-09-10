@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell, AuthStatus } from "@/components/auth/AuthShell";
-import { appOrigin, safeInternalPath, workspaceDestination, onboardingDestination } from "@/lib/auth";
-import { primaryMembership } from "@/lib/membership";
+import { ACCESS_CLOSED_PATH, appOrigin, safeInternalPath, workspaceDestination, onboardingDestination } from "@/lib/auth";
+import { accessSwitchedOff, primaryMembership } from "@/lib/membership";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -24,6 +24,15 @@ export default function Login() {
   const [loading, setLoading] = useState<"password" | "google" | null>(null);
   const [message, setMessage] = useState<"google" | "error" | null>(null);
   const next = safeInternalPath(params.get("next"));
+  const accessClosed = params.get("access") === "closed";
+
+  // A switched-off account should not keep a live session sitting in the
+  // browser. The database already refuses it everything, but ending the
+  // session is the difference between reaching nothing and being signed out.
+  useEffect(() => {
+    if (!accessClosed || !isSupabaseConfigured) return;
+    createClient()?.auth.signOut();
+  }, [accessClosed]);
 
   async function signIn(event: FormEvent) {
     event.preventDefault(); setMessage(null);
@@ -37,12 +46,21 @@ export default function Login() {
     if (userError || !userData.user) { setLoading(null); setMessage("error"); return; }
     const { data: membershipRows, error: membershipError } = await supabase
       .from("memberships")
-      .select("organization_id, role")
+      .select("organization_id, role, disabled_at")
       .eq("user_id", userData.user.id);
     const membership = primaryMembership(membershipRows);
     if (membershipError) {
       setLoading(null);
       setMessage("error");
+      return;
+    }
+    // The credentials were right and the account still exists -- it has simply
+    // been switched off. Saying "check your details" here would send somebody
+    // round in circles trying passwords that were never the problem.
+    if (accessSwitchedOff(membershipRows)) {
+      await supabase.auth.signOut();
+      setLoading(null);
+      router.replace(ACCESS_CLOSED_PATH);
       return;
     }
     const destination = membership ? workspaceDestination(membership.role, next) : onboardingDestination(next);
@@ -69,6 +87,11 @@ export default function Login() {
   return <AuthShell>
     {!isSupabaseConfigured && <span className="demo">Demo mode · No credentials required</span>}
     <h2>Welcome back.</h2><p>Enter your details to access your workspace.</p>
+    {accessClosed && <AuthStatus tone="error" title="This account has been switched off">
+      An administrator ended this account&apos;s access to the workspace. Signing in again
+      will not restore it. If you think that is a mistake, speak to whoever administers
+      your workspace — they can switch it back on.
+    </AuthStatus>}
     {message === "google" && <AuthStatus title="Google sign-in is not configured">Ask the portal administrator to enable Google in Supabase Auth.</AuthStatus>}
     {message === "error" && <AuthStatus tone="error" title="Unable to sign in">Check your details and try again, or continue with Google.</AuthStatus>}
     <form onSubmit={signIn}>

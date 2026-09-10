@@ -7,6 +7,13 @@ export const STAFF_HOME = "/staff";
 
 export const DEFAULT_AUTHENTICATED_PATH = ADMIN_HOME;
 
+// Where somebody goes when their access has been switched off. Deliberately
+// not /complete-profile: to primaryMembership the two states look the same,
+// but sending a switched-off account to the onboarding form would invite the
+// person to sign themselves back up, and the sign-in screen is the one page
+// that can explain the situation without offering a way around it.
+export const ACCESS_CLOSED_PATH = "/login?access=closed";
+
 export function isClientPath(pathname: string) {
   return pathname === CLIENT_HOME || pathname.startsWith(`${CLIENT_HOME}/`);
 }

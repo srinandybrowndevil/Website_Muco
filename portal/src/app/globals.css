@@ -3141,3 +3141,30 @@ td span small {
 .account-done { border: 1px solid var(--line); border-left: 2px solid var(--green); border-radius: 8px; padding: 15px 17px; }
 .account-done b { display: block; margin-bottom: 5px; }
 .account-done p { color: var(--text-2); font-size: 13px; }
+
+/* Switching somebody off, on the people list. The state has to read at a
+   glance from across the table -- the row you are looking for in a hurry is
+   the one that is off -- so the whole row dims and the word sits next to it,
+   rather than the state being implied by which button is showing. */
+.accesscell { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 190px; }
+.accesscell .muted { color: var(--text-dim); font-size: 12px; }
+.accessstate { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+.accessstate.on { color: var(--text-2); }
+.accessstate.on::before,
+.accessstate.off::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+.accessstate.on::before { background: var(--green, #6ec08a); }
+.accessstate.off { color: var(--accent); }
+.accessstate.off::before { background: var(--accent); }
+.secondary.compact { min-height: 35px; padding: 0 12px; font-size: 12px; }
+
+.accessconfirm { display: flex; flex-direction: column; gap: 7px; width: 100%; max-width: 320px; padding: 11px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface-2); }
+.accessconfirm label { font-size: 12px; color: var(--text-2); }
+.accessconfirm input { width: 100%; }
+.accessbuttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.accessconfirm .muted { font-size: 11px; line-height: 1.45; }
+.accesscell .error { font-size: 12px; margin: 0; max-width: 320px; }
+
+/* Dimmed, not hidden: somebody who has been switched off still belongs in the
+   list, with their history and a way back. */
+tr.person-off td { opacity: 0.62; }
+tr.person-off td:last-child { opacity: 1; }

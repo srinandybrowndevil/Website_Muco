@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { primaryMembership } from "@/lib/membership";
-import { homeForRole } from "@/lib/auth";
+import { accessSwitchedOff, primaryMembership } from "@/lib/membership";
+import { ACCESS_CLOSED_PATH, homeForRole } from "@/lib/auth";
 
 // The employee workspace. Contracted builders live here too -- specification
 // A9 groups them with employees rather than inventing a fifth portal -- which
@@ -14,9 +14,10 @@ export async function requireStaff() {
   if (error || !user) redirect("/login");
 
   const { data: rows, error: membershipError } = await client.from("memberships")
-    .select("organization_id, role").eq("user_id", user.id);
+    .select("organization_id, role, disabled_at").eq("user_id", user.id);
   if (membershipError) throw new Error("Workspace access could not be checked.");
   const membership = primaryMembership(rows);
+  if (accessSwitchedOff(rows)) redirect(ACCESS_CLOSED_PATH);
   if (!membership) redirect("/complete-profile");
   if (membership.role !== "employee") redirect(homeForRole(membership.role));
 

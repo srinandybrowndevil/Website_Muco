@@ -19,7 +19,7 @@
 // holds a client row is a member of staff; the team workspace is the account
 // they are actually working in.
 
-export type MembershipRow = { organization_id?: string; role: string };
+export type MembershipRow = { organization_id?: string; role: string; disabled_at?: string | null };
 
 const ROLE_PRIORITY = ["admin", "member", "client"];
 
@@ -30,11 +30,29 @@ function rank(role: string) {
 
 /** The membership an account acts under: highest privilege, then lowest org id. */
 export function primaryMembership<T extends MembershipRow>(rows: T[] | null | undefined): T | null {
-  if (!rows || rows.length === 0) return null;
-  return [...rows].sort((a, b) =>
+  // A membership that has been switched off is not a membership. Dropping it
+  // here, in the function every caller already funnels through, is the same
+  // argument as putting disabled_at inside the policy predicates: one place to
+  // change, and no page added later can forget to check. A caller that selects
+  // without disabled_at simply sees the row as active, which is the previous
+  // behaviour rather than a new hole -- the database refuses it regardless.
+  const active = (rows ?? []).filter(row => !row.disabled_at);
+  if (active.length === 0) return null;
+  return active.sort((a, b) =>
     rank(a.role) - rank(b.role) ||
     (a.organization_id ?? "").localeCompare(b.organization_id ?? "")
   )[0];
+}
+
+/**
+ * True when this account holds memberships and every one of them is switched
+ * off. Worth separating from "has no membership at all": the two look
+ * identical to primaryMembership but deserve opposite destinations. Somebody
+ * with no membership is a new customer to be onboarded; somebody who has been
+ * switched off must not be walked back through sign-up.
+ */
+export function accessSwitchedOff<T extends MembershipRow>(rows: T[] | null | undefined): boolean {
+  return !!rows && rows.length > 0 && rows.every(row => !!row.disabled_at);
 }
 
 /** Ordering for callers that have already filtered to team roles. */

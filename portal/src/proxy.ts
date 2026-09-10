@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
-import { homeForRole, isAccountPath, isAdminPath, isClientPath, isInternPath, isStaffPath, workspaceDestination } from "@/lib/auth";
-import { primaryMembership } from "@/lib/membership";
+import { ACCESS_CLOSED_PATH, homeForRole, isAccountPath, isAdminPath, isClientPath, isInternPath, isStaffPath, workspaceDestination } from "@/lib/auth";
+import { accessSwitchedOff, primaryMembership } from "@/lib/membership";
 import { hostForWorkspace, stripWorkspacePrefix, workspaceForHost } from "@/lib/workspace-host";
 
 // /verify is deliberately public: an employer checking a certificate has no
@@ -71,12 +71,16 @@ export async function proxy(request:NextRequest){
   const userId=typeof claims.sub==="string"?claims.sub:null;
   const {data:rows}=userId?await supabase
     .from("memberships")
-    .select("organization_id,role")
+    .select("organization_id,role,disabled_at")
     .eq("user_id",userId):{data:null};
   const membership=primaryMembership(rows);
 
   if(!membership){
     if(isPublic(path))return serve();
+    // Switched off is not the same as never joined, even though both leave
+    // primaryMembership with nothing to return. Onboarding somebody whose
+    // access was just revoked would be the product arguing with itself.
+    if(accessSwitchedOff(rows))return redirect(ACCESS_CLOSED_PATH);
     return redirect("/complete-profile");
   }
 

@@ -29,7 +29,7 @@ export default async function ChangePasswordPage() {
   // Only to offer a way back to where this person belongs. A missing
   // membership is not a reason to refuse someone their own account settings.
   const { data: rows } = await client.from("memberships")
-    .select("organization_id, role").eq("user_id", user.id);
+    .select("organization_id, role, disabled_at").eq("user_id", user.id);
   const membership = primaryMembership(rows);
   const home = membership ? homeForRole(membership.role) : "/";
 

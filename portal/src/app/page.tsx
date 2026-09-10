@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { primaryMembership } from "@/lib/membership";
-import { workspaceDestination } from "@/lib/auth";
+import { accessSwitchedOff, primaryMembership } from "@/lib/membership";
+import { ACCESS_CLOSED_PATH, workspaceDestination } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 // The team workspace used to live here. It now lives under /admin so an intern
@@ -21,13 +21,14 @@ export default async function Root() {
   if (!user) redirect("/login");
 
   const { data: rows, error: membershipError } = await client.from("memberships")
-    .select("organization_id, role").eq("user_id", user.id);
+    .select("organization_id, role, disabled_at").eq("user_id", user.id);
   // A failed lookup is not the same as having no workspace. Without this, a
   // transient error sent an existing customer, intern or employee to the
   // onboarding form as though their account did not exist.
   if (membershipError) throw new Error("Your workspace could not be opened. Refresh and try again.");
 
   const membership = primaryMembership(rows);
+  if (accessSwitchedOff(rows)) redirect(ACCESS_CLOSED_PATH);
   if (!membership) redirect("/complete-profile");
 
   redirect(workspaceDestination(membership.role));

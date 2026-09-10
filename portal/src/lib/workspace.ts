@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { primaryMembership } from "@/lib/membership";
-import { ADMIN_HOME, CLIENT_HOME } from "@/lib/auth";
+import { accessSwitchedOff, primaryMembership } from "@/lib/membership";
+import { ACCESS_CLOSED_PATH, ADMIN_HOME, CLIENT_HOME } from "@/lib/auth";
 
 // crm_schema_version() is `select 8` -- a constant written by a migration, not
 // per-request data. Reading it cost a full Postgres round trip on every page
@@ -33,9 +33,10 @@ export async function requireWorkspace(customer = false) {
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user) redirect("/login");
   const { data: rows, error: membershipError } = await client.from("memberships")
-    .select("organization_id, role").eq("user_id", user.id);
+    .select("organization_id, role, disabled_at").eq("user_id", user.id);
   const data = primaryMembership(rows);
   if (membershipError) throw new Error("Workspace access could not be checked. Check the database migrations.");
+  if (accessSwitchedOff(rows)) redirect(ACCESS_CLOSED_PATH);
   if (!data) redirect("/complete-profile");
   if (customer && data.role !== "client") redirect(ADMIN_HOME);
   if (!customer && data.role === "client") redirect(CLIENT_HOME);

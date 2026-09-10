@@ -80,6 +80,35 @@ test.describe("your own account", () => {
   }
 });
 
+test.describe("an account that has been switched off", () => {
+  // The rule itself is enforced in the database and proved there, against
+  // production, by disabling a real membership inside a transaction and
+  // watching every policy stop answering. What these checks cover is the part
+  // a person actually meets: being told what happened, on whichever address
+  // they use, instead of being bounced to the sign-up form.
+  for (const host of ["localhost:3100", "intern.localhost:3100", "employee.localhost:3100"]) {
+    test(`${host} explains it rather than offering onboarding`, async ({ page }) => {
+      const errors = consoleErrors(page);
+      await page.goto(`http://${host}/login?access=closed`);
+
+      await expect(page.getByText(/this account has been switched off/i)).toBeVisible();
+      // The wrong destination is the whole point of the check: sending someone
+      // whose access was just revoked to "create an account" would invite them
+      // to sign themselves straight back in.
+      await expect(page).toHaveURL(/\/login/);
+      expect(page.url(), "stays on the address it was asked on").toContain(host);
+      expect(errors, `${host} console errors`).toEqual([]);
+    });
+  }
+
+  test("an ordinary sign-in page says nothing of the kind", async ({ page }) => {
+    // Guards against the notice being pinned open, which would tell every
+    // visitor their account was revoked.
+    await page.goto("http://localhost:3100/login");
+    await expect(page.getByText(/switched off/i)).toHaveCount(0);
+  });
+});
+
 test.describe("sign-up", () => {
   test("refuses a breached password without creating an account", async ({ page }) => {
     const errors = consoleErrors(page);
