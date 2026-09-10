@@ -59,7 +59,13 @@ export async function proxy(request:NextRequest){
     response.cookies.getAll().forEach(cookie=>result.cookies.set(cookie));
     return result;
   };
-  if(!claims&&!isPublic(path))return redirect(`/login?next=${encodeURIComponent(`${rawPath}${request.nextUrl.search}`)}`);
+  // The destination is remembered in the app's own terms, with the workspace
+  // prefix, because that is the only form workspaceDestination will keep: it
+  // hands back anything that does not sit inside the role's own workspace. A
+  // short /certificate looks like it belongs to nobody, so signing in would
+  // quietly drop it and land the intern on their home page instead.
+  // The proxy shortens it again on the way back.
+  if(!claims&&!isPublic(path))return redirect(`/login?next=${encodeURIComponent(`${path}${request.nextUrl.search}`)}`);
   if(!claims)return serve();
 
   const userId=typeof claims.sub==="string"?claims.sub:null;
