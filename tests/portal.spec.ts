@@ -64,6 +64,22 @@ test.describe("workspace front doors", () => {
   });
 });
 
+test.describe("your own account", () => {
+  // /account belongs to no workspace. On a workspace address it must not be
+  // rewritten to /admin/account or /intern/account, and it must not be treated
+  // as trespassing in somebody else's workspace.
+  for (const host of ["localhost:3100", "admin.localhost:3100", "intern.localhost:3100"]) {
+    test(`${host} reaches the password page without a workspace prefix`, async ({ page }) => {
+      await page.goto(`http://${host}/account/password`, { waitUntil: "commit" });
+      await page.waitForURL(/\/login/);
+      const url = page.url();
+      expect(url, "stays on the address it was asked on").toContain(host);
+      expect(url, "keeps the destination unprefixed")
+        .toContain("next=%2Faccount%2Fpassword");
+    });
+  }
+});
+
 test.describe("sign-up", () => {
   test("refuses a breached password without creating an account", async ({ page }) => {
     const errors = consoleErrors(page);

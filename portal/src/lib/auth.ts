@@ -15,6 +15,17 @@ export function isAdminPath(pathname: string) {
   return pathname === ADMIN_HOME || pathname.startsWith(`${ADMIN_HOME}/`);
 }
 
+/**
+ * Your own account, which belongs to no workspace.
+ *
+ * Every other path here answers "which workspace owns this". This one answers
+ * "this is yours wherever you are", so it is reachable by any signed-in person
+ * from any of the four addresses, and never takes a workspace prefix.
+ */
+export function isAccountPath(pathname: string) {
+  return pathname === "/account" || pathname.startsWith("/account/");
+}
+
 export function isInternPath(pathname: string) {
   return pathname === INTERN_HOME || pathname.startsWith(`${INTERN_HOME}/`);
 }

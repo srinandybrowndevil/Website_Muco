@@ -3119,3 +3119,25 @@ td span small {
    urgent, nothing would read as urgent. */
 .duelist li.late { border-left: 2px solid var(--red); }
 .duelist li.late small { color: var(--red); }
+
+/* Your own account: no workspace chrome, because it belongs to none of them. */
+.account { display: grid; place-items: center; min-height: 100dvh; padding: 32px 20px; }
+.account-card { width: min(440px, 100%); }
+.account-card h1 { margin: 4px 0 6px; }
+.account-who { color: var(--text-dim); font-size: 13px; margin-bottom: 22px; }
+.account-form { display: grid; gap: 7px; }
+.account-form label { font-size: 12px; color: var(--text-2); margin-top: 8px; }
+.account-form input {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+.account-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.account-form button { margin-top: 14px; }
+.account-hint { color: var(--text-dim); font-size: 12px; margin-top: 12px; }
+.account-done { border: 1px solid var(--line); border-left: 2px solid var(--green); border-radius: 8px; padding: 15px 17px; }
+.account-done b { display: block; margin-bottom: 5px; }
+.account-done p { color: var(--text-2); font-size: 13px; }

@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
-import { homeForRole, isAdminPath, isClientPath, isInternPath, isStaffPath, workspaceDestination } from "@/lib/auth";
+import { homeForRole, isAccountPath, isAdminPath, isClientPath, isInternPath, isStaffPath, workspaceDestination } from "@/lib/auth";
 import { primaryMembership } from "@/lib/membership";
 import { hostForWorkspace, stripWorkspacePrefix, workspaceForHost } from "@/lib/workspace-host";
 
@@ -36,7 +36,7 @@ export async function proxy(request:NextRequest){
   // path is written without it. Everything below this line reasons in the
   // app's own terms -- /admin/audit -- whichever address it arrived on.
   const rawPath=request.nextUrl.pathname;
-  const path=hostWorkspace&&!isPublic(rawPath)&&rawPath!==hostWorkspace&&!rawPath.startsWith(`${hostWorkspace}/`)
+  const path=hostWorkspace&&!isPublic(rawPath)&&!isAccountPath(rawPath)&&rawPath!==hostWorkspace&&!rawPath.startsWith(`${hostWorkspace}/`)
     ?`${hostWorkspace}${rawPath==="/"?"":rawPath}`
     :rawPath;
   // Serve the workspace path while the address bar keeps the short one.
@@ -98,7 +98,7 @@ export async function proxy(request:NextRequest){
   // Arriving at another workspace's address is not a refusal, it is the wrong
   // front door. Send them to their own address rather than showing them a
   // locked page on somebody else's.
-  if(hostWorkspace&&hostWorkspace!==home&&!isPublic(rawPath)){
+  if(hostWorkspace&&hostWorkspace!==home&&!isPublic(rawPath)&&!isAccountPath(rawPath)){
     const ownHost=hostForWorkspace(requestHost,home);
     if(ownHost){
       const target=request.nextUrl.clone();
@@ -127,7 +127,8 @@ export async function proxy(request:NextRequest){
     : isAdminPath(path) ? "/admin"
     : null;
 
-  if(!isPublic(path) && path !== "/" && owner !== home){
+  // Your own account is not a workspace, so it is never somebody else's.
+  if(!isPublic(path) && !isAccountPath(path) && path !== "/" && owner !== home){
     // A path inside someone else's workspace says so, because landing
     // elsewhere reads as a broken link rather than the wrong account.
     // A path in no workspace at all is simply gone, and goes home quietly.
