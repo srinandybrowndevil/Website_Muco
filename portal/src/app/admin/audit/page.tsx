@@ -32,6 +32,7 @@ const FILTERS = [
   { key: "people", label: "People & access" },
   { key: "documents", label: "Documents" },
   { key: "views", label: "Views only" },
+  { key: "limits", label: "Dropped entries" },
 ] as const;
 
 const FILTER_ACTIONS: Record<string, string[]> = {
@@ -42,6 +43,9 @@ const FILTER_ACTIONS: Record<string, string[]> = {
   documents: ["certificate.view", "insert.intern_certificates", "update.intern_certificates",
               "delete.intern_certificates", "client_pii.view"],
   views: ["compensation.view", "certificate.view", "client_pii.view"],
+  // Not a view, but the one entry a reader must never miss: it marks a stretch
+  // where entries were dropped, so a gap in the trail is visible as a gap.
+  limits: ["audit.rate_limited"],
 };
 
 // Said as a sentence about a person, because that is how it will be read when
@@ -53,6 +57,8 @@ function describe(row: AuditRow, nameOf: (id: unknown) => string): string {
     case "compensation.view": return "Opened their own compensation";
     case "certificate.view": return `Opened certificate ${String(detail.serial ?? "")}`.trim();
     case "client_pii.view": return "Opened a client's contact details";
+    case "audit.rate_limited":
+      return "Hit the recording limit — further entries from this account were dropped for a minute";
     case "insert.compensation": return `Recorded compensation for ${subject}`;
     case "update.compensation":
       return detail.amount_changed

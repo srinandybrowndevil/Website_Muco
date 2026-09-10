@@ -5,7 +5,6 @@
 User-agent: *
 Allow: /
 Disallow: /404.html
-Disallow: /logo-showcase.html
 
 # OpenAI — ChatGPT training and browsing
 User-agent: GPTBot

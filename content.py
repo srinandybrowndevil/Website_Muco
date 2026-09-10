@@ -1306,7 +1306,7 @@ def build_home():
 
                 <p class="mockup-input-bar">
                   <span>Meyra is one of our own builds &mdash; not a product for sale yet.</span>
-                  <a class="card-cta" href="work.html#meyra">Read more</a>
+                  <a class="card-cta" href="work.html#meyra">Read more about Meyra</a>
                 </p>
               </div>
             </div>
@@ -3196,7 +3196,6 @@ def build_robots():
 User-agent: *
 Allow: /
 Disallow: /404.html
-Disallow: /logo-showcase.html
 {blocks}
 Sitemap: {domain}/sitemap.xml
 """.format(domain=DOMAIN, blocks=blocks)
