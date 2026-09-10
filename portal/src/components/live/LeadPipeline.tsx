@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CrmRow, currency, label } from "@/lib/crm";
 import { useLiveQuery } from "@/lib/use-live-query";
 import { EmptyState } from "../EmptyState";
+import { ActivityTimeline } from "./ActivityTimeline";
 
 // The stages, in the order money actually moves through them. This mirrors the
 // lead_stage type in the database rather than restating it loosely: a stage the
@@ -39,6 +40,18 @@ export function LeadPipeline({ organizationId }: { organizationId: string }) {
   // Applied on top of what the server last sent, so a card moves the instant it
   // is dropped instead of after a round trip.
   const [optimistic, setOptimistic] = useState<Record<string, Stage>>({});
+  // The card whose history is open. Held by id rather than by object so it
+  // follows the live data: a lead edited elsewhere updates in the open panel
+  // instead of showing what it looked like when the panel opened.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const detail = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const box = detail.current;
+    if (!box) return;
+    if (openId && !box.open) box.showModal();
+    if (!openId && box.open) box.close();
+  }, [openId]);
 
   const load = useCallback(async () => {
     const client = createClient()!;
@@ -172,6 +185,16 @@ export function LeadPipeline({ organizationId }: { organizationId: string }) {
                         draggable
                         onDragStart={() => setDragging(id)}
                         onDragEnd={() => { setDragging(null); setOver(null); }}
+                        onClick={() => setOpenId(id)}
+                        onKeyDown={event => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setOpenId(id);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Open ${String(lead.name)}`}
                       >
                         <b>{String(lead.name)}</b>
                         {lead.company ? <span>{String(lead.company)}</span> : null}
@@ -185,7 +208,11 @@ export function LeadPipeline({ organizationId }: { organizationId: string }) {
                             that can only be worked with a mouse cannot be worked
                             by everyone, so every card carries the same move as a
                             control that works from the keyboard. */}
-                        <label className="leadcard-move">
+                        <label
+                          className="leadcard-move"
+                          onClick={event => event.stopPropagation()}
+                          onKeyDown={event => event.stopPropagation()}
+                        >
                           <span className="visually-hidden">Stage for {String(lead.name)}</span>
                           <select
                             value={stageOf(lead)}
@@ -208,6 +235,38 @@ export function LeadPipeline({ organizationId }: { organizationId: string }) {
           })}
         </div>
       )}
+
+      <dialog ref={detail} className="detailbox" onClose={() => setOpenId(null)}>
+        {(() => {
+          const lead = rows.find(r => String(r.id) === openId);
+          if (!lead) return null;
+          return (
+            <>
+              <div className="detailbox-head">
+                <div>
+                  <p className="eyebrow">{label(stageOf(lead))}</p>
+                  <h2>{String(lead.name)}</h2>
+                  <p>
+                    {[lead.company, lead.email, lead.source && `via ${label(lead.source)}`]
+                      .filter(Boolean).map(String).join(" · ") || "No other details recorded."}
+                  </p>
+                </div>
+                <button className="secondary compact" onClick={() => setOpenId(null)}>Close</button>
+              </div>
+
+              <p className="detailbox-value">{currency(lead.estimated_value)}</p>
+              <p className="detailbox-since">Last contact {sinceLabel(lead.last_contact_at)}.</p>
+
+              <h3>History</h3>
+              <ActivityTimeline
+                organizationId={organizationId}
+                entityType="lead"
+                entityId={String(lead.id)}
+              />
+            </>
+          );
+        })()}
+      </dialog>
 
       {rows.length === MAX_ON_BOARD && (
         <p className="invoicedoc-note">

@@ -102,25 +102,32 @@ test.describe("marketing site", () => {
     });
   }
 
-  test("every internal link resolves", async ({ page, request }) => {
-    const seen = new Set<string>();
-    const broken: string[] = [];
+  test("every internal link resolves", async ({ request }) => {
+    // No browser. Rendering 25 pages just to read their href attributes is
+    // most of a minute of work to answer a question the raw HTML already
+    // answers, and it was timing out on a loaded machine.
+    const targets = new Map<string, string>();   // link -> the page that has it
 
     for (const file of PAGES) {
-      await page.goto(`${BASE}/${file}`);
-      const hrefs = await page.evaluate(() =>
-        Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]"))
-          .map(a => a.getAttribute("href") || "")
-          .filter(h => h && !h.startsWith("#") && !/^(https?:|mailto:|tel:)/.test(h)));
+      const response = await request.get(`${BASE}/${file}`);
+      expect(response.status(), `${file} should serve 200`).toBe(200);
+      const html = await response.text();
 
-      for (const href of hrefs) {
+      for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*["']([^"']+)["']/gi)) {
+        const href = match[1];
+        if (!href || href.startsWith("#") || /^(https?:|mailto:|tel:|javascript:)/i.test(href)) continue;
         const target = href.split("#")[0];
-        if (!target || seen.has(target)) continue;
-        seen.add(target);
-        const response = await request.get(`${BASE}/${target.replace(/^\//, "")}`);
-        if (response.status() >= 400) broken.push(`${file} -> ${href} (${response.status()})`);
+        if (target && !targets.has(target)) targets.set(target, file);
       }
     }
+
+    const broken: string[] = [];
+    for (const [target, from] of targets) {
+      const response = await request.get(`${BASE}/${target.replace(/^\//, "")}`);
+      if (response.status() >= 400) broken.push(`${from} -> ${target} (${response.status()})`);
+    }
+
+    expect(targets.size, "links were actually found to check").toBeGreaterThan(0);
     expect(broken, "internal links that 404").toEqual([]);
   });
 
