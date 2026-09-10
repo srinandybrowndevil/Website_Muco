@@ -48,7 +48,11 @@ export function AuthStatus({ tone = "success", title, children }: AuthStatusProp
       aria-live={tone === "error" ? "assertive" : "polite"}
     >
       <b>{title}</b>
-      <p>{children}</p>
+      {/* A div, not a p: callers pass a list of validation errors, and a
+          paragraph cannot legally contain one. The browser closes the
+          paragraph early when it happens, which is invalid markup and a
+          console error on the screen where someone is already stuck. */}
+      <div className="authstatus-body">{children}</div>
     </div>
   );
 }

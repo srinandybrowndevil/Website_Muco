@@ -38,3 +38,10 @@ _audit.js
 # reports/mobile/ is regenerated screenshots and measurements from
 # scripts/mobile-audit.cjs, which nothing serves and every run rewrites.
 /reports/mobile/
+
+# Playwright run output
+test-results/
+playwright-report/
+
+# Dependencies
+node_modules/

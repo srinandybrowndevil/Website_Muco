@@ -3227,15 +3227,26 @@ def build_vercel_json():
         img_src += " https://www.google-analytics.com"
     if GTM_CONTAINER_ID:
         script_src += " " + google_tag_manager_csp_hash()
+        # The container also reports back by requesting a 1x1 image from its own
+        # host, so allowing only the script leaves those beacons blocked. Found
+        # by a browser test: the page looked fine and the console said otherwise.
+        img_src += " https://www.googletagmanager.com"
     if CLARITY_ENABLED:
         # Clarity is loaded by the GTM container, so the policy has to admit
         # both the tag script and the endpoints it uploads sessions to. It is a
         # session recorder: it captures pointer movement, clicks, scrolling and
         # page content, which is why it is named in the privacy policy rather
         # than folded into "analytics".
-        script_src += " https://www.clarity.ms"
+        # Every Clarity host, by wildcard, because naming one of them is how
+        # this broke: the policy allowed www.clarity.ms, Clarity serves its
+        # script from scripts.clarity.ms and its pixel from c.clarity.ms, and
+        # the browser blocked both. Clarity had never once run in production
+        # while the privacy policy told visitors it did. A browser test caught
+        # it; nothing in the build could, because a blocked script is not a
+        # build error.
+        script_src += " https://*.clarity.ms"
         connect_src += " https://*.clarity.ms https://c.bing.com"
-        img_src += " https://c.bing.com"
+        img_src += " https://*.clarity.ms https://c.bing.com"
 
     csp = "; ".join([
         "default-src 'self'",

@@ -6,6 +6,11 @@
   "scripts": {
     "build": "node scripts/build-site.mjs",
     "dev": "node scripts/dev-site.mjs",
-    "test": "node --test test-*.mjs"
+    "test": "node --test test-*.mjs",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
   }
 }

@@ -1,0 +1,109 @@
+name: checks
+
+# Every guarantee in the delivery reports came from a probe someone ran by hand
+# once. This runs them again on every push, so they keep holding after the
+# session that made them ended.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  site:
+    name: marketing site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - name: Build the site
+        run: python build.py
+
+      # The generator writes vercel.json, which carries the Content-Security-
+      # Policy. A build that changes the policy and forgets a host looks
+      # perfectly healthy here and blocks a script in the browser -- which is
+      # exactly how Clarity ran for nobody. The browser tests below are what
+      # catch that, so a clean build is necessary and not sufficient.
+      - name: Fail if the build left the tree dirty
+        run: git diff --exit-code -- . ':!package-lock.json'
+
+      - run: npm ci
+      - run: npm test
+
+      - run: npx playwright install --with-deps chromium
+      - name: Browser tests
+        run: npx playwright test tests/marketing.spec.ts
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-site
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  portal:
+    name: portal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      - run: npm --prefix portal ci
+      - name: Typecheck
+        working-directory: portal
+        run: npx tsc --noEmit
+      - run: npm --prefix portal run lint
+      - run: npm --prefix portal run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
+  portal-browser:
+    name: portal in a browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      # The portal refuses to serve without Supabase configured, which is the
+      # right behaviour and means these cannot run until the two publishable
+      # values are set as repository secrets. Skipped rather than faked: a test
+      # that runs against a stub proves nothing about the real thing.
+      - name: Check the workspace secrets exist
+        id: secrets
+        run: |
+          if [ -n "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Portal browser tests skipped - set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as repository secrets to enable them."
+          fi
+
+      - if: steps.secrets.outputs.present == 'true'
+        run: npm ci
+      - if: steps.secrets.outputs.present == 'true'
+        run: npm --prefix portal ci
+      - if: steps.secrets.outputs.present == 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.secrets.outputs.present == 'true'
+        name: Browser tests
+        run: npx playwright test tests/portal.spec.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-portal
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
