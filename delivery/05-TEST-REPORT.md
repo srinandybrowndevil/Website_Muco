@@ -135,6 +135,73 @@ Re-run after the fix:
 - Failed: 3 — C2, C4 and F5. All three were fixed and re-tested within this station.
 - Not run: the five areas declared above.
 
+---
+
+## Second pass — re-test after the punch list was closed
+
+Run on instruction after QA, once F-06 through F-10 were fixed.
+
+### Family H — Access control after the policy rewrite
+
+All 23 policies were rewritten to evaluate the caller's identity once per statement instead of once per row. That is an optimisation on paper. On paper is not evidence, so the isolation guarantees were re-established from scratch against production.
+
+| # | Case | Expected | Actual | Result |
+|---|---|---|---|---|
+| H1 | Policy identities preserved | 23 of 23 match name, command, permissiveness, roles | 23 of 23 | Pass |
+| H2 | Any policy still evaluating per row | None | None | Pass |
+| H3 | Any table gained a policy | None | None | Pass |
+| H4 | Client sees own customer / other client's | 1 / 0 | 1 / 0 | Pass |
+| H5 | Client sees own project / other client's | 1 / 0 | 1 / 0 | Pass |
+| H6 | Client sees own invoice / other client's | 1 / 0 | 1 / 0 | Pass |
+| H7 | Client sees own request / other client's | 1 / 0 | 1 / 0 | Pass |
+| H8 | Client sees any source archive | 0 | 0 | Pass |
+| H9 | Client marks own invoice paid | Refused | 0 rows | Pass |
+| H10 | Client grants themselves administrator | Refused | Row-level security violation | Pass |
+| H11 | Active intern window state | active | active | Pass |
+| H12 | Active intern writes a work log | Allowed | Allowed | Pass |
+| H13 | Expired intern window state | closed | closed | Pass |
+| H14 | Expired intern writes a work log | Refused | Row-level security violation | Pass |
+| H15 | Expired intern amends a work log | Refused | 0 rows | Pass |
+| H16 | Expired intern reads own work log | Still allowed | 1 row | Pass |
+| H17 | Employee sees own pay / another person's | 1 / 0 | 1 / 0 | Pass |
+| H18 | Employee raises their own pay | Refused | 0 rows | Pass |
+| H19 | Client reads the audit log | 0 | 0 | Pass |
+| H20 | Administrator reads the audit log | Rows visible | 4 | Pass |
+| H21 | Client reads the profiles directory | Own row only | 1 | Pass |
+
+The intern lockout cases (H11 to H16) carried the most risk, because that policy passes the caller's identity into a function inside a subquery — the shape most likely to change meaning when rewritten. It did not. All probe rows were removed afterwards.
+
+### Family I — Query contracts on screens that were never opened
+
+The administrator screens could not be rendered signed in. What could be tested is the queries they issue, replayed against the live API without a session. PostgREST resolves a query's table relationships before it applies row security, so an anonymous call separates a malformed query from a valid one returning nothing.
+
+| # | Query | Expected | Actual | Result |
+|---|---|---|---|---|
+| I1 | Audit log with actor name | Resolves | Resolves; refused by policy, as it should be | Pass |
+| I2 | People list with member names | Resolves | `[]` | Pass |
+| I3 | Team settings with member names | Resolves | `[]` | Pass |
+| I4 | Compensation with its payments | Resolves | `[]` | Pass |
+| I5 | Request detail with customer contact | Resolves | `[]` | Pass |
+| I6 | Certificate with holder name | Resolves | **`PGRST201`, ambiguous relationship** | **Fail — QA finding F-11** |
+| I6 | Certificate, after naming the foreign key | Resolves | `[]` | Pass |
+
+I6 is the finding this pass exists to justify. The certificate page had never been opened with data, its query was invalid, and its error was discarded — so it would have printed a certificate with "Not recorded" where the intern's name belongs. Nothing in the type check, the lint or the build could catch it: the code is valid, and the fault is in what the database was asked.
+
+### Family J — Regression after removing the enquiry endpoint
+
+| # | Case | Actual | Result |
+|---|---|---|---|
+| J1 | Remaining contract test | 1 test, passing | Pass |
+| J2 | Static site build | Rebuilds clean | Pass |
+| J3 | References to the removed endpoint or its variables | None in source, README, deployment guide or example environment | Pass |
+| J4 | Portal typecheck, lint, build | No errors | Pass |
+
+### Second-pass summary
+
+- Cases run: 32
+- Passed: 31
+- Failed: 1 — I6, fixed and re-tested within the pass
+
 ## Handoff checklist for QA
 
 1. Three failures are recorded with reproduction and evidence. Two share a root cause and are packaged as finding F-01.

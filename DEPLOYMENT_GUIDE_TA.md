@@ -204,16 +204,13 @@ Production domain இன்னும் இல்லாவிட்டால் 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
-RESEND_API_KEY=OPTIONAL_RESEND_KEY
-LEAD_TO_EMAIL=YOUR_RECEIVING_EMAIL
-LEAD_FROM_EMAIL=YOUR_VERIFIED_RESEND_SENDER
 ```
 
-Supabase public values website API-க்கும் CRM-க்கும் ஒரே project-ல் இருந்து இருக்க வேண்டும். `RESEND_API_KEY` இல்லாவிட்டாலும் accepted lead function log-ல் பதிவாகும்; Supabase tables setup ஆனபின் CRM-லும் சேமிக்கப்படும். Resend இல்லாமல் notification email அனுப்பப்படாது.
+Supabase public values website API-க்கும் CRM-க்கும் ஒரே project-ல் இருந்து இருக்க வேண்டும். இந்த இரண்டு values `api/event.js` analytics intake-க்கு மட்டும் தான். Contact actions portal-ல் நடக்கு, அதனால் website-க்கு email key எதுவும் தேவை இல்லை.
 
 7. Deploy அழுத்தவும். Build logs-ல் public files packaged என்ற message பார்க்கவும்.
-8. Deployment → Functions-ல் `/api/lead`, `/api/event` இருப்பதைச் சரிபார்க்கவும். `api/` functions repository root-ல் இருக்க வேண்டும்; அவற்றை static output folder-க்கு copy செய்ய வேண்டாம். [Vercel Node functions](https://vercel.com/docs/functions/runtimes/node-js)
-9. Contact form-ல் ஒரு தெளிவான test enquiry அனுப்பவும்; CRM `/enquiries`-ல் அது வந்ததா பார்க்கவும். WhatsApp draft திறப்பதும் database-ல் record இருப்பதும் இரண்டு தனித்தனி checks.
+8. Deployment → Functions-ல் `/api/event` இருப்பதைச் சரிபார்க்கவும். `api/` functions repository root-ல் இருக்க வேண்டும்; அவற்றை static output folder-க்கு copy செய்ய வேண்டாம். [Vercel Node functions](https://vercel.com/docs/functions/runtimes/node-js)
+9. Contact actions portal-ல் தான் இருக்கு. portal.mucolabs.com-ல் login பண்ணி ஒரு test request அனுப்பவும்; admin `/admin/requests`-ல் அது வந்ததா பார்க்கவும்.
 
 `build.py` Vercel build-ல் ஓடுவதில்லை. Python sources மாற்றியபின் local-ல் regenerate செய்து generated files-ஐ GitHub-க்கு push செய்ய வேண்டும். Asset packaging script website files மட்டும் publish செய்கிறது; portal source, SQL, env files, original PNGs static web root-ல் சேராது.
 

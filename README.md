@@ -2,7 +2,7 @@
 
 Official website for MUCO LABS. Your Vision, Our Technology.
 
-Static HTML plus two Vercel serverless functions (`api/lead.js` and `api/event.js`). Deployed from `main`.
+Static HTML plus one Vercel serverless function (`api/event.js`, analytics intake). Deployed from `main`.
 
 ## Contact
 
@@ -141,16 +141,15 @@ leaves `mailto:` alone and still gates WhatsApp and phone:
   Asking a candidate to create a *customer* account to send a CV would close the
   recruitment funnel.
 
-`api/lead.js` is still deployed and still tested, but no page posts to it now.
-It remains the intake path for any future anonymous form: a Vercel serverless
-function that validates server-side, rate limits by IP, drops honeypot
-submissions, and reports separately whether the CRM and notification paths
-accepted the enquiry.
+There is no anonymous contact form. Every contact action goes through the
+portal, so an enquiry always arrives attached to an account rather than to an
+unverified email address.
 
-Set `RESEND_API_KEY` in Vercel (see `.env.example`) and it also emails the
-enquiry to you. Without it, a successful CRM record still appears in the
-portal. If neither CRM nor email accepts an enquiry, the browser receives an
-error so the visitor can retry or use WhatsApp/email directly.
+`api/lead.js` used to serve that form and was removed once nothing posted to
+it. An endpoint that accepts input and sends mail, with no caller and no
+traffic to compare against, is surface nobody is watching. If an anonymous
+form returns, it should come back with its own review rather than by reviving
+code that sat unused.
 
 Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in
 Vercel so accepted enquiries are stored in the MUCO CRM. These are required for
@@ -206,7 +205,6 @@ DNS at the records Vercel gives you.
 
 | Variable | Purpose |
 |---|---|
-| `RESEND_API_KEY` | Optional. Emails accepted enquiries from `api/lead.js`. |
 | `NEXT_PUBLIC_SUPABASE_URL` | Optional. CRM / analytics project URL. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional. Publishable / anon key for CRM RPC calls. |
 

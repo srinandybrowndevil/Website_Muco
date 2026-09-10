@@ -2,7 +2,6 @@ import http from "node:http";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
-import lead from "../api/lead.js";
 import event from "../api/event.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -16,7 +15,7 @@ http.createServer(async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   try {
     const url = new URL(req.url, `http://localhost:${port}`);
-    if (["/api/lead", "/api/event"].includes(url.pathname)) {
+    if (url.pathname === "/api/event") {
       if (req.method === "POST" && req.headers.origin && ![`http://localhost:${port}`, `http://127.0.0.1:${port}`].includes(req.headers.origin)) { res.writeHead(403).end(); return; }
       let body = "";
       for await (const chunk of req) {
@@ -27,7 +26,7 @@ http.createServer(async (req, res) => {
       req.headers["x-forwarded-for"] = req.socket.remoteAddress || "local";
       res.status = code => { res.statusCode = code; return res; };
       res.json = value => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify(value)); return res; };
-      await (url.pathname === "/api/lead" ? lead : event)(req, res);
+      await event(req, res);
       return;
     }
     if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405).end(); return; }

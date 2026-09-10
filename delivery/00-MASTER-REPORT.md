@@ -4,7 +4,7 @@
 **Loop:** 1
 **Date:** 10 September 2026
 **Prepared for:** Srinivash Mahalingam, founder, MUCO LABS
-**Result:** Not certified. One S1 and one S2 finding are open, both operational rather than defects in the code.
+**Result:** Not certified. One S1 and one S2 finding remain open, both operational rather than defects in the code. Every code finding is fixed.
 
 ---
 
@@ -15,6 +15,10 @@ MUCO LABS now runs two properties: a public marketing website and a private port
 The engineering is in good order. Access control is enforced in the database rather than in the pages, which means a person cannot reach another person's data by calling the interface directly — the strongest form of this guarantee available. Forty-seven test cases were run against the live system under simulated identities. Forty-four passed on the first attempt.
 
 Three failures were found, and all three were fixed and re-tested during the audit. The most significant was in the new audit log. It recorded who viewed compensation and client details correctly, but it accepted any action name from any signed-in person, so a client could have written an invented entry such as "founder approved everything" into the record, or flooded it to bury real entries. They could never have attributed an entry to somebody else, and could never have deleted one, so the log's core guarantee held. It is now restricted to a declared vocabulary and a rate cap.
+
+On instruction, a second pass then closed the whole punch list: the unused enquiry endpoint is gone, the 23 access-control policies are optimised, the 21 missing indexes are added, and the stale crawl line is removed.
+
+That second pass found something worth more than all of it. Closing the item about administrator screens never being opened meant replaying the queries those screens issue. One came back as an error rather than a row: the intern certificate page asked for the holder's name in a way the database refuses as ambiguous, and the page discarded the error instead of reading it. Every certificate would have printed with "Not recorded" where the intern's name belongs — a certificate certifying nobody. It is fixed, and it is the clearest argument in this report for spending ten minutes opening each screen for real.
 
 Two findings remain open, and neither can be closed by engineering.
 
@@ -86,11 +90,12 @@ Full detail with fields A through J is in `06-QA-AUDIT.md`.
 | F-05 | Leaked-password protection disabled | S2 | Founder | Open | A plan decision |
 | F-02 | Trigger function exposed on the public API surface | S3 | Backend | Fixed | Done |
 | F-03 | Link text "Read more" gives no destination | S3 | Frontend | Fixed | Done |
-| F-06 | Enquiry endpoint deployed with no caller | S3 | Founder decides | Open | Under an hour |
-| F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | Backend | Deferred with reason | Half a day |
-| F-08 | 21 foreign keys without a covering index | S3 | Backend | Open | Half a day |
-| F-09 | Administrator interface never rendered signed in | S3 | Founder | Open | Ten minutes |
-| F-10 | Crawl file excludes a page that is not built | S4 | Frontend | Open | Minutes |
+| F-11 | Intern certificate rendered without the holder's name | S2 | Frontend | Fixed | Done |
+| F-06 | Enquiry endpoint deployed with no caller | S3 | Backend | Fixed | Done |
+| F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | Backend | Fixed | Done |
+| F-08 | 21 foreign keys without a covering index | S3 | Backend | Fixed | Done |
+| F-09 | Administrator interface never rendered signed in | S3 | Founder | Partly closed | Ten minutes |
+| F-10 | Crawl file excludes a page that is not built | S4 | Frontend | Fixed | Done |
 
 ## 8. Growth and organic-lead assessment
 
@@ -102,28 +107,32 @@ One thing to watch rather than fix: twelve pages carry frequently-asked-question
 
 **Not certified.** Evidence exists for functional smoke, critical-path access control, security sanity, accessibility structure, growth hygiene, and build and type safety. Evidence does not exist for cross-browser rendering, real devices and screen readers, client performance budget, load behaviour, or the administrator interface rendered with real data.
 
-The gate fails on F-04 (S1) and F-05 (S2). Closing F-04, and either closing or formally accepting F-05, moves this to a pass with an S3 and S4 punch list.
+The gate fails on F-04 (S1) and F-05 (S2). Closing F-04, and either closing or formally accepting F-05, moves this to a pass with one S3 item remaining — the live render of the administrator screens, which only the founder can perform.
+
+Every other finding in this loop is fixed and re-tested, including F-11, which was found while closing F-09.
 
 ## 10. Quick wins this week
 
+Three remain, and all three are yours.
+
 1. **Change the administrator password.** Closes the only S1. Minutes.
-2. **Open each administrator screen once while signed in** and report anything wrong. Closes F-09.
+2. **Open each administrator screen once while signed in** and report anything wrong. Closes F-09. The certificate defect found this loop is why this is worth ten minutes rather than being a formality.
 3. **Decide on the Supabase plan.** The paid tier closes F-05 and adds point-in-time recovery, which is the missing backup story.
-4. **Remove the stale robots line.** Closes F-10.
+
+F-06, F-07, F-08, F-10 and F-11 were on this list and are now done.
 
 ## 11. Structural work this month
 
-1. **Decide the fate of `api/lead.js`.** It is defended but unused; delete it, or alert on any call.
-2. **One performance pass** covering the per-row authorisation checks and the missing foreign-key indexes together, driven by the queries the workspaces actually issue. The database already carries 16 unused indexes, so adding all 21 speculatively would make writes slower for no gain.
-3. **Close the verification gaps** — a cross-browser pass, a screen-reader pass on the portal, and a client performance measurement.
+1. **Close the verification gaps** — a cross-browser pass, a screen-reader pass on the portal, and a client performance measurement. These are the areas this loop could not reach, and each hides the same class of fault F-11 turned out to be: valid code, wrong result, invisible to type checks and builds.
+2. **Watch the write cost of the new indexes.** Twenty-one were added this loop and the database already carried 16 unused ones. If insert volume grows enough to notice, drop the indexes whose parent rows are never deleted and never joined backwards.
 
 ## 12. Open questions and assumption log
 
 **Open questions for the founder.**
 
 1. Has the administrator password been changed? This report assumes it has not, because that has not been confirmed. If it has, F-04 closes immediately.
-2. Should `api/lead.js` be removed, or is a contact form returning?
-3. Is the Supabase paid plan acceptable, or should F-05 be accepted in writing as a known risk?
+2. Is the Supabase paid plan acceptable, or should F-05 be accepted in writing as a known risk?
+3. `api/lead.js` is now removed. If an anonymous contact form is returning at some point, say so — it should come back with its own review rather than by reviving code that sat unused.
 
 **Assumptions.**
 

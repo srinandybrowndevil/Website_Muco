@@ -10,9 +10,9 @@
 
 ## Result
 
-**FAIL.** One S1 and one S2 finding are open. Neither is a defect in the shipped code, and neither can be closed by this operator: one requires a credential change only the account holder can make, the other requires a paid plan.
+**FAIL.** One S1 and one S2 finding remain open. Neither is a defect in the shipped code, and neither can be closed by this operator: one requires a credential change only the account holder can make, the other requires a paid plan.
 
-Every finding raised against the code itself was fixed and re-tested inside this loop.
+Every finding raised against the code itself is now fixed and re-tested. F-01, F-02 and F-03 were closed in the first pass of this loop; F-06, F-07, F-08 and F-10 were closed in the second, on instruction. F-09 is partly closed — the work of closing it uncovered F-11, a real defect the administrator screens had been hiding.
 
 ## Findings table
 
@@ -23,11 +23,12 @@ Every finding raised against the code itself was fixed and re-tested inside this
 | F-03 | Link text "Read more" gives no destination | S3 | frontend | accessibility | Frontend | Yes | Fixed this loop |
 | F-04 | Sole administrator credential is known-exposed | S1 | process | vulnerability | Founder | Yes, by the account holder only | Open |
 | F-05 | Leaked-password protection disabled | S2 | infra | vulnerability | Founder | Yes, with a paid plan | Open |
-| F-06 | Enquiry endpoint deployed with no caller | S3 | backend | reliability | Backend | Yes | Open |
-| F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | data | perf | Backend | Yes | Open, deferred with reason |
-| F-08 | 21 foreign keys without a covering index | S3 | data | perf | Backend | Yes | Open |
-| F-09 | Administrator interface never rendered signed in | S3 | process | docs | Founder | Yes | Open |
-| F-10 | Crawl file excludes a page that is not built | S4 | growth | docs | Frontend | Yes | Open |
+| F-06 | Enquiry endpoint deployed with no caller | S3 | backend | reliability | Backend | Yes | Fixed this loop |
+| F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | data | perf | Backend | Yes | Fixed this loop |
+| F-08 | 21 foreign keys without a covering index | S3 | data | perf | Backend | Yes | Fixed this loop |
+| F-09 | Administrator interface never rendered signed in | S3 | process | docs | Founder | Partial | Partly closed |
+| F-10 | Crawl file excludes a page that is not built | S4 | growth | docs | Frontend | Yes | Fixed this loop |
+| F-11 | Intern certificate rendered without the holder's name | S2 | frontend | bug | Frontend | Yes | Fixed this loop |
 
 ---
 
@@ -153,7 +154,7 @@ Every finding raised against the code itself was fixed and re-tested inside this
 
 ---
 
-### F-06 — Enquiry endpoint deployed with no caller — S3, open
+### F-06 — Enquiry endpoint deployed with no caller — S3, fixed
 
 **A. What.** `api/lead.js`, deployed as a serverless function.
 
@@ -165,33 +166,45 @@ Every finding raised against the code itself was fixed and re-tested inside this
 
 **F. Fixable.** Yes.
 
-**G. How to fix.** Preferred: delete the function and its contract test, since the contact route is now the portal. Acceptable: keep it and alert on any invocation, since legitimate volume should be zero. Not changed in this loop because removing a deployed endpoint is a product decision and this station cannot see every possible consumer.
+**G. How to fix.** Applied on instruction. `api/lead.js` and its contract test are removed, the local development server no longer routes to it, and the documentation now states plainly that contact actions live in the portal. `RESEND_API_KEY`, `LEAD_TO_EMAIL` and `LEAD_FROM_EMAIL` are gone from the example environment file with them: the site now holds no mail credentials at all, because it sends no mail.
 
-**J. Who.** Founder decides; Backend executes.
+**H. Proof.** No reference to the endpoint or its variables remains in the source, the generated README, the deployment guide or the example environment. The site rebuilds and the remaining contract test passes.
 
----
-
-### F-07 — Authorisation checks re-evaluated per row in 23 policies — S3, open
-
-**E. Impact.** Each policy calls `auth.uid()` once per row rather than once per statement. At current data volumes this is not measurable. It becomes measurable in the thousands of rows. Severity S3, likelihood environmental.
-
-**G. How to fix.** Wrap the call as `(select auth.uid())`. Deferred deliberately; the reason is recorded in the migration. Rewriting 23 access-control policies for a performance gain that no current query experiences trades a real risk of introducing an access defect against no present benefit. Revisit when any guarded table passes roughly ten thousand rows.
-
-**J. Who.** Backend owns; revisit on the volume trigger, not on a date.
-
----
-
-### F-08 — 21 foreign keys without a covering index — S3, open
-
-**E. Impact.** Joins and cascading deletes scan rather than seek. Not measurable at current volume. Severity S3.
-
-**G. How to fix.** Add covering indexes on the listed columns. Best done alongside F-07 as one performance pass, informed by the queries the workspaces actually issue rather than by adding all 21 speculatively — an unused index costs write time on every insert, and the advisor already reports 16 unused indexes on this database.
+**I. Prevent.** If an anonymous form returns, it comes back with its own review rather than by reviving code that sat unused and unwatched.
 
 **J. Who.** Backend owns.
 
 ---
 
-### F-09 — Administrator interface never rendered signed in — S3, open
+### F-07 — Authorisation checks re-evaluated per row in 23 policies — S3, fixed
+
+**E. Impact.** Each policy calls `auth.uid()` once per row rather than once per statement. At current data volumes this is not measurable. It becomes measurable in the thousands of rows. Severity S3, likelihood environmental.
+
+**G. How to fix.** Applied on instruction. All 23 policies now call `(select auth.uid())`, which PostgreSQL evaluates once per statement instead of once per row. The value cannot change mid-statement, so this is an optimisation and nothing else.
+
+The earlier decision to defer was not wrong, and the condition that made deferring safe is the condition under which it was done: rewriting access-control policies risks opening a hole, so the rewrite is only as trustworthy as the verification behind it.
+
+**H. Proof.** Two layers. Structurally, all 23 policies match their previous name, command, permissiveness and target roles exactly, none still evaluates per row, and no table gained a policy it did not have. Behaviourally, eighteen access checks were re-run against production: a client sees only their own customer, project, invoice and request and none of the other client's; source archives stay invisible; a client cannot mark their own invoice paid or grant themselves administrator; an employee sees their own pay and not another person's and cannot raise it; the audit log stays administrator-only. The intern date lockout was the one most at risk, because it passes the identity into a function inside a subquery — an active intern can still write a work log, an expired one is refused, and reads still continue after the window closes. Every probe row was removed afterwards.
+
+**I. Prevent.** Any future policy edit should run the same probe suite before it is called done. A policy rewrite verified only by reading it is not verified.
+
+**J. Who.** Backend owns.
+
+---
+
+### F-08 — 21 foreign keys without a covering index — S3, fixed
+
+**E. Impact.** Joins and cascading deletes scan rather than seek. Not measurable at current volume. Severity S3.
+
+**G. How to fix.** Applied on instruction, in the same migration as F-07 so the performance work is one reviewable change. All 21 covering indexes are added. None is speculative — each covers a real foreign key, which is what a parent-row delete and a reverse join both need.
+
+The cost is honest and worth stating: each index adds a little write time on every insert. This database already carries 16 unused indexes. If write volume ever grows enough to feel it, the ones whose parent rows are never deleted and never joined backwards are the ones to drop.
+
+**J. Who.** Backend owns.
+
+---
+
+### F-09 — Administrator interface never rendered signed in — S3, partly closed
 
 **A. What.** `/admin/audit`, `/admin/people` and the administrator screens generally.
 
@@ -199,19 +212,47 @@ Every finding raised against the code itself was fixed and re-tested inside this
 
 **E. Impact.** The data layer beneath these screens is proven by direct probes. The rendering path is proven only by compile, lint, build, and an anonymous request that correctly redirects to sign-in. A rendering defect that appears only with real data would not have been caught. Severity S3, likelihood rare given the type checks, but the risk is real and is stated rather than implied away.
 
-**G. How to fix.** The founder opens each administrator screen once while signed in and reports anything wrong. This is the shortest path to closing it.
+**G. How to fix.** Partly applied. The live render still needs the founder, and that part cannot be delegated. What could be tested without a session was: the queries these screens issue were replayed against the live API anonymously. That works because PostgREST resolves a query's table relationships before it applies row security, so an anonymous call separates "this query is malformed" from "this query is fine and you may see nothing".
 
-**J. Who.** Founder verifies; Frontend fixes anything found.
+That check found F-11, a real defect on a page that had never been opened with data. It is the exact class of fault this finding was pointing at, which is the argument for the founder spending the remaining ten minutes rather than assuming the screens are fine.
+
+**H. Proof.** Every embedded query the portal issues now resolves: the audit log, the people list, the team settings list, compensation with its payments, the request detail with its customer, and the corrected certificate query. One did not, and is recorded as F-11.
+
+**J. Who.** Founder verifies the live render; Frontend fixes anything found.
 
 ---
 
-### F-10 — Crawl file excludes a page that is not built — S4, open
+### F-10 — Crawl file excludes a page that is not built — S4, fixed
 
 **A. What.** `robots.txt` disallows `/logo-showcase.html`, which the site generator does not produce.
 
 **E. Impact.** None functionally. It is a stale line that misleads the next person reading the file. Severity S4.
 
-**G. How to fix.** Remove the line, or restore the page if it was dropped by accident.
+**G. How to fix.** Applied. The line is removed from the generator and the file rebuilt.
+
+**J. Who.** Frontend owns.
+
+---
+
+### F-11 — Intern certificate rendered without the holder's name — S2, fixed
+
+**A. What.** `portal/src/app/intern/certificate/page.tsx`, the query that reads the intern's record.
+
+**B. How to see.** Replay the query the page issues: ask the API for `intern_profiles` with a `profiles(full_name)` embed. It returns error `PGRST201`, not a row.
+
+**C. Why.** `intern_profiles` reaches `profiles` by two different foreign keys — once as the intern, once as the mentor. An unqualified embed is therefore ambiguous, and PostgREST refuses to guess which was meant. The page then compounded it: the error was discarded rather than read, so the failure had no way to announce itself.
+
+**D. Why now.** Present since the certificate page was written. The mentor link was added in the same migration that created the table, so the embed has never been unambiguous.
+
+**E. Impact.** The certificate is the document an intern shows an employer. With the record unread, the page still rendered — with "Not recorded" in place of the holder's name and an empty track. It printed a certificate that certified nobody. Severity S2, likelihood always: this failed for every intern, every time. It was found only because the queries were replayed directly. Nothing in the type checks, the lint or the build could have caught it, because the code is valid and the fault is in what the database was asked.
+
+**F. Fixable.** Yes.
+
+**G. How to fix.** Applied. The embed now names its foreign key, so there is nothing to disambiguate. The page also stops discarding the two query errors: a failure to read either record now stops the page with a plain message. Printing a certificate with a placeholder where the name belongs is worse than not printing one.
+
+**H. Proof.** The corrected query resolves against the live API. Every other embed the portal issues was replayed too, and all resolve.
+
+**I. Prevent.** Two rules earn their place. An embed on a table with more than one path to the same table must name its foreign key. And a query whose error is discarded will eventually fail silently — the pattern to avoid is destructuring only `data` when `error` exists alongside it.
 
 **J. Who.** Frontend owns.
 
@@ -235,7 +276,9 @@ Evidence exists for: functional smoke on the shipped features, critical-path acc
 
 Evidence does not exist for: cross-browser rendering, real-device and screen-reader behaviour, client performance budget, load behaviour, and the administrator interface rendered with real data.
 
-The bar is not met because F-04 (S1) and F-05 (S2) are open. Neither is a defect in the shipped code. F-04 closes with a password change. F-05 closes with a plan upgrade, or with the founder accepting the risk in writing, at which point the gate would pass with an S3 and S4 punch list.
+The bar is not met because F-04 (S1) and F-05 (S2) are open. Neither is a defect in the shipped code. F-04 closes with a password change. F-05 closes with a plan upgrade, or with the founder accepting the risk in writing, at which point the gate would pass with a single S3 item — the live render of the administrator screens, which only the founder can perform.
+
+Every other finding raised in this loop, including F-11 which was found while closing F-09, is fixed and re-tested.
 
 ## Loop-back instructions for R&D
 

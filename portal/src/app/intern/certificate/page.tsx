@@ -15,13 +15,24 @@ export default async function CertificatePage() {
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening the certificate.");
 
-  const { data: profile } = await client.from("intern_profiles")
-    .select("id, track, starts_at, ends_at, status, profiles(full_name)")
+  // The embed names its foreign key. intern_profiles reaches profiles twice --
+  // once as the intern, once as the mentor -- and an unqualified profiles(...)
+  // is ambiguous, which PostgREST answers with PGRST201 rather than a guess.
+  // Unqualified, this query failed and the certificate printed "Not recorded"
+  // where the intern's name belongs.
+  const { data: profile, error: profileError } = await client.from("intern_profiles")
+    .select("id, track, starts_at, ends_at, status, profiles!intern_profiles_user_id_fkey(full_name)")
     .eq("user_id", userId).maybeSingle();
 
-  const { data: certificate } = await client.from("intern_certificates")
+  const { data: certificate, error: certificateError } = await client.from("intern_certificates")
     .select("serial, issued_on, tools, mentor_name")
     .maybeSingle();
+
+  // A certificate is shown to employers. Printing one with a placeholder where
+  // the holder's name belongs is worse than not printing it, so a failure to
+  // read either record stops the page instead of degrading quietly.
+  if (profileError) throw new Error("Your internship record could not be read, so the certificate cannot be shown.");
+  if (certificateError) throw new Error("Your certificate could not be read. Try again in a moment.");
 
   const holder = (profile?.profiles as unknown as { full_name: string | null } | null)?.full_name ?? "Not recorded";
   const track = String(profile?.track ?? "").replace("intern_", "");
