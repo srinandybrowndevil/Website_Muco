@@ -13,7 +13,10 @@ import { hostForWorkspace, stripWorkspacePrefix, workspaceForHost } from "@/lib/
 // exposes nothing: it accepts five characters of a hash and returns rows from
 // a public corpus. Without it here the proxy sends the call to /login, and the
 // breach check silently reports itself unavailable forever.
-const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback","/verify","/api/password-breach"];
+// /robots.txt has to be reachable without a session, or the proxy sends
+// crawlers to the sign-in page and the workspaces end up with no crawl
+// directives at all.
+const publicPaths=["/login","/signup","/forgot-password","/reset-password","/verify-email","/complete-profile","/accept-invite","/auth/error","/auth/callback","/verify","/api/password-breach","/robots.txt"];
 const isPublic=(path:string)=>publicPaths.some(route=>path===route||path.startsWith(`${route}/`));
 
 export async function proxy(request:NextRequest){

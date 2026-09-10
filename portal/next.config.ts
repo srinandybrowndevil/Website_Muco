@@ -11,7 +11,17 @@ import type { NextConfig } from "next";
 // the realtime socket fail -- verified locally before committing.
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // 'unsafe-eval' is React Refresh in development, not anything a production
+  // build does, so it is scoped the same way the dev websocket below is. It
+  // being in the shipped header was a default nobody revisited: it permits
+  // eval and new Function on the origin holding every customer record.
+  //
+  // 'unsafe-inline' stays. Next.js hydration ships inline scripts and there is
+  // no nonce plumbing here yet; the header still refuses script from any other
+  // origin, which is the vector that matters.
+  `script-src 'self' 'unsafe-inline'${
+    process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
+  }`,
   "style-src 'self' 'unsafe-inline'",
   // Profile photos are served from the Supabase storage bucket, so the origin
   // has to be named here or every avatar is blocked. blob: covers the local
@@ -65,6 +75,10 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: csp },
+          // Belt and braces beside robots.txt and the per-page meta tag: this
+          // covers responses that never render HTML, where a meta robots tag
+          // has nowhere to live.
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

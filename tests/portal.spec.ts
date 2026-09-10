@@ -143,6 +143,32 @@ test.describe("the screens built for the roles checklist", () => {
   });
 });
 
+test.describe("the workspaces are not for the public", () => {
+  // robots.txt was not a public path, so the proxy redirected it to the sign-in
+  // page on all five hosts. A crawler following that lands on HTML, which reads
+  // as "no robots.txt", so none of these addresses carried a crawl directive at
+  // all -- the per-page meta noindex was doing the whole job alone, and it only
+  // exists on responses that render HTML.
+  test("robots.txt is served rather than redirected to sign-in", async ({ request }) => {
+    const response = await request.get("http://localhost:3100/robots.txt", { maxRedirects: 0 });
+    expect(response.status(), "must not redirect a crawler to /login").toBe(200);
+    const body = await response.text();
+    expect(body).toContain("Disallow: /");
+    expect(body).not.toContain("<html");
+  });
+
+  test("every response carries a noindex header", async ({ request }) => {
+    const response = await request.get("http://localhost:3100/login");
+    expect(response.headers()["x-robots-tag"]).toContain("noindex");
+  });
+
+  test("the sign-in page still says noindex in its markup", async ({ page }) => {
+    await page.goto("http://localhost:3100/login");
+    const robots = await page.locator('meta[name="robots"]').getAttribute("content");
+    expect(robots).toContain("noindex");
+  });
+});
+
 test.describe("sign-up", () => {
   test("refuses a breached password without creating an account", async ({ page }) => {
     const errors = consoleErrors(page);

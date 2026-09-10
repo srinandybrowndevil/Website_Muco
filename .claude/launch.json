@@ -18,6 +18,20 @@
         "3100"
       ],
       "port": 3100
+    },
+    {
+      "name": "portal-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "portal",
+        "run",
+        "start",
+        "--",
+        "--port",
+        "3200"
+      ],
+      "port": 3200
     }
   ]
 }
