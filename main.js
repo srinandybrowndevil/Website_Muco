@@ -686,6 +686,123 @@
   }
 
   /* ------------------------------------------------------------------ boot */
+  // The enquiry form. Every visitor who fills this in becomes a lead in the
+  // CRM without needing an account, which is the point: an account is a
+  // reasonable thing to ask of a client and an unreasonable thing to ask of
+  // someone deciding whether to talk to us at all.
+  //
+  // Contact details stay behind sign-in. This collects rather than exposes, so
+  // it adds a way in without giving scrapers an address to harvest.
+  function initLeadForm() {
+    var form = document.getElementById('lead-form');
+    if (!form) return;
+
+    var status = document.getElementById('lead-status');
+    var submit = document.getElementById('lead-submit');
+    var FIELDS = ['name', 'business', 'phone', 'email', 'location', 'service',
+                  'website', 'budget', 'timeline', 'message'];
+
+    function clearErrors() {
+      FIELDS.concat(['consent']).forEach(function (field) {
+        var slot = document.getElementById('err-' + field);
+        if (slot) slot.textContent = '';
+        var input = form.elements[field];
+        if (input && input.removeAttribute) input.removeAttribute('aria-invalid');
+      });
+      form.classList.remove('is-error');
+    }
+
+    function showErrors(errors) {
+      var first = null;
+      Object.keys(errors).forEach(function (field) {
+        var slot = document.getElementById('err-' + field);
+        if (slot) slot.textContent = errors[field];
+        var input = form.elements[field];
+        if (input && input.setAttribute) input.setAttribute('aria-invalid', 'true');
+        if (!first && input && input.focus) first = input;
+      });
+      // Send focus to the first thing that needs fixing, rather than leaving
+      // someone to hunt for the red text.
+      if (first) first.focus();
+    }
+
+    function param(name) {
+      try {
+        return new URLSearchParams(window.location.search).get(name) || '';
+      } catch (err) {
+        return '';
+      }
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      clearErrors();
+
+      var payload = {
+        consent: form.elements.consent && form.elements.consent.checked,
+        company_website: form.elements.company_website ? form.elements.company_website.value : '',
+        page: window.location.pathname,
+        referrer: document.referrer || '',
+        utm_source: param('utm_source'),
+        utm_medium: param('utm_medium'),
+        utm_campaign: param('utm_campaign')
+      };
+      FIELDS.forEach(function (field) {
+        var input = form.elements[field];
+        payload[field] = input ? String(input.value || '').trim() : '';
+      });
+
+      submit.disabled = true;
+      var original = submit.textContent;
+      submit.textContent = 'Sending…';
+      status.className = 'form-status';
+      status.textContent = '';
+
+      fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (response) {
+        return response.json().catch(function () { return {}; }).then(function (body) {
+          return { status: response.status, body: body };
+        });
+      }).then(function (result) {
+        submit.disabled = false;
+        submit.textContent = original;
+
+        if (result.status === 400 && result.body.errors) {
+          form.classList.add('is-error');
+          showErrors(result.body.errors);
+          status.className = 'form-status form-status-err';
+          status.textContent = 'Please check the highlighted fields.';
+          return;
+        }
+        if (result.status === 429) {
+          status.className = 'form-status form-status-err';
+          status.textContent = 'That is a lot of enquiries at once. Wait a minute and try again.';
+          return;
+        }
+        if (!result.body.ok) {
+          // Never a dead end: if the enquiry could not be saved, say so and
+          // leave a way through that does not depend on this form working.
+          status.className = 'form-status form-status-err';
+          status.textContent = 'We could not save that. Please try again, or sign in to the portal and send it there.';
+          return;
+        }
+
+        form.reset();
+        status.className = 'form-status form-status-ok';
+        status.textContent = 'Thank you — your enquiry has reached us. We usually reply the same working day.';
+        status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }).catch(function () {
+        submit.disabled = false;
+        submit.textContent = original;
+        status.className = 'form-status form-status-err';
+        status.textContent = 'That did not send — check your connection and try again.';
+      });
+    });
+  }
+
   function init() {
     initHeaderShadow();
     initMobileMenu();
@@ -699,6 +816,7 @@
     initLivePlatform();
     initClock();
     initLearningCourses();
+    initLeadForm();
   }
 
   if (document.readyState === 'loading') {

@@ -11,6 +11,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
+  // The long pages scroll to trigger lazy images before asserting, and this
+  // machine reports a slow filesystem. Thirty seconds was tight enough that a
+  // healthy page failed on the clock rather than on anything true.
+  timeout: 60_000,
   reporter: [["list"]],
   use: {
     trace: "retain-on-failure",

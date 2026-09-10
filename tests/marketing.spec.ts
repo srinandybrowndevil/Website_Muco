@@ -54,14 +54,22 @@ test.describe("marketing site", () => {
       // has not started loading, which is correct behaviour and not a fault.
       // Then only judge images that have finished -- complete with no width is
       // a real failure, complete still false just means not started.
+      // Bounded, or a long page spends the whole test budget scrolling. Twelve
+      // screens is past the bottom of every page here, and the step is short
+      // because it only has to let the lazy-load observer fire.
       await page.evaluate(async () => {
-        for (let y = 0; y < document.body.scrollHeight; y += window.innerHeight) {
+        for (let step = 0; step < 12; step++) {
+          const y = step * window.innerHeight;
+          if (y > document.body.scrollHeight) break;
           window.scrollTo(0, y);
-          await new Promise(r => setTimeout(r, 120));
+          await new Promise(r => setTimeout(r, 60));
         }
         window.scrollTo(0, 0);
       });
-      await page.waitForLoadState("networkidle");
+      // Settling, not idling: a page with an analytics beacon retrying may
+      // never reach networkidle, and waiting for it would fail a healthy page.
+      await page.waitForLoadState("domcontentloaded");
+      await page.waitForTimeout(400);
 
       const brokenImages = await page.evaluate(() =>
         Array.from(document.images)
@@ -114,6 +122,94 @@ test.describe("marketing site", () => {
       }
     }
     expect(broken, "internal links that 404").toEqual([]);
+  });
+
+  test.describe("enquiry form", () => {
+    // The endpoint is stubbed in every case below. These check the form the
+    // visitor actually touches -- validation, focus, the honeypot, what each
+    // failure says -- without writing a lead into the real CRM.
+    const OPEN = `${BASE}/contact.html#enquiry`;
+
+    test("refuses an empty submission and says why", async ({ page }) => {
+      await page.route("**/api/lead", route => route.fulfill({
+        status: 400,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: false, errors: {
+          name: "Please enter your name.",
+          phone: "Please enter a number we can reach you on.",
+          message: "Please tell us a little about the project.",
+          consent: "Please confirm we may contact you.",
+        } }),
+      }));
+      await page.goto(OPEN);
+      await page.locator("#lead-submit").click();
+
+      for (const field of ["name", "phone", "message", "consent"]) {
+        await expect(page.locator(`#err-${field}`), `${field} error`).not.toBeEmpty();
+      }
+      // Focus lands on the first thing to fix, rather than leaving someone to
+      // hunt for red text.
+      await expect(page.locator("#lead-name")).toBeFocused();
+      await expect(page.locator("#lead-name")).toHaveAttribute("aria-invalid", "true");
+    });
+
+    test("sends a complete enquiry and confirms it", async ({ page }) => {
+      let sent: Record<string, unknown> | null = null;
+      await page.route("**/api/lead", async route => {
+        sent = JSON.parse(route.request().postData() || "{}");
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, recorded: true }) });
+      });
+
+      // Query before the fragment. Written the other way round it is not a
+      // query string at all, it is part of the fragment, and every campaign
+      // parameter arrives empty.
+      await page.goto(`${BASE}/contact.html?utm_source=probe&utm_medium=test&utm_campaign=suite#enquiry`);
+      await page.locator("#lead-name").fill("Probe Person");
+      await page.locator("#lead-phone").fill("+91 90000 00000");
+      await page.locator("#lead-message").fill("Orders arrive by phone and we lose them.");
+      await page.locator("#lead-consent").check();
+      await page.locator("#lead-submit").click();
+
+      await expect(page.locator("#lead-status")).toHaveClass(/form-status-ok/);
+      await expect(page.locator("#lead-status")).toContainText(/reached us/i);
+      // The form empties, so a second enquiry does not repeat the first.
+      await expect(page.locator("#lead-name")).toHaveValue("");
+
+      expect(sent, "the endpoint received the enquiry").not.toBeNull();
+      const body = sent as unknown as Record<string, unknown>;
+      expect(body.name).toBe("Probe Person");
+      expect(body.consent).toBe(true);
+      // Where the lead came from travels with it, or attribution is guesswork.
+      expect(body.utm_source).toBe("probe");
+      expect(body.utm_campaign).toBe("suite");
+      expect(body.page).toContain("/contact");
+      // The honeypot must go out empty, or every real submission looks like a bot.
+      expect(body.company_website).toBe("");
+    });
+
+    test("the honeypot is unreachable by keyboard and hidden from view", async ({ page }) => {
+      await page.goto(OPEN);
+      const trap = page.locator("#lead-company-website");
+      await expect(trap).toHaveAttribute("tabindex", "-1");
+      await expect(trap).not.toBeInViewport();
+    });
+
+    test("a refusal never leaves the visitor without a way through", async ({ page }) => {
+      await page.route("**/api/lead", route => route.fulfill({
+        status: 503, contentType: "application/json", body: JSON.stringify({ ok: false }),
+      }));
+      await page.goto(OPEN);
+      await page.locator("#lead-name").fill("Probe Person");
+      await page.locator("#lead-phone").fill("+91 90000 00000");
+      await page.locator("#lead-message").fill("Something short.");
+      await page.locator("#lead-consent").check();
+      await page.locator("#lead-submit").click();
+
+      await expect(page.locator("#lead-status")).toHaveClass(/form-status-err/);
+      await expect(page.locator("#lead-status")).toContainText(/portal/i);
+      // And the button comes back, so the visitor can retry.
+      await expect(page.locator("#lead-submit")).toBeEnabled();
+    });
   });
 
   test("tap targets are big enough to hit", async ({ page }) => {

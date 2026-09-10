@@ -32,7 +32,7 @@
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css?v=ad4d8145e9" />
+<link rel="stylesheet" href="style.css?v=6397c7b49d" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -244,7 +244,107 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-surface section-grid">
+    <section class="band-surface section-grid" id="enquiry">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Tell us about it</span>
+          <h2>Send an enquiry</h2>
+          <p class="section-sub form-intro">No account needed. Fill this in and it reaches
+            Srinivash Mahalingam directly &mdash; usually answered the same working day.
+            Nothing here is shared with anyone outside MUCO LABS.</p>
+        </div>
+
+        <form class="form-card" id="lead-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-name">Your name <span class="form-req">*</span></label>
+              <input class="form-control" id="lead-name" name="name" type="text"
+                     autocomplete="name" required maxlength="100" />
+              <p class="form-error" id="err-name" role="alert"></p>
+            </div>
+            <div class="form-group">
+              <label for="lead-business">Business name</label>
+              <input class="form-control" id="lead-business" name="business" type="text"
+                     autocomplete="organization" maxlength="120" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-phone">Phone <span class="form-req">*</span></label>
+              <input class="form-control" id="lead-phone" name="phone" type="tel"
+                     autocomplete="tel" required maxlength="32" />
+              <p class="form-hint">A number we can reach you on, with country code if outside India.</p>
+              <p class="form-error" id="err-phone" role="alert"></p>
+            </div>
+            <div class="form-group">
+              <label for="lead-email">Email</label>
+              <input class="form-control" id="lead-email" name="email" type="email"
+                     autocomplete="email" maxlength="160" />
+              <p class="form-error" id="err-email" role="alert"></p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-service">What do you need?</label>
+              <select class="form-control" id="lead-service" name="service"><option value="">Select a service</option><option value="Website design & development">Website design & development</option><option value="Mobile app development">Mobile app development</option><option value="UI/UX and product design">UI/UX and product design</option><option value="Custom software & SaaS">Custom software & SaaS</option><option value="CRM / ERP / HRMS / LMS / billing">CRM / ERP / HRMS / LMS / billing</option><option value="Digital marketing & SEO">Digital marketing & SEO</option><option value="AI & business automation">AI & business automation</option><option value="Branding, IT & cloud support">Branding, IT & cloud support</option><option value="Website review / audit">Website review / audit</option><option value="Maintenance & support">Maintenance & support</option><option value="Something else">Something else</option></select>
+            </div>
+            <div class="form-group">
+              <label for="lead-location">City / location</label>
+              <input class="form-control" id="lead-location" name="location" type="text"
+                     maxlength="100" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-budget">Budget range</label>
+              <select class="form-control" id="lead-budget" name="budget"><option value="">Select a range</option><option value="Under ₹25,000">Under ₹25,000</option><option value="₹25,000 – ₹75,000">₹25,000 – ₹75,000</option><option value="₹75,000 – ₹2,00,000">₹75,000 – ₹2,00,000</option><option value="₹2,00,000 – ₹5,00,000">₹2,00,000 – ₹5,00,000</option><option value="Above ₹5,00,000">Above ₹5,00,000</option><option value="Not decided yet">Not decided yet</option></select>
+              <p class="form-hint">A rough range is fine. It changes what we propose.</p>
+            </div>
+            <div class="form-group">
+              <label for="lead-timeline">Timeline</label>
+              <select class="form-control" id="lead-timeline" name="timeline"><option value="">Select a timeline</option><option value="As soon as possible">As soon as possible</option><option value="Within 1 month">Within 1 month</option><option value="1–3 months">1–3 months</option><option value="3–6 months">3–6 months</option><option value="Just exploring">Just exploring</option></select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="lead-website">Current website, if you have one</label>
+            <input class="form-control" id="lead-website" name="website" type="url"
+                   inputmode="url" placeholder="https://" maxlength="300" />
+          </div>
+
+          <div class="form-group">
+            <label for="lead-message">About the project <span class="form-req">*</span></label>
+            <textarea class="form-control" id="lead-message" name="message" rows="5"
+                      required maxlength="4000"></textarea>
+            <p class="form-hint">The problem is more useful than the solution. What goes wrong
+              today, and what should happen instead?</p>
+            <p class="form-error" id="err-message" role="alert"></p>
+          </div>
+
+          <!-- Left empty by people, filled by bots. Hidden from both sight and
+               screen readers, and never reported as an error. -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="lead-company-website">Company website</label>
+            <input id="lead-company-website" name="company_website" type="text"
+                   tabindex="-1" autocomplete="off" />
+          </div>
+
+          <div class="form-consent">
+            <input id="lead-consent" name="consent" type="checkbox" required />
+            <label for="lead-consent">You may contact me about this enquiry. <span class="form-req">*</span></label>
+            <p class="form-error" id="err-consent" role="alert"></p>
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="lead-submit">Send enquiry</button>
+          <p class="form-status" id="lead-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="band-deep">
       <div class="container">
         <div class="split">
           <div class="stack">
@@ -301,7 +401,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-deep">
+    <section class="band-surface section-grid">
       <div class="container container-narrow">
         <div class="section-head">
           <span class="eyebrow">After you send it</span>
@@ -312,7 +412,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-surface section-grid">
+    <section class="band-deep">
       <div class="container container-narrow">
         <div class="section-head">
           <span class="eyebrow">Before you ask</span>
@@ -383,6 +483,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </footer>
 
-  <script src="main.js?v=7fd2656dcb" defer></script>
+  <script src="main.js?v=a01e62b178" defer></script>
 </body>
 </html>

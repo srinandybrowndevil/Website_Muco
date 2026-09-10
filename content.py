@@ -2406,6 +2406,106 @@ def build_contact():
       </div>
     </section>
 
+    <section class="section-divider" id="enquiry">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Tell us about it</span>
+          <h2>Send an enquiry</h2>
+          <p class="section-sub form-intro">No account needed. Fill this in and it reaches
+            {founder} directly &mdash; usually answered the same working day.
+            Nothing here is shared with anyone outside {brand}.</p>
+        </div>
+
+        <form class="form-card" id="lead-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-name">Your name <span class="form-req">*</span></label>
+              <input class="form-control" id="lead-name" name="name" type="text"
+                     autocomplete="name" required maxlength="100" />
+              <p class="form-error" id="err-name" role="alert"></p>
+            </div>
+            <div class="form-group">
+              <label for="lead-business">Business name</label>
+              <input class="form-control" id="lead-business" name="business" type="text"
+                     autocomplete="organization" maxlength="120" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-phone">Phone <span class="form-req">*</span></label>
+              <input class="form-control" id="lead-phone" name="phone" type="tel"
+                     autocomplete="tel" required maxlength="32" />
+              <p class="form-hint">A number we can reach you on, with country code if outside India.</p>
+              <p class="form-error" id="err-phone" role="alert"></p>
+            </div>
+            <div class="form-group">
+              <label for="lead-email">Email</label>
+              <input class="form-control" id="lead-email" name="email" type="email"
+                     autocomplete="email" maxlength="160" />
+              <p class="form-error" id="err-email" role="alert"></p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-service">What do you need?</label>
+              <select class="form-control" id="lead-service" name="service">{services}</select>
+            </div>
+            <div class="form-group">
+              <label for="lead-location">City / location</label>
+              <input class="form-control" id="lead-location" name="location" type="text"
+                     maxlength="100" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lead-budget">Budget range</label>
+              <select class="form-control" id="lead-budget" name="budget">{budgets}</select>
+              <p class="form-hint">A rough range is fine. It changes what we propose.</p>
+            </div>
+            <div class="form-group">
+              <label for="lead-timeline">Timeline</label>
+              <select class="form-control" id="lead-timeline" name="timeline">{timelines}</select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="lead-website">Current website, if you have one</label>
+            <input class="form-control" id="lead-website" name="website" type="url"
+                   inputmode="url" placeholder="https://" maxlength="300" />
+          </div>
+
+          <div class="form-group">
+            <label for="lead-message">About the project <span class="form-req">*</span></label>
+            <textarea class="form-control" id="lead-message" name="message" rows="5"
+                      required maxlength="4000"></textarea>
+            <p class="form-hint">The problem is more useful than the solution. What goes wrong
+              today, and what should happen instead?</p>
+            <p class="form-error" id="err-message" role="alert"></p>
+          </div>
+
+          <!-- Left empty by people, filled by bots. Hidden from both sight and
+               screen readers, and never reported as an error. -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="lead-company-website">Company website</label>
+            <input id="lead-company-website" name="company_website" type="text"
+                   tabindex="-1" autocomplete="off" />
+          </div>
+
+          <div class="form-consent">
+            <input id="lead-consent" name="consent" type="checkbox" required />
+            <label for="lead-consent">You may contact me about this enquiry. <span class="form-req">*</span></label>
+            <p class="form-error" id="err-consent" role="alert"></p>
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="lead-submit">Send enquiry</button>
+          <p class="form-status" id="lead-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
     <section class="section-divider">
       <div class="container">
         <div class="split">
