@@ -4,6 +4,7 @@ import { RequestDetailClient } from "@/components/requests/RequestDetailClient";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { demoRequest, type ProjectRequest } from "@/lib/requests";
+import { recordView } from "@/lib/audit";
 
 export default async function RequestDetailPage({
   params,
@@ -63,6 +64,12 @@ export default async function RequestDetailPage({
   if (error || !data) {
     notFound();
   }
+
+  // This screen carries a customer's name, company, email and phone together.
+  // Specification 13 counts that as viewing client personal data, so it is
+  // recorded against the request -- never by copying the details themselves
+  // into the log, which would just move the exposure somewhere less guarded.
+  await recordView("client_pii.view", "project_request", id);
 
   return (
     <AppShell>

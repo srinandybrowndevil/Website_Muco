@@ -171,4 +171,61 @@ select
   (select count(*) from public.invoices         where number like 'PROBE-%') as probe_invoices,
   (select count(*) from public.project_requests where status = 'accepted')   as accepted_requests;
 
+-- ------------------------------------------------- audit log and tier packs
+-- Phase 9 and 10. The audit log is append-only: administrators read it, and
+-- nobody -- including them -- may change or delete a row. Structure is checked
+-- here rather than only behaviour, because the guarantee is the *absence* of
+-- policies, and an absence is easy to undo by accident later.
+do $$
+declare v_bad text;
+begin
+  select string_agg(policyname || ' (' || cmd || ')', ', ') into v_bad
+  from pg_policies
+  where schemaname = 'public' and tablename = 'audit_events'
+    and cmd in ('ALL','UPDATE','DELETE','INSERT');
+  if v_bad is not null then
+    raise exception 'audit_events is no longer append-only: %', v_bad;
+  end if;
+
+  if not exists (select 1 from pg_policies
+                 where schemaname='public' and tablename='audit_events' and cmd='SELECT') then
+    raise exception 'audit_events has no read policy, so the log is unreadable';
+  end if;
+
+  -- Every guarded table must still carry its trigger. Losing one loses the
+  -- record silently: writes keep working and simply stop being logged.
+  if (select count(*) from pg_trigger t join pg_class c on c.oid = t.tgrelid
+      where not t.tgisinternal and c.relname in
+        ('compensation','project_grants','memberships','intern_certificates','intern_profiles')
+        and t.tgname like 'audit_%') <> 5 then
+    raise exception 'An audit trigger is missing from a guarded table';
+  end if;
+
+  -- Specification 13 forbids credentials in audit payloads. Written as a live
+  -- check rather than trust in callers, since the stripping happens in
+  -- record_audit_event and a later edit could quietly drop it.
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', (select user_id from public.memberships where role='admin' limit 1),
+                      'role','authenticated')::text, true);
+  perform public.record_audit_event('probe.secrets','probe', null,
+    '{"password":"x","token":"y","aadhaar":"z","kept":"ok"}'::jsonb);
+  if exists (select 1 from public.audit_events
+             where action='probe.secrets' and detail ?| array['password','token','aadhaar']) then
+    raise exception 'A secret-looking key reached the audit log';
+  end if;
+
+  -- No tier may reach customer data, invoices or production at any level.
+  if exists (select 1 from public.intern_tier_permissions
+             where module not in ('own_profile','work_log','learning','sandbox_project',
+                                  'client_code_redacted','analytics_aggregate')) then
+    raise exception 'A tier pack names a module outside the intern vocabulary';
+  end if;
+
+  if (select count(distinct tier) from public.intern_tier_permissions) <> 3 then
+    raise exception 'A duration tier has no permission pack';
+  end if;
+
+  perform set_config('request.jwt.claims', null, true);
+end $$;
+
 rollback;

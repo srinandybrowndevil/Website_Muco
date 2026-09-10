@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireIntern } from "@/lib/intern";
+import { recordView } from "@/lib/audit";
 import { createClient } from "@/lib/supabase/server";
 import { InternShell } from "@/components/intern/InternShell";
 import { EmptyState } from "@/components/EmptyState";
@@ -40,6 +41,12 @@ export default async function CertificatePage() {
       </InternShell>
     );
   }
+
+  // Recorded only once there is a certificate to look at, and carrying the
+  // serial rather than the holder's details. Saving it as a PDF happens in the
+  // browser's own print dialog, which the page cannot observe, so opening it
+  // is the honest moment to record.
+  await recordView("certificate.view", "intern_certificate", null, { serial: certificate.serial });
 
   return (
     <InternShell readOnly={readOnly}>

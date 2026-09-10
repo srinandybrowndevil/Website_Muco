@@ -2829,3 +2829,53 @@ td span small {
 @media (max-width: 600px) {
   .daysleft { justify-self: start; }
 }
+
+/* Audit log filters. Links rather than buttons: each filter is a real URL, so
+   the founder can bookmark "show me compensation access" and share it. */
+.filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.filterbar .chip {
+  display: inline-flex;
+  align-items: center;
+  /* 40px tall including the border, comfortably past the 24px minimum in
+     WCAG 2.5.8 and usable with a thumb on a phone. */
+  min-height: 40px;
+  padding: 9px 15px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 13px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.filterbar .chip:hover { border-color: var(--line-strong); color: var(--text); }
+
+.filterbar .chip.active {
+  border-color: var(--accent);
+  background: rgba(207, 144, 97, 0.12);
+  color: var(--text);
+}
+
+/* Timestamps read as one unit; wrapping "10 Sep 2026, 4:15 pm" mid-value makes
+   a column of them much harder to scan. */
+.nowrap { white-space: nowrap; }
+
+/* What a tier opens, and what it does not. The refused rows stay visible and
+   are dimmed rather than hidden -- an intern should be able to see the edge of
+   their access, not wonder whether a module exists at all. */
+.permlist { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.permlist li { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: baseline; padding: 12px 14px; background: var(--surface); }
+.permlist li span { color: var(--text-2); }
+.permlist li b { font-weight: 500; font-size: 13px; color: var(--accent-bright); }
+.permlist li.off span { color: var(--text-dim); }
+.permlist li.off b { color: var(--text-dim); }
+
+/* The figure on the staff compensation page. */
+.compamount { font-family: var(--font-serif); font-size: 32px; font-weight: 400; line-height: 1.1; margin: 10px 0 4px; }

@@ -1,4 +1,5 @@
 import { requireStaff } from "@/lib/staff";
+import { recordView } from "@/lib/audit";
 import { createClient } from "@/lib/supabase/server";
 import { StaffShell } from "@/components/staff/StaffShell";
 import { EmptyState } from "@/components/EmptyState";
@@ -20,6 +21,8 @@ function formatDate(value: string | null) {
 
 export default async function CompensationPage() {
   await requireStaff();
+  // Specification 13: reading pay is an audited event, including your own.
+  await recordView("compensation.view", "compensation");
   const client = await createClient();
   if (!client) throw new Error("Configure Supabase before opening compensation.");
 
