@@ -35,6 +35,7 @@ export function AcceptInviteForm({ token }: { token: string }) {
   const [breached, setBreached] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,10 +68,11 @@ export function AcceptInviteForm({ token }: { token: string }) {
       return;
     }
 
-    const { error: signUpFailed } = await supabase.auth.signUp({
+    const { data: created, error: signUpFailed } = await supabase.auth.signUp({
       email: invitation.invited_email,
       password,
     });
+
     // An account may already exist for this address — somebody invited twice,
     // or invited after signing up themselves. That is not a failure; the
     // invitation still has to be redeemed, so try signing in and continue.
@@ -84,6 +86,19 @@ export function AcceptInviteForm({ token }: { token: string }) {
         setError("An account already exists for this address. Sign in with your existing password, or use the recovery link.");
         return;
       }
+    } else if (!created.session) {
+      // Sign-up succeeded and produced no session, which means this Supabase
+      // project requires email confirmation. accept_invitation needs a session
+      // — it reads auth.uid() — so redeeming now would fail with
+      // "authentication required", which reads to the person as a broken link.
+      //
+      // The invitation is deliberately left unredeemed. It is single-use, so
+      // spending it here would leave somebody with a confirmed account, no
+      // membership, and a link that no longer works. They confirm, come back to
+      // the same link, and the sign-in branch above redeems it.
+      setBusy(false);
+      setNeedsConfirmation(true);
+      return;
     }
 
     const { error: acceptFailed } = await supabase.rpc("accept_invitation", { invite_token: token });
@@ -97,6 +112,22 @@ export function AcceptInviteForm({ token }: { token: string }) {
   }
 
   if (loading) return <p className="hint">Checking the invitation…</p>;
+
+  if (needsConfirmation) {
+    return (
+      <div className="callout ok" role="status">
+        <Icon name="mail" size={18} />
+        <div>
+          <b>Confirm your email address, then open this link again.</b>
+          <p>
+            Your password is set. This workspace asks you to confirm the address first, so we have
+            sent you a message — click the link in it, then come back to the invitation link and it
+            will let you straight in. The invitation has not been used up.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!invitation || !invitation.available) {
     return (

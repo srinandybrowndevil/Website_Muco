@@ -55,24 +55,32 @@ test.describe("four separate front doors", () => {
         .toContain("next=" + encodeURIComponent(door.deep));
     });
 
-    test(`${door.key} asks crawlers to stay out`, async ({ request }) => {
+    test(`${door.key} asks crawlers to stay out`, async ({ page }) => {
       // Three layers, and this checks two of them. robots.txt has to be
       // reachable without a session -- when it was not, every one of these
       // hosts answered a crawler with a redirect to /login, which reads as
       // "no robots.txt at all".
-      const robots = await request.get(`http://${door.host}/robots.txt`, { maxRedirects: 0 });
-      expect(robots.status(), `${door.key} robots.txt must not redirect`).toBe(200);
-      const body = await robots.text();
+      //
+      // Driven through the browser rather than Playwright's request fixture on
+      // purpose. That fixture resolves hostnames through Node, and Node does
+      // not special-case *.localhost the way every browser does, so it answers
+      // ENOTFOUND for an address a browser reaches perfectly well. Using it
+      // here reports a DNS failure as a product failure.
+      const robots = await page.goto(`http://${door.host}/robots.txt`);
+      expect(robots?.status(), `${door.key} robots.txt status`).toBe(200);
+      expect(robots?.url(), `${door.key} robots.txt must not redirect`).toContain("/robots.txt");
+
+      const body = await robots!.text();
       expect(body).toContain("Disallow: /");
       expect(body).not.toContain("<html");
 
-      const page = await request.get(`http://${door.host}/login`);
-      expect(page.headers()["x-robots-tag"]).toContain("noindex");
+      const login = await page.goto(`http://${door.host}/login`);
+      expect(login?.headers()["x-robots-tag"]).toContain("noindex");
     });
 
-    test(`${door.key} sets the security headers`, async ({ request }) => {
-      const response = await request.get(`http://${door.host}/login`);
-      const headers = response.headers();
+    test(`${door.key} sets the security headers`, async ({ page }) => {
+      const response = await page.goto(`http://${door.host}/login`);
+      const headers = response!.headers();
       expect(headers["x-frame-options"]).toBe("DENY");
       expect(headers["x-content-type-options"]).toBe("nosniff");
       expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
@@ -82,13 +90,31 @@ test.describe("four separate front doors", () => {
 });
 
 test.describe("the address that was retired", () => {
-  test("portal redirects to client, keeping the path", async ({ request }) => {
+  test("portal redirects to client, keeping the path", async ({ page }) => {
     // portal.mucolabs.com is in several hundred published links. Removing the
     // workspace is a decision; breaking the links is not part of it.
-    const response = await request.get("http://portal.localhost:3104/billing", { maxRedirects: 0 });
-    expect(response.status(), "must be a permanent redirect").toBe(308);
-    expect(response.headers()["location"]).toContain("client.localhost:3104");
-    expect(response.headers()["location"]).toContain("/billing");
+    await page.goto("http://portal.localhost:3104/billing", { waitUntil: "commit" });
+    await page.waitForURL(/\/login/);
+
+    // Two things at once: the hostname changed to the client workspace, and the
+    // path survived the hop -- so somebody following an old bookmark to their
+    // invoices signs in and lands on their invoices, not on a home page.
+    const url = page.url();
+    expect(url, "must land on the client workspace").toContain("client.localhost:3104");
+    expect(url, "must keep where they were going").toContain("next=%2Fbilling");
+  });
+
+  test("the redirect is permanent, not temporary", async ({ page }) => {
+    // A 302 would leave every browser and every crawler asking the retired
+    // hostname again forever. 308 is what lets the old address eventually stop
+    // being asked for at all.
+    const response = await page.goto("http://portal.localhost:3104/billing", { waitUntil: "commit" });
+    const chain: number[] = [];
+    for (let hop = response?.request().redirectedFrom(); hop; hop = hop.redirectedFrom()) {
+      const hopResponse = await hop.response();
+      if (hopResponse) chain.unshift(hopResponse.status());
+    }
+    expect(chain[0], "the first hop off portal must be a permanent redirect").toBe(308);
   });
 });
 
