@@ -1,0 +1,159 @@
+/* ---------------------------------------------------------------------------
+   The employee workspace.
+
+   Light first, because most of the people who open this are in a room with a
+   window. Seven destinations is few enough to read as a row, so navigation is
+   horizontal and text-led rather than a rail of icons — this is not a product
+   somebody lives in all day, it is one they open to find out what is on them
+   this week.
+
+   Denser than the intern workspace and looser than the console. That is the
+   whole reason density is a token: the same table component renders here at 38
+   pixels a row and in admin at 34, and neither had to be rewritten.
+--------------------------------------------------------------------------- */
+
+.workshell { min-height: 100dvh; display: flex; flex-direction: column; }
+
+.workhead {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.workhead > .bar {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s5);
+}
+
+.workhead .mark { display: flex; align-items: center; gap: var(--s3); text-decoration: none; }
+.workhead .mark b { display: block; font-size: var(--t-sm); font-weight: 600; }
+
+.workhead .mark small {
+  display: block;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.workhead .spacer { flex: 1; }
+
+.worknav {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  display: flex;
+  gap: var(--s1);
+  padding: 0 var(--s5);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.worknav::-webkit-scrollbar { display: none; }
+
+.worknav a {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s3) var(--s3);
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  font-weight: 560;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+
+.worknav a:hover { color: var(--text); }
+.worknav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+.worknav a svg { color: currentColor; }
+
+/* --------------------------------------------------------------- your pay */
+
+/* Compensation gets its own treatment, and it is deliberately unlike every
+   other panel here: a single figure, large, on its own. Burying somebody's pay
+   in a table of six other numbers is how a page stops being trustworthy about
+   the one thing it exists to say. */
+.payfigure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--s6) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.payfigure .amount {
+  font-size: clamp(2.5rem, 7vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.payfigure .cycle { color: var(--text-2); font-size: var(--t-sm); }
+
+/* ---------------------------------------------------------- project rooms */
+
+.roomhead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.roomgrants { display: flex; flex-wrap: wrap; gap: var(--s2); }
+
+/* A milestone list reads as a sequence, so it is drawn as one: a rule running
+   down the left with a mark on it per milestone. The numbering is real -- the
+   position column orders them -- rather than decoration. */
+.timeline { list-style: none; display: flex; flex-direction: column; }
+
+.timeline li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s3) var(--pad-card) var(--s3) calc(var(--pad-card) + 28px);
+  border-bottom: 1px solid var(--line);
+}
+
+.timeline li:last-child { border-bottom: 0; }
+
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--pad-card) + 5px);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.timeline li:first-child::before { top: var(--s4); }
+.timeline li:last-child::before { bottom: calc(100% - var(--s4)); }
+
+.timeline li::after {
+  content: "";
+  position: absolute;
+  left: var(--pad-card);
+  top: calc(var(--s3) + 6px);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.timeline li[data-done="true"]::after { border-color: var(--ok); background: var(--ok); }
+.timeline li[data-done="now"]::after { border-color: var(--accent); background: var(--surface); }
+.timeline b { font-weight: 560; }
+.timeline small { color: var(--text-dim); font-size: var(--t-meta); }

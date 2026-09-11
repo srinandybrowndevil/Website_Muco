@@ -6,11 +6,8 @@ import { TaskList, type TaskRow } from "@muco/ui/work";
 export const metadata: Metadata = { title: "Tasks" };
 
 export default async function TasksPage() {
-  const { supabase, userId } = await requireAccount("intern");
+  const { supabase, userId } = await requireAccount("employee");
 
-  // assignee_id is the whole filter, and it is also what the policy enforces.
-  // An intern querying this table directly gets exactly these rows back; the
-  // filter here is for ordering, not for safety.
   const { data } = await supabase
     .from("tasks")
     .select("id,title,description,status,priority,due_at,projects(name)")
@@ -18,7 +15,7 @@ export default async function TasksPage() {
     .neq("status", "cancelled")
     .order("status", { ascending: true })
     .order("due_at", { ascending: true, nullsFirst: false })
-    .limit(100);
+    .limit(200);
 
   const tasks: TaskRow[] = (data ?? []).map(row => {
     const project = Array.isArray(row.projects) ? row.projects[0] : row.projects;
@@ -38,11 +35,12 @@ export default async function TasksPage() {
   return (
     <div className="page">
       <div className="page-head">
-        <span className="eyebrow">Assigned work</span>
+        <span className="eyebrow">Assigned to you</span>
         <h1>Tasks</h1>
         <p className="lede">
-          You can see only the tasks assigned to you. Tick one when it is done; that is the only
-          change you can make here, and it is enforced by the database rather than by this page.
+          Every task assigned to you, across every project you are on. Marking one done is the only
+          change you can make from here — reassigning or moving a task is refused by the database,
+          not merely absent from this page.
         </p>
       </div>
 
@@ -57,8 +55,8 @@ export default async function TasksPage() {
       <p className="notice">
         <Icon name="info" size={14} />
         <span>
-          A task you cannot see is not a task you missed. Work reaches you through your mentor, who
-          assigns it here.
+          Tasks on projects you have not been granted do not appear here, and are not returned to
+          this account at all.
         </span>
       </p>
     </div>

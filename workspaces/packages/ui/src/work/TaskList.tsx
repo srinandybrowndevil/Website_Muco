@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createClient } from "@muco/core/browser";
 import { formatDate, relativeDays } from "@muco/core";
-import { EmptyState, Icon, StatusPill } from "@muco/ui";
+import { EmptyState, Icon, StatusPill } from "../primitives";
 
 export type TaskRow = {
   id: string;
