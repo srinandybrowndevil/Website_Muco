@@ -85,4 +85,10 @@ One further failure was the auditor's own doing. The enquiry test posts to an en
 3. **Entity presence.** The organisation record lists one social profile. A Google Business Profile is the single highest-value addition for a studio serving Erode and the surrounding districts, and it cannot be created from here.
 4. **Published prices and founding date.** Neither appears on the site, so neither was added to the structured data. Inventing them would be worse than omitting them.
 5. **Open roles.** The careers page lists five disciplines under a heading describing where help is usually needed. If any are genuinely open positions with dates, job posting markup would place them in Google Jobs. That requires confirmation, not assumption.
-6. **Outstanding from loop 1.** The sender policy record still publishes nothing, and the administrator credential shared earlier in conversation remains unrotated.
+6. **Mail authentication — a correction.** This report and several statements before it recorded the sender policy record as broken. It is not, and never was during this work. The domain publishes a valid policy for Google Workspace, a signing key under the default selector, a reporting policy at quarantine, and Google mail exchangers. All three mechanisms are correctly configured.
+
+   What was being reported as a fault is an orphaned hostname left by a previous provider's policy-merge service. It resolves to nothing, and nothing references it. A hostname that resolves to nothing and that nothing looks up is litter, not a defect. The error was asking whether that record existed without ever asking whether anything depended on it.
+
+   One genuine observation remains, and it is small: the reporting policy sends aggregate reports to an address at the previous provider. If the domain has moved on, those reports are going somewhere nobody reads. Changing it needs access to the DNS, which is at Cloudflare and not reachable from here.
+
+7. **The administrator credential** shared earlier in conversation still needs rotating. Whether it has been cannot be determined from here: the account record was touched shortly after a sign-in, which is what a sign-in does, and says nothing about the password. This is the one item that cannot be done or verified on the founder's behalf.
