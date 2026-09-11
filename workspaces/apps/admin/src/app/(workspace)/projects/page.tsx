@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
 import { formatDate, formatMoney, humanise } from "@muco/core";
 import { EmptyState, Icon, StatusPill } from "@muco/ui";
+import { CreateProject } from "@/components/CreateProject";
 
 export const metadata: Metadata = { title: "Projects" };
 
@@ -35,11 +36,30 @@ export default async function ProjectsPage({
   const { data: projects } = await query;
   const rows = projects ?? [];
 
+  const { data: customers } = await supabase
+    .from("customers")
+    .select("id,name,company")
+    .eq("organization_id", organizationId)
+    .order("company", { ascending: true });
+
   return (
     <div className="page">
       <div className="page-head">
-        <span className="eyebrow">Everything the studio is building</span>
-        <h1>Projects</h1>
+        <div className="split">
+          <div className="stack-sm">
+            <span className="eyebrow">Everything the studio is building</span>
+            <h1>Projects</h1>
+          </div>
+          {role === "admin" ? (
+            <CreateProject
+              organizationId={organizationId}
+              customers={(customers ?? []).map(row => ({
+                id: row.id as string,
+                label: (row.company as string) || (row.name as string),
+              }))}
+            />
+          ) : null}
+        </div>
         <p className="lede">
           Internal builds, client work and sandboxes. The kind decides who may be put on it: a
           sandbox can carry an intern, a client project carries somebody else&rsquo;s confidential

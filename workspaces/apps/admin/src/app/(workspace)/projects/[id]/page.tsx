@@ -2,8 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, formatMoney, humanise } from "@muco/core";
+import { formatDate, formatMoney, humanise, stillLive } from "@muco/core";
 import { EmptyState, Fact, Facts, Icon, StatusPill } from "@muco/ui";
+import { Milestones, type Milestone } from "@/components/Milestones";
+import { Tasks, type ProjectTask } from "@/components/Tasks";
+import { ShareDocument, type SharedFile } from "@/components/ShareDocument";
+import { Invoices, type Invoice } from "@/components/Invoices";
 
 export const metadata: Metadata = { title: "Project" };
 
@@ -24,7 +28,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   if (!project) notFound();
 
-  const [milestones, tasks, grants, invoices] = await Promise.all([
+  const [milestones, tasks, grants, invoices, files, lastInvoice] = await Promise.all([
     supabase.from("project_milestones").select("id,title,detail,status,due_on,position,completed_at")
       .eq("project_id", id).order("position", { ascending: true }),
     supabase.from("tasks").select("id,title,status,due_at,assignee_id,profiles(full_name)")
@@ -33,11 +37,44 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     supabase.from("project_grants")
       .select("id,module,level,ends_at,user_id,profiles!project_grants_user_id_fkey(full_name)")
       .eq("project_id", id),
-    supabase.from("invoices").select("id,number,amount,status,due_on")
+    supabase.from("invoices").select("id,number,amount,status,issued_on,due_on")
       .eq("project_id", id).order("issued_on", { ascending: false }),
+    supabase.from("files").select("id,name,kind,size_bytes,created_at")
+      .eq("project_id", id).order("created_at", { ascending: false }),
+    // Only to propose the next number. The database has the final say on
+    // whether it is allowed, and refuses a duplicate.
+    supabase.from("invoices").select("number")
+      .eq("organization_id", organizationId).order("number", { ascending: false }).limit(1),
   ]);
 
   const customer = one<{ id: string; company: string; name: string; email: string }>(project.customers);
+
+  const rows: ProjectTask[] = (tasks.data ?? []).map(task => ({
+    id: task.id as string,
+    title: task.title as string,
+    status: task.status as string,
+    due_at: task.due_at as string | null,
+    assignee_id: task.assignee_id as string | null,
+    assignee: one<{ full_name: string }>(task.profiles)?.full_name ?? null,
+  }));
+
+  // Studio staff can always be assigned; everybody else needs a live grant on
+  // this project, because the policy on projects admits them only through one.
+  const granted = (grants.data ?? [])
+    .filter(grant => stillLive(grant.ends_at as string))
+    .map(grant => ({
+      id: grant.user_id as string,
+      name: one<{ full_name: string }>(grant.profiles)?.full_name ?? "Unnamed",
+      note: (grant.module as string) + " at " + (grant.level as string),
+    }));
+
+  const assignable = [...new Map(granted.map(person => [person.id, person])).values()];
+
+  const year = new Date().getFullYear();
+  const previous = (lastInvoice.data ?? [])[0]?.number as string | undefined;
+  const sequence = previous?.match(/(\d+)$/);
+  const nextNumber = "MUCO-INV-" + year + "-" +
+    String((sequence ? Number(sequence[1]) : 0) + 1).padStart(4, "0");
 
   return (
     <div className="page">
@@ -79,29 +116,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 {(milestones.data ?? []).length} complete
               </span>
             </div>
-            {(milestones.data ?? []).length === 0 ? (
-              <EmptyState icon="target" title="No milestones set">
-                The client workspace shows these, so a project with none tells a customer nothing
-                about when anything lands.
-              </EmptyState>
-            ) : (
-              <div className="list">
-                {(milestones.data ?? []).map(milestone => (
-                  <div className="item" key={milestone.id}>
-                    <span className="item-main">
-                      <b>{milestone.title}</b>
-                      <small>{milestone.detail ?? "No detail"}</small>
-                    </span>
-                    <span className="hint">
-                      {milestone.status === "completed"
-                        ? "Done " + formatDate(milestone.completed_at)
-                        : formatDate(milestone.due_on)}
-                    </span>
-                    <StatusPill value={milestone.status} />
-                  </div>
-                ))}
-              </div>
-            )}
+            <Milestones
+              projectId={id}
+              organizationId={organizationId}
+              milestones={(milestones.data ?? []) as Milestone[]}
+              canEdit={role === "admin"}
+            />
           </section>
 
           <section className="panel">
@@ -111,24 +131,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 {(tasks.data ?? []).filter(t => t.status === "open").length} open
               </span>
             </div>
-            {(tasks.data ?? []).length === 0 ? (
-              <EmptyState icon="list" title="No tasks on this project" />
-            ) : (
-              <div className="list">
-                {(tasks.data ?? []).map(task => (
-                  <div className="item" key={task.id}>
-                    <span className="item-main">
-                      <b>{task.title}</b>
-                      <small>
-                        {one<{ full_name: string }>(task.profiles)?.full_name ?? "Unassigned"}
-                        {task.due_at ? " · due " + formatDate(task.due_at) : ""}
-                      </small>
-                    </span>
-                    <StatusPill value={task.status} />
-                  </div>
-                ))}
-              </div>
-            )}
+            <Tasks
+              projectId={id}
+              organizationId={organizationId}
+              tasks={rows}
+              assignable={assignable}
+              canEdit={role === "admin"}
+            />
           </section>
         </div>
 
@@ -157,25 +166,32 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             )}
           </section>
 
+          <section className="panel">
+            <div className="panel-head">
+              <h2>Files</h2>
+              <span className="hint">{(files.data ?? []).length}</span>
+            </div>
+            <ShareDocument
+              projectId={id}
+              customerId={customer?.id ?? null}
+              organizationId={organizationId}
+              files={(files.data ?? []) as SharedFile[]}
+              canEdit={role === "admin" || role === "member"}
+            />
+          </section>
+
           {role === "admin" ? (
             <section className="panel">
               <div className="panel-head"><h2>Invoices</h2></div>
-              {(invoices.data ?? []).length === 0 ? (
-                <EmptyState icon="receipt" title="None raised" />
-              ) : (
-                <div className="list">
-                  {(invoices.data ?? []).map(invoice => (
-                    <div className="item" key={invoice.id}>
-                      <span className="item-main">
-                        <b className="mono">{invoice.number}</b>
-                        <small>{invoice.due_on ? "Due " + formatDate(invoice.due_on) : "No due date"}</small>
-                      </span>
-                      <span className="tabular">{formatMoney(invoice.amount)}</span>
-                      <StatusPill value={invoice.status} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              <Invoices
+                projectId={id}
+                customerId={customer?.id ?? null}
+                organizationId={organizationId}
+                invoices={(invoices.data ?? []) as Invoice[]}
+                budget={project.budget as number | null}
+                nextNumber={nextNumber}
+                canEdit={role === "admin"}
+              />
             </section>
           ) : null}
         </div>
