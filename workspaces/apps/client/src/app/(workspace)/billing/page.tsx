@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, formatMoney, relativeDays } from "@muco/core";
+import { formatDate, formatMoney, isPast, relativeDays } from "@muco/core";
 import { Callout, EmptyState, Icon, StatusPill } from "@muco/ui";
 import { loadCustomer } from "@/lib/project";
 
@@ -25,7 +25,7 @@ export default async function BillingPage() {
   const rows = invoices ?? [];
   const sum = (list: typeof rows) => list.reduce((total, row) => total + Number(row.amount ?? 0), 0);
   const open = rows.filter(row => ["sent", "viewed", "overdue"].includes(row.status));
-  const overdue = rows.filter(row => row.status === "overdue" || (row.due_on && row.status !== "paid" && row.status !== "void" && Date.parse(row.due_on) < Date.now()));
+  const overdue = rows.filter(row => row.status === "overdue" || (row.status !== "paid" && row.status !== "void" && isPast(row.due_on)));
   const paid = rows.filter(row => row.status === "paid");
 
   return (

@@ -807,3 +807,20 @@ kbd {
 
 .authaside h2 { font-size: var(--t-xl); max-width: 22ch; }
 .authaside p { font-size: var(--t-sm); color: var(--text-2); max-width: 44ch; }
+
+/* A divider that says "or" without drawing a heavy line across the form. */
+.orline {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  color: var(--text-dim);
+  font-size: var(--t-meta);
+}
+
+.orline::before,
+.orline::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}

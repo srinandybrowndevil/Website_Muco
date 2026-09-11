@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, relativeDays } from "@muco/core";
+import { formatDate, isPast, relativeDays, today } from "@muco/core";
 import { EmptyState, Icon, StatusPill } from "@muco/ui";
 
 export const metadata: Metadata = { title: "Home" };
@@ -15,7 +15,7 @@ function one<T>(value: unknown): T | null {
 // somebody has to interpret.
 export default async function EmployeeHome() {
   const { supabase, userId, fullName } = await requireAccount("employee");
-  const today = new Date().toISOString().slice(0, 10);
+  const todayISO = today();
 
   const [projects, tasks] = await Promise.all([
     supabase.from("granted_projects")
@@ -35,14 +35,14 @@ export default async function EmployeeHome() {
         .select("id,title,due_on,status,project_id,projects(name)")
         .in("project_id", projectIds)
         .neq("status", "completed")
-        .gte("due_on", today)
+        .gte("due_on", todayISO)
         .order("due_on", { ascending: true })
         .limit(3)
     : { data: [] };
 
   const firstName = (fullName ?? "").split(" ")[0];
   const overdue = (tasks.data ?? []).filter(
-    task => task.due_at && Date.parse(task.due_at) < Date.now(),
+    task => isPast(task.due_at),
   ).length;
 
   return (

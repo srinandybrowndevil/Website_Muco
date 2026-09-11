@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, formatDateTime, formatMoney, humanise } from "@muco/core";
+import { formatDate, formatDateTime, formatMoney, humanise, isPast } from "@muco/core";
 import { Avatar, EmptyState, Fact, Facts, Icon, StatusPill } from "@muco/ui";
 import { PersonAccess } from "@/components/PersonAccess";
 
@@ -158,7 +158,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
         ) : (
           <div className="list">
             {(grants.data ?? []).map(grant => {
-              const lapsed = grant.ends_at ? Date.parse(grant.ends_at) < Date.now() : false;
+              const lapsed = isPast(grant.ends_at);
               return (
                 <div className="item" key={grant.id}>
                   <span className="item-main">

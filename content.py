@@ -119,8 +119,8 @@ PROJECTS = [
         "scope": "Public marketing site, service and pricing architecture, enquiry capture with "
                  "source attribution, portfolio with honest project stages, and a roadmap to "
                  "authenticated customer and admin areas.",
-        "state": "Live at mucolabs.com with server-side lead capture, and portal.mucolabs.com "
-                 "provides the authenticated customer and admin workspace.",
+        "state": "Live at mucolabs.com with server-side lead capture, and four separate logged-in "
+                 "workspaces at admin, employee, intern and client.mucolabs.com.",
         "chips": ["Static-first", "SEO & schema", "Accessibility", "Portal roadmap"],
     },
     {
@@ -1004,7 +1004,7 @@ def live_platform():
     return """<figure class="preview live-platform" data-live-platform>
               <div class="preview-bar">
                 <div class="preview-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-                <span class="preview-url">portal.mucolabs.com / command</span>
+                <span class="preview-url">admin.mucolabs.com / command</span>
                 <span class="preview-chrome-end">
                   <span class="live-signal"><i aria-hidden="true"></i> Interactive concept</span>
                   <span class="live-clock" data-live-clock>--:--:--</span>
@@ -2597,7 +2597,7 @@ def build_contact():
         budgets=options(budgets, "Select a range"),
         timelines=options(timelines, "Select a timeline"),
         portal_contact=PORTAL_CONTACT,
-        portal_signup_contact=PORTAL_DOMAIN + "/signup?next=%2Fportal%2Fcontact",
+        portal_signup_contact=PORTAL_LOGIN,
     )
 
     contact_jsonld = """{

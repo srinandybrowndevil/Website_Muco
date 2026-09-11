@@ -24,6 +24,7 @@ export function SignInForm({ workspace }: { workspace: WorkspaceKey }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [google, setGoogle] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const next = safeInternalPath(params.get("next"), "/");
@@ -58,6 +59,38 @@ export function SignInForm({ workspace }: { workspace: WorkspaceKey }) {
     // again immediately.
     router.replace(next);
     router.refresh();
+  }
+
+  // Carried over rather than added. The application this replaced offered
+  // Google, and section 2 of the specification rules out social login "beyond
+  // what auth already supports" -- which is an instruction to keep this and not
+  // to add a second one.
+  //
+  // The redirect returns to this origin, not to a shared one. Each workspace
+  // holds its own session, so a callback landing on another host would create
+  // a session in the wrong product.
+  async function signInWithGoogle() {
+    setError(null);
+    const supabase = createClient();
+    if (!supabase) {
+      setError("This workspace is not connected to its database. Tell the studio.");
+      return;
+    }
+    setGoogle(true);
+    const { error: failure } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/auth/callback?next=" + encodeURIComponent(next),
+      },
+    });
+    if (failure) {
+      setGoogle(false);
+      setError(
+        failure.message.toLowerCase().includes("provider")
+          ? "Google sign-in is not switched on for this workspace. Use your email address and password."
+          : failure.message,
+      );
+    }
   }
 
   return (
@@ -121,6 +154,13 @@ export function SignInForm({ workspace }: { workspace: WorkspaceKey }) {
 
       <button className="btn primary lg block" type="submit" disabled={busy}>
         {busy ? "Signing in" : "Sign in to " + WORKSPACES[workspace].name.toLowerCase()}
+      </button>
+
+      <div className="orline"><span>or</span></div>
+
+      <button className="btn block" type="button" onClick={signInWithGoogle} disabled={google || busy}>
+        <Icon name="mail" size={15} />
+        <span>{google ? "Opening Google" : "Continue with Google"}</span>
       </button>
 
       <a className="hint" href="/forgot-password">Forgotten your password?</a>

@@ -52,47 +52,58 @@ jobs:
             test-results/
           retention-days: 7
 
-  portal:
-    name: portal
+  workspaces:
+    name: four workspaces
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
 
       # Types prove the code agrees with itself. This proves it agrees with the
       # database: every column and foreign key named in a select has to exist
-      # in the migrations. It is what would have caught a certificate printing
-      # "Not recorded" because an embed named a foreign key that was ambiguous,
-      # and a staff page rendering "Unnamed project" for months.
+      # in the migrations. It reads all four applications and both shared
+      # packages, because four apps mean four chances to name a column that was
+      # renamed, and the one that breaks is the one nobody thought to check.
       - name: Check every query against the schema
         run: python scripts/schema-check.py
 
-      - run: npm --prefix portal ci
-      - name: Typecheck
-        working-directory: portal
-        run: npx tsc --noEmit
-      - run: npm --prefix portal run lint
-      - run: npm --prefix portal run build
+      - name: Install
+        working-directory: workspaces
+        run: npm ci
+
+      # --workspaces --if-present, so adding a fifth application to the
+      # monorepo puts it in CI without anybody editing this file.
+      - name: Typecheck every application
+        working-directory: workspaces
+        run: npm run typecheck
+
+      - name: Lint every application
+        working-directory: workspaces
+        run: npm run lint
+
+      - name: Build every application
+        working-directory: workspaces
+        run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
 
-  portal-browser:
-    name: portal in a browser
+  workspaces-browser:
+    name: four workspaces in a browser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
 
-      # The portal refuses to serve without Supabase configured, which is the
-      # right behaviour and means these cannot run until the two publishable
-      # values are set as repository secrets. Skipped rather than faked: a test
-      # that runs against a stub proves nothing about the real thing.
+      # Each workspace refuses to serve without Supabase configured, which is
+      # the right behaviour and means these cannot run until the two
+      # publishable values are set as repository secrets. Skipped rather than
+      # faked: a test that runs against a stub proves nothing about the real
+      # thing.
       - name: Check the workspace secrets exist
         id: secrets
         run: |
@@ -100,18 +111,19 @@ jobs:
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Portal browser tests skipped - set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as repository secrets to enable them."
+            echo "::notice::Workspace browser tests skipped - set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as repository secrets to enable them."
           fi
 
       - if: steps.secrets.outputs.present == 'true'
         run: npm ci
       - if: steps.secrets.outputs.present == 'true'
-        run: npm --prefix portal ci
+        working-directory: workspaces
+        run: npm ci
       - if: steps.secrets.outputs.present == 'true'
         run: npx playwright install --with-deps chromium
       - if: steps.secrets.outputs.present == 'true'
         name: Browser tests
-        run: npx playwright test tests/portal.spec.ts
+        run: npx playwright test tests/workspaces.spec.ts
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
@@ -119,7 +131,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-portal
+          name: playwright-report-workspaces
           path: |
             playwright-report/
             test-results/

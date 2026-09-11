@@ -8,14 +8,21 @@ each name against them, walking into embeds.
 It is what would have caught a certificate printing "Not recorded" because an
 embed named an ambiguous foreign key, and a staff page rendering "Unnamed
 project" for months because an employee could not read the projects table.
+
+It reads every application under workspaces/, not one of them. Four apps mean
+four chances for a query to name a column that was renamed, and the one that
+breaks is always the one nobody thought to check.
 """
 import re
 import os
 import sys
 import glob
 
-MIG = os.path.join("portal", "supabase", "migrations")
-SRC = os.path.join("portal", "src")
+MIG = os.path.join("workspaces", "supabase", "migrations")
+# All four applications and the two packages they share. Scanning one app
+# would leave three unchecked, and the column that does not exist is always in
+# the one nobody checked.
+SRC = os.path.join("workspaces")
 
 # Table-body lines that declare something other than a column.
 SKIP = ("constraint", "unique", "primary", "check", "foreign", "exclude", "like")

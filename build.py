@@ -31,20 +31,37 @@ DOMAIN = "https://mucolabs.com"
 PHONE = "+91 6381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
-PORTAL_DOMAIN = "https://portal.mucolabs.com"
-# The customer portal is deployed at portal.mucolabs.com. Starting a project
-# intentionally enters the customer auth flow first; the requested destination
-# survives sign-in or sign-up and opens the new-request form.
+PORTAL_DOMAIN = "https://client.mucolabs.com"
+# The client workspace moved from portal.mucolabs.com to client.mucolabs.com
+# when the one portal became four. The old hostname still answers and redirects
+# here permanently, path intact, so links already published keep working -- but
+# a link written today should name the address that exists.
 PORTAL_LIVE = True
 PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
-# Login exposes both Sign in and Create a customer account. The encoded next
-# path brings either route to the authenticated project-request form.
-PORTAL_SIGNUP = PORTAL_LOGIN + "?next=%2Fportal%2Frequests%2Fnew"
-# Every contact action on the site is account-gated: WhatsApp, phone and email
-# all route through sign-in, so an enquiry always arrives attached to a customer
-# account instead of as an anonymous message. The legal pages are the one
-# exemption -- see GATE_KEEP_EMAIL.
-PORTAL_CONTACT = PORTAL_LOGIN + "?next=%2Fportal%2Fcontact"
+# Starting a project now goes to this site's own contact form rather than to a
+# sign-up page, because there is no longer a sign-up page to go to.
+#
+# That is a real change and worth stating plainly. The four workspaces are
+# invitation-only by design: section 11.1 of the specification lists sign in,
+# reset password and invite accept as the authentication screens, and does not
+# list self-service registration. A stranger can no longer create themselves a
+# customer account.
+#
+# Nothing about lead capture breaks. The contact form writes into
+# website_enquiries exactly as before, those land in the admin console under
+# Enquiries, and the founder converts one into a customer and sends an
+# invitation. What changes is that an account exists because the studio decided
+# it should, which is the rule every other workspace already followed.
+#
+# If the founder wants self-service sign-up back, it is this constant and a
+# sign-up page in apps/client -- not a redesign.
+CONTACT_PAGE = "/contact"
+PORTAL_SIGNUP = CONTACT_PAGE
+# Every contact action on the site stays gated: WhatsApp, phone and email all
+# route through the contact form, so an enquiry arrives as a record rather than
+# as a message in somebody's phone. The legal pages are the one exemption --
+# see GATE_KEEP_EMAIL.
+PORTAL_CONTACT = CONTACT_PAGE
 PORTAL_SIGNUP_NOTE = ""
 NEWLINE = chr(10)
 PORTAL_LOGIN_LINK = "".join([

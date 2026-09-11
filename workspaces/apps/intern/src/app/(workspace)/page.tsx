@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, humanise } from "@muco/core";
+import { daysUntil, formatDate, humanise } from "@muco/core";
 import { Callout, Dial, EmptyState, Icon, StatusPill } from "@muco/ui";
 
 export const metadata: Metadata = { title: "Home" };
@@ -51,7 +51,7 @@ export default async function InternHome() {
     1,
     Math.round((Date.parse(internship.ends_at) - Date.parse(internship.starts_at)) / 86_400_000),
   );
-  const left = Math.max(0, Math.round((Date.parse(internship.ends_at) - Date.now()) / 86_400_000));
+  const left = Math.max(0, daysUntil(internship.ends_at) ?? 0);
   const firstName = (fullName ?? "").split(" ")[0];
   const mentorName = one<{ full_name: string }>(mentor?.data)?.full_name;
   const certificate = issued.data;

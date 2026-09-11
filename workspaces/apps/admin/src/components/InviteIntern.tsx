@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { today } from "@muco/core";
 import { createClient } from "@muco/core/browser";
 import { Icon } from "@muco/ui";
 
@@ -41,12 +42,12 @@ export function InviteIntern({
   mentors: { id: string; name: string }[];
 }) {
   const router = useRouter();
-  const today = new Date().toISOString().slice(0, 10);
+  const todayISO = today();
 
   const [email, setEmail] = useState("");
   const [track, setTrack] = useState(TRACKS[0][0]);
   const [tier, setTier] = useState("m2");
-  const [startsAt, setStartsAt] = useState(today);
+  const [startsAt, setStartsAt] = useState(todayISO);
   const [endsAt, setEndsAt] = useState("");
   const [mentorId, setMentorId] = useState("");
   const [college, setCollege] = useState("");
@@ -60,7 +61,7 @@ export function InviteIntern({
   function pickTier(value: string) {
     setTier(value);
     const days = TIERS.find(row => row[0] === value)?.[2] ?? 60;
-    const start = new Date(startsAt || today);
+    const start = new Date(startsAt || todayISO);
     setEndsAt(new Date(start.getTime() + days * 86_400_000).toISOString().slice(0, 10));
   }
 

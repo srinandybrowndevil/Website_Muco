@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAdmin } from "@muco/core/server";
 import { Callout } from "@muco/ui";
@@ -25,9 +26,9 @@ export default async function InviteStaffPage() {
       </div>
 
       <div className="tabs">
-        <a href="/people/invite/intern" aria-current={KIND === "intern" ? "page" : undefined}>Intern</a>
-        <a href="/people/invite/staff" aria-current={KIND === "staff" ? "page" : undefined}>Staff</a>
-        <a href="/people/invite/client" aria-current={KIND === "client" ? "page" : undefined}>Client</a>
+        <Link href="/people/invite/intern" aria-current={KIND === "intern" ? "page" : undefined}>Intern</Link>
+        <Link href="/people/invite/staff" aria-current={KIND === "staff" ? "page" : undefined}>Staff</Link>
+        <Link href="/people/invite/client" aria-current={KIND === "client" ? "page" : undefined}>Client</Link>
       </div>
 
       <section className="panel">
@@ -37,7 +38,7 @@ export default async function InviteStaffPage() {
       </section>
 
       <Callout tone="info" icon="lock" title="Compensation is private from the moment it exists">
-        Each person sees their own and nobody else's, including other employees. The policy on that
+        Each person sees their own and nobody else&rsquo;s, including other employees. The policy on
         table is user_id = auth.uid(), and every view of it is written to the audit log.
       </Callout>
     </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDateTime, relativeDays } from "@muco/core";
+import { relativeDays } from "@muco/core";
 import { EmptyState, Icon, StatusPill } from "@muco/ui";
 
 export const metadata: Metadata = { title: "Enquiries" };

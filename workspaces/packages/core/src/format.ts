@@ -101,3 +101,49 @@ export function humanise(value: string | null | undefined, fallback = "—"): st
 export function count(n: number, singular: string, plural = `${singular}s`): string {
   return `${n} ${n === 1 ? singular : plural}`;
 }
+
+/**
+ * Today, as the studio's calendar sees it.
+ *
+ * Not `new Date().toISOString().slice(0, 10)`, which is the obvious version and
+ * is wrong for five and a half hours of every day: it is UTC, so between
+ * midnight and 5:30am in Erode it names yesterday. A query filtering "grants
+ * expiring from today" against that misses a day's worth of rows, every night,
+ * silently.
+ */
+export function today(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric", month: "2-digit", day: "2-digit", timeZone: ZONE,
+  }).format(new Date());
+}
+
+/** A calendar day this many days from today, in the studio's timezone. */
+export function daysFromToday(days: number): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric", month: "2-digit", day: "2-digit", timeZone: ZONE,
+  }).format(new Date(Date.now() + days * 86_400_000));
+}
+
+/** True when a date has already passed. Null and unparseable are not past. */
+export function isPast(value: string | Date | null | undefined): boolean {
+  const days = daysUntil(value);
+  return days !== null && days < 0;
+}
+
+/** True when a date is today or within the next `days` days. */
+export function isWithin(value: string | Date | null | undefined, days: number): boolean {
+  const left = daysUntil(value);
+  return left !== null && left >= 0 && left <= days;
+}
+
+/**
+ * A grant, an internship or anything else with an optional end date is live
+ * when it has no end date or its end date has not passed.
+ *
+ * Worth having in one place: written inline it comes out four slightly
+ * different ways, and one of them treats a grant expiring today as already
+ * expired.
+ */
+export function stillLive(endsAt: string | null | undefined): boolean {
+  return !endsAt || !isPast(endsAt);
+}

@@ -12,6 +12,11 @@ import { NextResponse } from "next/server";
 // SHA-1 appears here because the corpus is indexed by it. It is not being
 // relied on for security — it is a lookup key into a public dataset.
 
+// Next adds `next` to RequestInit through a global augmentation that is in
+// scope when an application is built and not when this package is
+// typechecked on its own. Naming the shape here keeps both true.
+type CachedRequestInit = RequestInit & { next?: { revalidate?: number } };
+
 const CORPUS = "https://api.pwnedpasswords.com/range/";
 const PREFIX = /^[0-9A-F]{5}$/;
 
@@ -37,7 +42,7 @@ export async function POST(request: Request) {
       // The answer for a prefix changes only when the corpus is republished,
       // so a long cache costs nothing and spares the service.
       next: { revalidate: 60 * 60 * 24 },
-    });
+    } as CachedRequestInit);
     if (!response.ok) return NextResponse.json({ available: false }, { status: 200 });
     return NextResponse.json({ available: true, suffixes: await response.text() }, { status: 200 });
   } catch {

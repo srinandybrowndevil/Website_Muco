@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, humanise } from "@muco/core";
+import { formatDate, humanise, stillLive } from "@muco/core";
 import { EmptyState, Fact, Facts, Icon, StatusPill } from "@muco/ui";
 
 export const metadata: Metadata = { title: "Project" };
@@ -23,7 +23,7 @@ export default async function ProjectPage() {
     .order("project_id", { ascending: true });
 
   const live = (grants ?? []).filter(
-    grant => !grant.ends_at || Date.parse(grant.ends_at) >= Date.now() - 86_400_000,
+    grant => stillLive(grant.ends_at),
   );
   const projectIds = [...new Set(live.map(grant => grant.project_id))];
 

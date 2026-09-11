@@ -109,7 +109,7 @@ def build_learning_portal():
         <article class="learning-course"><span class="eyebrow">02 · Learn</span><h2>Open your dashboard</h2><p>Sign in using your Way2Me learner account. Registration and access are managed by Way2Me.</p><a href="{DASHBOARD_URL}">Continue to Way2Me ↗</a></article>
         <article class="learning-course"><span class="eyebrow">03 · Get help</span><h2>Speak to Way2Me</h2><p>Ask about course suitability, fees, batches, enrolment or account access.</p><a class="learning-enquiry" href="{CONTACT_URL}">Enquire at Way2Me ↗</a></article>
       </div>
-      <div class="learning-account-note"><h2>Use the right account.</h2><p>Use your Way2Me account for learning. Your MUCO LABS customer account is for business projects, requests and files.</p><a href="https://portal.mucolabs.com/login">Go to the MUCO customer portal →</a><p>If the Way2Me dashboard is unavailable, <a href="{CONTACT_URL}">contact the Way2Me team</a>.</p></div>
+      <div class="learning-account-note"><h2>Use the right account.</h2><p>Use your Way2Me account for learning. Your MUCO LABS customer account is for business projects, requests and files.</p><a href="https://client.mucolabs.com/login">Go to the MUCO client workspace →</a><p>If the Way2Me dashboard is unavailable, <a href="{CONTACT_URL}">contact the Way2Me team</a>.</p></div>
     </div></section>'''
     return render('learning-portal.html', 'Learning Portal | Way2Me access | MUCO LABS',
         'Open your Way2Me learner dashboard, register for a learner account, browse courses or contact Way2Me for support.', body,

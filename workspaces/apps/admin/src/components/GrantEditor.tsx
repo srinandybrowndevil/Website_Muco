@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { daysFromToday, today } from "@muco/core";
 import { createClient } from "@muco/core/browser";
 import { Icon } from "@muco/ui";
 
@@ -41,9 +42,7 @@ export function GrantEditor({
   const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
   const [module, setModule] = useState(MODULES[0][0]);
   const [level, setLevel] = useState("read");
-  const [endsAt, setEndsAt] = useState(
-    new Date(Date.now() + 90 * 86_400_000).toISOString().slice(0, 10),
-  );
+  const [endsAt, setEndsAt] = useState(() => daysFromToday(90));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,7 +64,7 @@ export function GrantEditor({
       project_id: projectId,
       module,
       level,
-      starts_at: new Date().toISOString().slice(0, 10),
+      starts_at: today(),
       ends_at: endsAt || null,
     });
 

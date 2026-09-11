@@ -11,27 +11,60 @@
       "port": 8123
     },
     {
-      "name": "portal",
-      "runtimeExecutable": "node",
-      "runtimeArgs": [
-        "scripts/dev-portal.mjs",
-        "3100"
-      ],
-      "port": 3100
-    },
-    {
-      "name": "portal-prod",
+      "name": "admin",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "--prefix",
-        "portal",
         "run",
-        "start",
-        "--",
-        "--port",
-        "3200"
+        "dev",
+        "--workspace",
+        "@muco/admin",
+        "--prefix",
+        "workspaces"
       ],
-      "port": 3200
+      "port": 3101,
+      "url": "http://admin.localhost:3101"
+    },
+    {
+      "name": "employee",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--workspace",
+        "@muco/employee",
+        "--prefix",
+        "workspaces"
+      ],
+      "port": 3102,
+      "url": "http://employee.localhost:3102"
+    },
+    {
+      "name": "intern",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--workspace",
+        "@muco/intern",
+        "--prefix",
+        "workspaces"
+      ],
+      "port": 3103,
+      "url": "http://intern.localhost:3103"
+    },
+    {
+      "name": "client",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--workspace",
+        "@muco/client",
+        "--prefix",
+        "workspaces"
+      ],
+      "port": 3104,
+      "url": "http://client.localhost:3104"
     }
   ]
 }

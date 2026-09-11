@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Avatar, Icon } from "@muco/ui";
 import { SignOutButton } from "@muco/ui/auth";
 
@@ -67,19 +67,25 @@ export function Console({
   counts: Counts;
 }) {
   const pathname = usePathname() ?? "/";
-  const [open, setOpen] = useState(false);
 
   // Closing the drawer on navigation is the difference between a menu and a
-  // menu that stays in the way. Keyed on pathname so it also closes when a
-  // link inside the page moves somewhere else.
-  useEffect(() => { setOpen(false); }, [pathname]);
+  // menu that stays in the way. Derived rather than done in an effect: the
+  // drawer is only ever open because somebody clicked, so a pathname that has
+  // changed since that click means the click is spent. Setting state inside an
+  // effect for this causes a second render every time anybody navigates.
+  const [openedAt, setOpenedAt] = useState<string | null>(null);
+  const open = openedAt === pathname;
+  const setOpen = useCallback(
+    (next: boolean) => setOpenedAt(next ? pathname : null),
+    [pathname],
+  );
 
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, setOpen]);
 
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   const badge = (href: string) =>

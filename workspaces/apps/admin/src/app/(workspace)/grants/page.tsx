@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, relativeDays } from "@muco/core";
+import { formatDate, isPast, isWithin, relativeDays } from "@muco/core";
 import { EmptyState, Icon } from "@muco/ui";
 import { GrantEditor } from "@/components/GrantEditor";
 import { RevokeGrant } from "@/components/RevokeGrant";
@@ -41,11 +41,7 @@ export default async function GrantsPage() {
     byPerson.set(grant.user_id as string, list);
   }
 
-  const soon = rows.filter(grant => {
-    if (!grant.ends_at) return false;
-    const days = (Date.parse(grant.ends_at as string) - Date.now()) / 86_400_000;
-    return days >= 0 && days <= 7;
-  }).length;
+  const soon = rows.filter(grant => isWithin(grant.ends_at as string, 7)).length;
 
   const options = (people.data ?? []).map(row => ({
     id: row.user_id as string,
@@ -109,7 +105,7 @@ export default async function GrantsPage() {
               </div>
               <div className="list">
                 {list.map(grant => {
-                  const lapsed = grant.ends_at ? Date.parse(grant.ends_at as string) < Date.now() : false;
+                  const lapsed = isPast(grant.ends_at as string);
                   return (
                     <div className="item" key={grant.id}>
                       <span className="item-main">

@@ -45,7 +45,7 @@ export default async function ClientHome() {
 
   const next = (milestones.data ?? []).find(milestone => milestone.status !== "completed") ?? null;
   const outstanding = (invoices.data ?? []).filter(
-    invoice => invoice.status === "sent" || invoice.status === "viewed" || invoice.status === "overdue",
+    invoice => ["sent", "viewed", "overdue"].includes(invoice.status),
   );
   const owed = outstanding.reduce((total, invoice) => total + Number(invoice.amount ?? 0), 0);
 

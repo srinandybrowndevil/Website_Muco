@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAdmin } from "@muco/core/server";
 import { Callout } from "@muco/ui";
@@ -37,9 +38,9 @@ export default async function InviteClientPage() {
       </div>
 
       <div className="tabs">
-        <a href="/people/invite/intern" aria-current={KIND === "intern" ? "page" : undefined}>Intern</a>
-        <a href="/people/invite/staff" aria-current={KIND === "staff" ? "page" : undefined}>Staff</a>
-        <a href="/people/invite/client" aria-current={KIND === "client" ? "page" : undefined}>Client</a>
+        <Link href="/people/invite/intern" aria-current={KIND === "intern" ? "page" : undefined}>Intern</Link>
+        <Link href="/people/invite/staff" aria-current={KIND === "staff" ? "page" : undefined}>Staff</Link>
+        <Link href="/people/invite/client" aria-current={KIND === "client" ? "page" : undefined}>Client</Link>
       </div>
 
       <section className="panel">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, humanise } from "@muco/core";
+import { formatDate, humanise, stillLive } from "@muco/core";
 import { EmptyState, Fact, Facts, Icon, StatusPill } from "@muco/ui";
 import { TaskList, type TaskRow } from "@muco/ui/work";
 
@@ -40,7 +40,7 @@ export default async function ProjectRoom({ params }: { params: Promise<{ id: st
   ]);
 
   const live = (grants.data ?? []).filter(
-    grant => !grant.ends_at || Date.parse(grant.ends_at) >= Date.now() - 86_400_000,
+    grant => stillLive(grant.ends_at),
   );
 
   const rows: TaskRow[] = (tasks.data ?? []).map(task => ({

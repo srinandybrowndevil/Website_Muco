@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, humanise } from "@muco/core";
+import { formatDate, humanise, stillLive } from "@muco/core";
 import { EmptyState, Icon, StatusPill } from "@muco/ui";
 
 export const metadata: Metadata = { title: "Projects" };
@@ -25,7 +25,7 @@ export default async function ProjectsPage() {
 
   const byProject = new Map<string, { module: string; level: string; ends_at: string | null }[]>();
   for (const grant of grants.data ?? []) {
-    const live = !grant.ends_at || Date.parse(grant.ends_at) >= Date.now() - 86_400_000;
+    const live = stillLive(grant.ends_at);
     if (!live) continue;
     const list = byProject.get(grant.project_id) ?? [];
     list.push(grant);

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAccount } from "@muco/core/server";
-import { formatDate, relativeDays } from "@muco/core";
+import { daysFromToday, formatDate, relativeDays, today } from "@muco/core";
 import { EmptyState, Icon, Metric } from "@muco/ui";
 
 export const metadata: Metadata = { title: "Home" };
@@ -27,8 +27,8 @@ type QueueRow = { icon: string; href: string; what: string; detail: string; when
 export default async function AdminHome() {
   const { supabase, organizationId, fullName } = await requireAccount("admin");
   const org = { organization_id: organizationId };
-  const today = new Date().toISOString().slice(0, 10);
-  const inAWeek = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
+  const todayISO = today();
+  const inAWeek = daysFromToday(7);
 
   const [interns, staff, clients, pending, expiring, enquiries, requests, recent] = await Promise.all([
     supabase.from("intern_profiles").select("id", { count: "exact", head: true })
@@ -42,7 +42,7 @@ export default async function AdminHome() {
       .match(org).eq("status", "completed").order("ends_at", { ascending: true }),
     supabase.from("project_grants")
       .select("id,module,level,ends_at,projects(name),profiles!project_grants_user_id_fkey(full_name)")
-      .match(org).gte("ends_at", today).lte("ends_at", inAWeek).order("ends_at", { ascending: true }),
+      .match(org).gte("ends_at", todayISO).lte("ends_at", inAWeek).order("ends_at", { ascending: true }),
     supabase.from("website_enquiries").select("id,name,business,created_at")
       .match(org).eq("status", "new").order("created_at", { ascending: false }).limit(4),
     supabase.from("project_requests").select("id,title,status,created_at")
