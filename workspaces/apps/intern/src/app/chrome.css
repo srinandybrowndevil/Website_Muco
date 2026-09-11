@@ -1,0 +1,201 @@
+/* ---------------------------------------------------------------------------
+   The intern workspace.
+
+   Not a console. An intern is here for four, eight or twelve weeks and should
+   never have to learn an interface, so this is shaped like something they
+   already know: a header that says who they are and how long is left, a single
+   column of content, and navigation that sits under the thumb on a phone.
+
+   There is no sidebar, no command palette and no density control. Those are
+   tools for somebody who lives in a product all day. Showing them here would
+   also teach an intern the shape of a system they have no business knowing
+   about, which the specification rules out directly.
+--------------------------------------------------------------------------- */
+
+.internshell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  /* Room for the navigation bar that sits at the bottom on a phone, plus the
+     home indicator on a phone that has one. */
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 760px) {
+  .internshell { padding-bottom: 0; }
+}
+
+/* ------------------------------------------------------------------ header */
+
+.internhead {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.internhead > div {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s5);
+}
+
+.internhead .mark { display: flex; align-items: center; gap: var(--s3); text-decoration: none; }
+.internhead .mark b { display: block; font-size: var(--t-sm); font-weight: 600; }
+
+.internhead .mark small {
+  display: block;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.internhead .spacer { flex: 1; }
+
+/* How long is left, in the header, on every page. It is the one fact an intern
+   opens this workspace to check, and putting it here means they never have to
+   navigate to find it. */
+.daysleft {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  padding: 0.25em 0.8em;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  color: var(--accent);
+  font-size: var(--t-meta);
+  font-weight: 560;
+  white-space: nowrap;
+}
+
+.daysleft b { font-size: var(--t-base); font-variant-numeric: tabular-nums; }
+.daysleft.ending { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+.daysleft.over { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text-2); }
+
+/* -------------------------------------------------------------- navigation */
+
+/* One row of destinations. On a desktop it sits under the header where a
+   person reads left to right; on a phone it pins to the bottom where a thumb
+   already is. Same markup, same order, no second menu to keep in step. */
+.internnav {
+  position: fixed;
+  z-index: 30;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s1);
+  padding: var(--s2) var(--s2) calc(var(--s2) + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.internnav::-webkit-scrollbar { display: none; }
+
+.internnav a {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 62px;
+  padding: var(--s1) var(--s2);
+  border-radius: var(--r-sm);
+  color: var(--text-dim);
+  font-size: var(--t-label);
+  font-weight: 560;
+  text-decoration: none;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+
+.internnav a:hover { color: var(--text); }
+.internnav a[aria-current="page"] { color: var(--accent); }
+
+@media (min-width: 760px) {
+  .internnav {
+    position: static;
+    justify-content: flex-start;
+    gap: var(--s1);
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding: 0 var(--s5);
+    background: none;
+    backdrop-filter: none;
+    border-top: 0;
+  }
+
+  .internnav a {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: var(--s2);
+    min-width: 0;
+    padding: var(--s3) var(--s3);
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    font-size: var(--t-sm);
+  }
+
+  .internnav a[aria-current="page"] { border-bottom-color: var(--accent); }
+}
+
+/* --------------------------------------------------------------- home card */
+
+/* The one statement on the home page: what is happening, in a sentence, beside
+   the countdown. Serif, because it is the only place in this workspace that
+   speaks rather than reports. */
+.internhero {
+  display: grid;
+  gap: var(--s5);
+  align-items: center;
+  grid-template-columns: 1fr;
+  padding: var(--pad-card);
+}
+
+@media (min-width: 620px) {
+  .internhero { grid-template-columns: auto 1fr; }
+}
+
+.internhero h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--t-2xl);
+  letter-spacing: 0;
+}
+
+.internhero p { color: var(--text-2); font-size: var(--t-sm); max-width: 52ch; }
+
+/* ------------------------------------------------------------- certificate */
+
+.certname {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--t-display);
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.certificate .card-foot { font-family: var(--font-mono); font-size: var(--t-label); }
+
+/* Printing is the download. What comes out has to be the document and not a
+   screenshot of an application, so the navigation, the buttons and the notes
+   around it are removed rather than hidden behind a separate print route. */
+@media print {
+  .internhead,
+  .internnav,
+  .btn,
+  .notice,
+  .page-head .eyebrow { display: none !important; }
+
+  .page { padding: 0; gap: var(--s5); }
+  .certificate { border: 1px solid #000; box-shadow: none; break-inside: avoid; }
+  body { background: #fff; color: #000; }
+}

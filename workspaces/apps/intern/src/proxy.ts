@@ -7,7 +7,11 @@ import { createWorkspaceProxy } from "@muco/core/proxy";
 // The same question is asked again inside each page, by requireAccount. That
 // is not redundancy for its own sake: this matcher is a regular expression,
 // and a regular expression is a thing that acquires holes.
-export const proxy = createWorkspaceProxy("intern");
+// /verify is public on purpose. An employer checking a certificate has no
+// account here, and a verification page that demands one verifies nothing.
+// The function behind it returns seven columns and cannot be made to return
+// an eighth.
+export const proxy = createWorkspaceProxy("intern", { publicPaths: ["/verify"] });
 
 // Static on purpose, and repeated in each of the four applications rather than
 // imported: Next.js parses this at build time and refuses anything it cannot
