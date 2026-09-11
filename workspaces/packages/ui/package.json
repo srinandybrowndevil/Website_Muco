@@ -1,0 +1,23 @@
+{
+  "name": "@muco/ui",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/styles/tokens.css",
+    "./base.css": "./src/styles/base.css",
+    "./components.css": "./src/styles/components.css",
+    "./auth": "./src/auth/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "next": "^16.3.3",
+    "react": "^19.2.8"
+  },
+  "dependencies": {
+    "@muco/core": "*"
+  }
+}

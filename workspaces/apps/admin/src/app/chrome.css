@@ -1,0 +1,186 @@
+/* ---------------------------------------------------------------------------
+   The admin console.
+
+   An instrument panel, not a dashboard. The rail is always there and always
+   the same width, because muscle memory is the point: the founder opens this
+   twenty times a day and should reach People without reading. Navigation is
+   grouped by what the group is *for* — running the studio, the internship
+   programme, money, what came in from outside, and control — rather than
+   alphabetically, because those five are five different frames of mind.
+
+   Nothing here is shared with the other three workspaces. An intern who saw
+   this navigation would learn the shape of a system they have no business
+   knowing about, and the specification says so directly.
+--------------------------------------------------------------------------- */
+
+.console { display: flex; min-height: 100dvh; }
+
+.rail {
+  position: fixed;
+  z-index: 40;
+  inset: 0 auto 0 0;
+  width: 236px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  transform: translateX(-100%);
+  transition: transform var(--mid) var(--ease);
+}
+
+.rail.open { transform: none; }
+
+@media (min-width: 1024px) {
+  .rail { transform: none; }
+  .frame { margin-left: 236px; }
+}
+
+.frame { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ------------------------------------------------------------------- brand */
+
+.railbrand {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s4) var(--s4) var(--s3);
+  border-bottom: 1px solid var(--line);
+}
+
+.railbrand img { width: 30px; height: 30px; }
+.railbrand b { display: block; font-size: var(--t-sm); font-weight: 600; letter-spacing: 0.01em; }
+
+.railbrand small {
+  display: block;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.railclose { margin-left: auto; }
+
+@media (min-width: 1024px) { .railclose { display: none; } }
+
+/* -------------------------------------------------------------- navigation */
+
+.railnav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s3) var(--s2) var(--s5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.navgroup { display: flex; flex-direction: column; gap: 1px; }
+
+.navgroup > span {
+  padding: var(--s2) var(--s3) var(--s1);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.railnav a {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  height: 32px;
+  padding: 0 var(--s3);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-sm);
+  text-decoration: none;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.railnav a:hover { background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); }
+
+/* The active item is marked by weight and a fill, not by colour alone, and
+   the icon takes the accent so the eye lands on the row rather than reading
+   the whole list. */
+.railnav a[aria-current="page"] {
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  color: var(--text);
+  font-weight: 560;
+}
+
+.railnav a[aria-current="page"] svg { color: var(--accent); }
+.railnav a em { margin-left: auto; font-style: normal; font-size: var(--t-label); color: var(--accent); font-weight: 600; }
+
+/* ------------------------------------------------------------------ footer */
+
+.railfoot {
+  border-top: 1px solid var(--line);
+  padding: var(--s3);
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.railfoot .who { flex: 1; min-width: 0; }
+.railfoot .who b { display: block; font-size: var(--t-meta); font-weight: 560; }
+
+.railfoot .who small {
+  display: block;
+  font-size: var(--t-label);
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ topbar */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  height: 52px;
+  padding: 0 var(--s4);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar .crumb { font-size: var(--t-meta); color: var(--text-dim); }
+.topbar .crumb b { color: var(--text); font-weight: 560; }
+.topbar .spacer { flex: 1; }
+
+@media (min-width: 1024px) { .railtoggle { display: none; } }
+
+.scrimclick {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  background: rgb(0 0 0 / 0.4);
+}
+
+@media (min-width: 1024px) { .scrimclick { display: none; } }
+
+/* ------------------------------------------------------------- needs-you  */
+
+/* The queue on the home page. Everything here is something that will not move
+   until the founder does something, which is why it sits above the counts:
+   counts are a state of the world, this is a list of obligations. */
+.queue { display: flex; flex-direction: column; }
+
+.queue .item { gap: var(--s3); }
+.queue .item .when { font-size: var(--t-meta); color: var(--text-dim); white-space: nowrap; }
+
+.queue .kind {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}

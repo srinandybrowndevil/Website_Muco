@@ -1,0 +1,76 @@
+/* ---------------------------------------------------------------------------
+   employee.mucolabs.com
+
+   A working surface, light first, because most of the people who open
+   it are in a room with a window. Cool neutrals biased toward the violet
+   accent so the grey reads as chosen rather than inherited. Medium rhythm:
+   denser than the intern workspace, looser than the console.
+
+   Three states, not two. An explicit choice stamps data-theme on the root; the
+   default "system" setting stamps nothing at all, so the un-stamped document
+   is the one most people see and the bare :root block below has to be a
+   complete palette on its own. The media query redefines only what changes,
+   guarded so an explicit light choice still beats a dark operating system, and
+   the [data-theme="dark"] block repeats it so the toggle wins in the other
+   direction too.
+--------------------------------------------------------------------------- */
+
+:root {
+  --bg: #f4f4f8;
+  --surface: #ffffff;
+  --surface-2: #ecebf3;
+  --line: rgb(20 20 32 / 0.09);
+  --line-strong: rgb(20 20 32 / 0.16);
+  --text: #16161f;
+  --text-2: #52526a;
+  --text-dim: #7e7e97;
+  --accent: #5b4bc4;
+  --accent-ink: #ffffff;
+  --ok: #1f7a4d;
+  --warn: #8f5c10;
+  --bad: #b13327;
+  --info: #2a5f9e;
+
+  /* Density: what makes this workspace feel unlike the other three even though
+     every component is shared. */
+  --row-h: 38px;
+  --pad-card: 18px;
+  --gap: 14px;
+  --content-max: 1200px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --bg: #101017;
+  --surface: #191922;
+  --surface-2: #21212c;
+  --line: rgb(236 234 245 / 0.09);
+  --line-strong: rgb(236 234 245 / 0.18);
+  --text: #eceaf5;
+  --text-2: #adaac2;
+  --text-dim: #7d7a90;
+  --accent: #9b8cf0;
+  --accent-ink: #14102b;
+  --ok: #6ec08a;
+  --warn: #d6a55c;
+  --bad: #e08a80;
+  --info: #7fb0e0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #101017;
+  --surface: #191922;
+  --surface-2: #21212c;
+  --line: rgb(236 234 245 / 0.09);
+  --line-strong: rgb(236 234 245 / 0.18);
+  --text: #eceaf5;
+  --text-2: #adaac2;
+  --text-dim: #7d7a90;
+  --accent: #9b8cf0;
+  --accent-ink: #14102b;
+  --ok: #6ec08a;
+  --warn: #d6a55c;
+  --bad: #e08a80;
+  --info: #7fb0e0;
+}

@@ -1,0 +1,809 @@
+/* ---------------------------------------------------------------------------
+   Primitives.
+
+   No navigation lives here, and no page. The specification says plainly: "Do
+   not copy admin navigation into client or intern chrome." So this file gives
+   the four workspaces a shared vocabulary — a button, a field, a table, a
+   status — and each one builds its own chrome out of it.
+
+   Two rules the file follows on purpose:
+
+   Border, fill, radius and shadow each say "separate object", so they are
+   spent by role rather than stamped on everything. A .panel is a hairline and
+   a surface. A .card is a panel that has earned elevation. .raised is for the
+   single thing on a screen that has to sit above the rest. One radius and one
+   shadow on every block flattens the hierarchy it was meant to create.
+
+   Status is never colour alone. Every state carries a shape — a filled dot, a
+   ring, a bar — so the eight percent of men with a colour vision deficiency
+   read the same interface as everybody else, and so does anybody printing it.
+--------------------------------------------------------------------------- */
+
+/* ------------------------------------------------------------------ layout */
+
+.stack { display: flex; flex-direction: column; gap: var(--gap); }
+.stack-sm { display: flex; flex-direction: column; gap: var(--s2); }
+.stack-lg { display: flex; flex-direction: column; gap: var(--s6); }
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  flex-wrap: wrap;
+}
+
+/* Columns the content fills, rather than a fixed count that leaves one card
+   stretched over dead space or sitting alone in a row. */
+.grid {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+
+.grid-2 { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); }
+.grid-main { display: grid; gap: var(--gap); grid-template-columns: 1fr; }
+
+@media (min-width: 960px) {
+  .grid-main { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: start; }
+}
+
+.page {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--s6) var(--s5) var(--s8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s6);
+}
+
+@media (max-width: 640px) {
+  .page { padding: var(--s5) var(--s4) var(--s8); gap: var(--s5); }
+}
+
+/* --------------------------------------------------------------- page head */
+
+.page-head { display: flex; flex-direction: column; gap: var(--s2); }
+.page-head .split { align-items: flex-end; }
+
+.eyebrow {
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.page-head h1 { font-size: var(--t-2xl); }
+
+/* The sentence under a title says what the page is for, and on these four
+   workspaces it very often says what the reader may and may not see. That is
+   product copy doing access control's explaining for it, which is the whole
+   reason it gets a style rather than being left to a stray paragraph. */
+.lede {
+  color: var(--text-2);
+  font-size: var(--t-sm);
+  max-width: 68ch;
+}
+
+/* ---------------------------------------------------------------- surfaces */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-1);
+}
+
+.raised { box-shadow: var(--shadow-2); }
+
+.card-head,
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s4) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.card-head h2,
+.panel-head h2 { font-size: var(--t-base); font-weight: 600; }
+
+.card-body,
+.panel-body { padding: var(--pad-card); }
+
+.card-foot {
+  padding: var(--s3) var(--pad-card);
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 0 0 var(--r) var(--r);
+  font-size: var(--t-meta);
+  color: var(--text-2);
+}
+
+/* A panel that is a link. The whole block is the target, which is what people
+   try first, and the arrow moves rather than the card so nothing reflows. */
+.linkcard {
+  display: block;
+  text-decoration: none;
+  transition: border-color var(--fast) var(--ease);
+}
+
+.linkcard:hover { border-color: var(--line-strong); }
+.linkcard:hover .linkcard-go { transform: translateX(3px); }
+.linkcard-go { transition: transform var(--fast) var(--ease); color: var(--accent); }
+
+/* ----------------------------------------------------------------- buttons */
+
+.btn {
+  --btn-bg: transparent;
+  --btn-fg: var(--text);
+  --btn-line: var(--line-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 38px;
+  padding: 0 var(--s4);
+  border: 1px solid var(--btn-line);
+  border-radius: var(--r-sm);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-size: var(--t-sm);
+  font-weight: 560;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease), opacity var(--fast) var(--ease);
+}
+
+.btn:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+
+.btn:disabled,
+.btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+
+.btn.primary {
+  --btn-bg: var(--accent);
+  --btn-fg: var(--accent-ink);
+  --btn-line: var(--accent);
+}
+
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--text)); }
+
+.btn.quiet { --btn-line: transparent; }
+
+.btn.danger {
+  --btn-fg: var(--bad);
+  --btn-line: color-mix(in srgb, var(--bad) 45%, transparent);
+}
+
+.btn.danger:hover { background: color-mix(in srgb, var(--bad) 12%, transparent); }
+
+.btn.sm { min-height: 30px; padding: 0 var(--s3); font-size: var(--t-meta); }
+.btn.lg { min-height: 46px; padding: 0 var(--s5); font-size: var(--t-base); }
+.btn.block { width: 100%; }
+
+.iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  color: var(--text-2);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.iconbtn:hover { background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--text); }
+
+/* ------------------------------------------------------------------ status */
+
+/* Colour plus shape. The dot is filled for a live state, hollow for a waiting
+   one, and a bar for a stopped one, so the state survives being printed in
+   black and white or read by somebody who cannot separate the hues. */
+.pill {
+  --tone: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.2em 0.7em 0.2em 0.55em;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
+  color: var(--tone-text, var(--tone));
+  font-size: var(--t-meta);
+  font-weight: 560;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: currentColor;
+}
+
+.pill[data-shape="open"]::before { background: transparent; }
+
+.pill[data-shape="stopped"]::before {
+  width: 9px;
+  height: 0;
+  border-radius: 1px;
+  border-width: 0 0 2px 0;
+  background: transparent;
+}
+
+.pill.ok { --tone: var(--ok); }
+.pill.warn { --tone: var(--warn); }
+.pill.bad { --tone: var(--bad); }
+.pill.info { --tone: var(--info); }
+.pill.neutral { --tone: var(--text-dim); --tone-text: var(--text-2); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  padding: 0.15em 0.55em;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text-2);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge.accent {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ fields */
+
+.field { display: flex; flex-direction: column; gap: var(--s2); }
+
+.field > label,
+.label {
+  font-size: var(--t-meta);
+  font-weight: 560;
+  color: var(--text-2);
+}
+
+.input,
+input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="date"], input[type="search"], input[type="tel"], input[type="url"],
+select, textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--t-sm);
+  transition: border-color var(--fast) var(--ease);
+}
+
+textarea { min-height: 110px; padding: var(--s3); resize: vertical; line-height: var(--lh-snug); }
+
+select {
+  appearance: none;
+  padding-right: var(--s6);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.input:hover, input:hover, select:hover, textarea:hover { border-color: var(--text-dim); }
+
+input:disabled, select:disabled, textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+/* A field somebody may read but not change. Different from disabled, which
+   reads as "not yet" — this one means "not yours to edit", and the internship
+   dates are the reason it exists. */
+.readonly {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: var(--s2) var(--s3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--t-sm);
+}
+
+.hint { font-size: var(--t-meta); color: var(--text-dim); }
+.errortext { font-size: var(--t-meta); color: var(--bad); }
+
+.checkline {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  font-size: var(--t-sm);
+  color: var(--text-2);
+}
+
+.checkline input { width: auto; min-height: 0; margin-top: 3px; accent-color: var(--accent); }
+
+/* --------------------------------------------------------------- callouts */
+
+.callout {
+  --tone: var(--info);
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s4);
+  border-radius: var(--r);
+  border: 1px solid color-mix(in srgb, var(--tone) 30%, transparent);
+  background: color-mix(in srgb, var(--tone) 8%, transparent);
+  font-size: var(--t-sm);
+  color: var(--text);
+}
+
+.callout.ok { --tone: var(--ok); }
+.callout.warn { --tone: var(--warn); }
+.callout.bad { --tone: var(--bad); }
+.callout.accent { --tone: var(--accent); }
+.callout svg { color: var(--tone); margin-top: 2px; }
+.callout b { display: block; margin-bottom: var(--s1); }
+.callout p { color: var(--text-2); }
+
+/* ----------------------------------------------------------------- metrics */
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--pad-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  text-decoration: none;
+  transition: border-color var(--fast) var(--ease);
+}
+
+a.metric:hover { border-color: var(--accent); }
+
+.metric .k {
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.metric .v {
+  font-size: var(--t-3xl);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.metric .n { font-size: var(--t-meta); color: var(--text-2); }
+.metric.attention { border-color: color-mix(in srgb, var(--warn) 50%, transparent); }
+.metric.attention .v { color: var(--warn); }
+
+/* ------------------------------------------------------------------ tables */
+
+/* Wide content scrolls inside its own container. The page body never does. */
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+
+table { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--s3) var(--s4);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+tbody td {
+  height: var(--row-h);
+  padding: var(--s2) var(--s4);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: color-mix(in srgb, var(--text) 3%, transparent); }
+
+/* The first column is the thing the row is about. Everything else is about
+   that thing, and reads as secondary because it is. */
+tbody td:first-child { color: var(--text); font-weight: 500; }
+
+th.num, td.num { text-align: right; }
+
+td a { color: var(--text); font-weight: 500; }
+td a:hover { color: var(--accent); }
+
+/* -------------------------------------------------------------------- list */
+
+.list { display: flex; flex-direction: column; }
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--fast) var(--ease);
+}
+
+.item:last-child { border-bottom: 0; }
+a.item:hover { background: color-mix(in srgb, var(--text) 4%, transparent); }
+.item-main { flex: 1; min-width: 0; }
+.item-main b { display: block; font-weight: 560; }
+.item-main small { display: block; color: var(--text-dim); font-size: var(--t-meta); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ------------------------------------------------------------------- empty */
+
+/* An empty state is part of the page, not an afterthought — it is the first
+   thing a new workspace shows, so it has to explain and offer one action. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s7) var(--s5);
+  text-align: center;
+  color: var(--text-2);
+}
+
+.empty .mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+
+.empty b { font-size: var(--t-base); font-weight: 560; color: var(--text); }
+.empty p { font-size: var(--t-sm); max-width: 44ch; }
+
+/* ----------------------------------------------------------------- avatars */
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-size: var(--t-meta);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+}
+
+.avatar.lg { width: 52px; height: 52px; font-size: var(--t-base); }
+.avatar.sm { width: 26px; height: 26px; font-size: var(--t-label); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------------------------------------------------------------- progress */
+
+.bar {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--mid) var(--ease);
+}
+
+.bar.ok > span { background: var(--ok); }
+.bar.warn > span { background: var(--warn); }
+.bar.bad > span { background: var(--bad); }
+
+/* -------------------------------------------------------------------- tabs */
+
+.tabs {
+  display: flex;
+  gap: var(--s1);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tabs a {
+  padding: var(--s3) var(--s4);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  font-weight: 560;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+
+.tabs a:hover { color: var(--text); }
+.tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+
+/* ------------------------------------------------------------------- chips */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  height: 30px;
+  padding: 0 var(--s3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--t-meta);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+
+.chip:hover { color: var(--text); border-color: var(--text-dim); }
+
+.chip[aria-pressed="true"],
+.chip[aria-current="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: var(--t-label);
+}
+
+/* -------------------------------------------------------------- definition */
+
+/* Label above value, repeated down a page. Used for anything that is a record
+   rather than a form: the internship dates, a certificate, an invoice. */
+.facts {
+  display: grid;
+  gap: var(--s4) var(--s5);
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+}
+
+.fact { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.fact dt {
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.fact dd { font-size: var(--t-sm); color: var(--text); overflow-wrap: anywhere; }
+.fact dd.mono { font-size: var(--t-meta); }
+
+/* ---------------------------------------------------------------- skeleton */
+
+.skeleton {
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--text) 6%, transparent) 25%,
+    color-mix(in srgb, var(--text) 11%, transparent) 37%,
+    color-mix(in srgb, var(--text) 6%, transparent) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+/* ------------------------------------------------------------------ dialog */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: start center;
+  padding: var(--s7) var(--s4);
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.dialog {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------------- dial */
+
+.dial { display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+.dial-face { position: relative; display: grid; place-items: center; }
+
+.dial-centre {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.dial-centre b {
+  font-family: var(--font-serif);
+  font-size: 2.75rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.dial-centre small {
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.dial figcaption { font-size: var(--t-meta); color: var(--text-2); text-align: center; }
+
+/* ------------------------------------------------------- password rules */
+
+.requirements { list-style: none; display: grid; gap: var(--s1); }
+
+.requirements li {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: var(--t-meta);
+  color: var(--text-dim);
+  transition: color var(--fast) var(--ease);
+}
+
+.requirements li svg { color: var(--line-strong); }
+.requirements li.met { color: var(--text-2); }
+.requirements li.met svg { color: var(--ok); }
+
+/* ------------------------------------------------------------------ notice */
+
+/* A sentence the product says about itself — what you may see here, why a
+   button is locked. Quiet by design: it is reassurance, not an alarm. */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  font-size: var(--t-meta);
+  color: var(--text-dim);
+}
+
+.notice svg { margin-top: 2px; }
+
+/* -------------------------------------------------------------- auth pages */
+
+/* The show/hide control sits inside the field rather than beside it, so the
+   field keeps its full width on a phone and the control stays where a thumb
+   already is. */
+.passwrap { position: relative; }
+.passwrap input { padding-right: 44px; }
+
+.passwrap .iconbtn {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+}
+
+/* A sign-in page is one column on a phone and two on a desktop, where the
+   second column carries the workspace's own statement — which is the only
+   part of these four pages that differs. */
+.authpage {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .authpage { grid-template-columns: 1fr 1fr; }
+}
+
+.authform {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s5);
+  padding: var(--s7) var(--s5);
+  max-width: 460px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.authmark { display: flex; align-items: center; gap: var(--s3); }
+.authmark img { width: 36px; height: 36px; }
+.authmark b { font-size: var(--t-sm); font-weight: 600; letter-spacing: 0.02em; }
+
+.authmark small {
+  display: block;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.authaside {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s6);
+  padding: var(--s7) var(--s6);
+  background: var(--surface-2);
+  border-left: 1px solid var(--line);
+}
+
+@media (min-width: 900px) {
+  .authaside { display: flex; }
+}
+
+.authaside h2 { font-size: var(--t-xl); max-width: 22ch; }
+.authaside p { font-size: var(--t-sm); color: var(--text-2); max-width: 44ch; }

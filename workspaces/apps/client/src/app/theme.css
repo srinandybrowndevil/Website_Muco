@@ -1,0 +1,77 @@
+/* ---------------------------------------------------------------------------
+   client.mucolabs.com
+
+   Quiet and editorial, like a letter from the studio rather than a
+   tool. Ivory, deep ink, a considered blue, wide margins and a serif for the
+   one statement that matters on each page. Nothing here should look like
+   internal software, because it is the only one of the four a customer sees.
+
+   Three states, not two. An explicit choice stamps data-theme on the root; the
+   default "system" setting stamps nothing at all, so the un-stamped document
+   is the one most people see and the bare :root block below has to be a
+   complete palette on its own. The media query redefines only what changes,
+   guarded so an explicit light choice still beats a dark operating system, and
+   the [data-theme="dark"] block repeats it so the toggle wins in the other
+   direction too.
+--------------------------------------------------------------------------- */
+
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --surface-2: #f2f1ec;
+  --line: rgb(16 20 28 / 0.09);
+  --line-strong: rgb(16 20 28 / 0.15);
+  --text: #131720;
+  --text-2: #4e5462;
+  --text-dim: #7f8796;
+  --accent: #2c5c8a;
+  --accent-ink: #ffffff;
+  --ok: #1f7a4d;
+  --warn: #8f5c10;
+  --bad: #b13327;
+  --info: #2a5f9e;
+
+  /* Density: what makes this workspace feel unlike the other three even though
+     every component is shared. */
+  --row-h: 44px;
+  --pad-card: 22px;
+  --gap: 18px;
+  --content-max: 1040px;
+  --lh-body: 1.65;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --bg: #0c0f15;
+  --surface: #141821;
+  --surface-2: #1b202b;
+  --line: rgb(233 236 242 / 0.09);
+  --line-strong: rgb(233 236 242 / 0.17);
+  --text: #e9ecf2;
+  --text-2: #a8afbd;
+  --text-dim: #79808e;
+  --accent: #7fb0e0;
+  --accent-ink: #08111c;
+  --ok: #6ec08a;
+  --warn: #d6a55c;
+  --bad: #e08a80;
+  --info: #7fb0e0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c0f15;
+  --surface: #141821;
+  --surface-2: #1b202b;
+  --line: rgb(233 236 242 / 0.09);
+  --line-strong: rgb(233 236 242 / 0.17);
+  --text: #e9ecf2;
+  --text-2: #a8afbd;
+  --text-dim: #79808e;
+  --accent: #7fb0e0;
+  --accent-ink: #08111c;
+  --ok: #6ec08a;
+  --warn: #d6a55c;
+  --bad: #e08a80;
+  --info: #7fb0e0;
+}

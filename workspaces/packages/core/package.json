@@ -1,0 +1,25 @@
+{
+  "name": "@muco/core",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./browser": "./src/browser.ts",
+    "./proxy": "./src/proxy.ts",
+    "./breach": "./src/breach.ts",
+    "./breach-route": "./src/breach-route.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.4",
+    "@supabase/supabase-js": "2.112.4"
+  },
+  "peerDependencies": {
+    "next": "^16.3.3",
+    "react": "^19.2.8"
+  }
+}

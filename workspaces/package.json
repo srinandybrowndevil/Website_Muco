@@ -1,0 +1,25 @@
+{
+  "name": "muco-workspaces",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:admin": "npm run dev --workspace @muco/admin",
+    "dev:employee": "npm run dev --workspace @muco/employee",
+    "dev:intern": "npm run dev --workspace @muco/intern",
+    "dev:client": "npm run dev --workspace @muco/client",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.9",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "typescript": "^5.9.2"
+  }
+}

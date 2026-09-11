@@ -1,0 +1,76 @@
+/* ---------------------------------------------------------------------------
+   admin.mucolabs.com
+
+   An instrument panel. Graphite ground with a copper instrument light,
+   the tightest rhythm of the four, and no serif anywhere: this is the screen
+   the founder keeps open all day and scans forty rows at a time. Copper is
+   the studio's colour, kept for the one thing on each screen that acts.
+
+   Three states, not two. An explicit choice stamps data-theme on the root; the
+   default "system" setting stamps nothing at all, so the un-stamped document
+   is the one most people see and the bare :root block below has to be a
+   complete palette on its own. The media query redefines only what changes,
+   guarded so an explicit light choice still beats a dark operating system, and
+   the [data-theme="dark"] block repeats it so the toggle wins in the other
+   direction too.
+--------------------------------------------------------------------------- */
+
+:root {
+  --bg: #f6f5f3;
+  --surface: #ffffff;
+  --surface-2: #f0eeea;
+  --line: rgb(26 22 18 / 0.09);
+  --line-strong: rgb(26 22 18 / 0.17);
+  --text: #1a1714;
+  --text-2: #57504a;
+  --text-dim: #8b837a;
+  --accent: #a8613a;
+  --accent-ink: #ffffff;
+  --ok: #1f7a4d;
+  --warn: #8f5c10;
+  --bad: #b13327;
+  --info: #2a5f9e;
+
+  /* Density: what makes this workspace feel unlike the other three even though
+     every component is shared. */
+  --row-h: 34px;
+  --pad-card: 16px;
+  --gap: 12px;
+  --content-max: 1360px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --bg: #0e0f12;
+  --surface: #16171c;
+  --surface-2: #1d1f25;
+  --line: rgb(240 236 230 / 0.09);
+  --line-strong: rgb(240 236 230 / 0.18);
+  --text: #f0ece6;
+  --text-2: #b3aca3;
+  --text-dim: #847d74;
+  --accent: #cf9061;
+  --accent-ink: #17100a;
+  --ok: #6ec08a;
+  --warn: #d6a55c;
+  --bad: #e08a80;
+  --info: #7fb0e0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e0f12;
+  --surface: #16171c;
+  --surface-2: #1d1f25;
+  --line: rgb(240 236 230 / 0.09);
+  --line-strong: rgb(240 236 230 / 0.18);
+  --text: #f0ece6;
+  --text-2: #b3aca3;
+  --text-dim: #847d74;
+  --accent: #cf9061;
+  --accent-ink: #17100a;
+  --ok: #6ec08a;
+  --warn: #d6a55c;
+  --bad: #e08a80;
+  --info: #7fb0e0;
+}
