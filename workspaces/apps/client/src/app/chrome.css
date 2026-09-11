@@ -1,0 +1,169 @@
+/* ---------------------------------------------------------------------------
+   The client workspace.
+
+   The only one of the four a customer sees, so nothing here should look like
+   internal software. Ivory, deep ink, wide margins, and a serif reserved for
+   the one statement each page is actually making. It reads as a letter from
+   the studio rather than a tool the studio happens to have let them into.
+
+   No counts, no queues, no badges with numbers in them. A customer does not
+   have a workload here; they have a project, and they came to find out how it
+   is going.
+--------------------------------------------------------------------------- */
+
+.clientshell { min-height: 100dvh; display: flex; flex-direction: column; }
+
+/* ---------------------------------------------------------------- masthead */
+
+.masthead { border-bottom: 1px solid var(--line); background: var(--surface); }
+
+.masthead > .bar {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s4) var(--s5);
+}
+
+.masthead .mark { display: flex; align-items: center; gap: var(--s3); text-decoration: none; }
+.masthead .mark b { display: block; font-size: var(--t-sm); font-weight: 600; letter-spacing: 0.01em; }
+
+.masthead .mark small {
+  display: block;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.masthead .who { margin-left: auto; text-align: right; }
+.masthead .who b { display: block; font-size: var(--t-meta); font-weight: 560; }
+.masthead .who small { display: block; font-size: var(--t-label); color: var(--text-dim); }
+
+.clientnav {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  display: flex;
+  gap: var(--s4);
+  padding: 0 var(--s5);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.clientnav::-webkit-scrollbar { display: none; }
+
+.clientnav a {
+  padding: var(--s3) 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--text-dim);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+
+.clientnav a:hover { color: var(--text); }
+.clientnav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+
+/* ------------------------------------------------------------------ status */
+
+/* The one statement on the home page. A sentence, in a serif, at a size that
+   says this is the answer — not a progress bar, because the specification is
+   explicit that project status should stay honest and not show a fake
+   percentage complete. */
+.statement {
+  padding: var(--s7) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.statement .eyebrow { display: block; margin-bottom: var(--s3); }
+
+.statement h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: 0;
+  max-width: 22ch;
+}
+
+.statement p { margin-top: var(--s3); color: var(--text-2); max-width: 58ch; }
+
+/* --------------------------------------------------------------- milestone */
+
+.milestones { list-style: none; display: flex; flex-direction: column; }
+
+.milestones li {
+  position: relative;
+  display: flex;
+  gap: var(--s4);
+  padding: var(--s4) var(--pad-card) var(--s4) calc(var(--pad-card) + 34px);
+  border-bottom: 1px solid var(--line);
+}
+
+.milestones li:last-child { border-bottom: 0; }
+
+.milestones li::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--pad-card) + 7px);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.milestones li:first-child::before { top: var(--s5); }
+.milestones li:last-child::before { bottom: calc(100% - var(--s5)); }
+
+.milestones li::after {
+  content: "";
+  position: absolute;
+  left: var(--pad-card);
+  top: calc(var(--s4) + 7px);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: var(--surface);
+}
+
+.milestones li[data-state="completed"]::after { border-color: var(--ok); background: var(--ok); }
+.milestones li[data-state="active"]::after { border-color: var(--accent); border-width: 4px; }
+
+.milestones .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.milestones .body b { font-weight: 560; }
+.milestones .body p { font-size: var(--t-sm); color: var(--text-2); }
+.milestones .when { font-size: var(--t-meta); color: var(--text-dim); white-space: nowrap; }
+
+/* ----------------------------------------------------------------- invoice */
+
+.paidstrip {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s5);
+  flex-wrap: wrap;
+  padding: var(--s5) var(--pad-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.paidstrip .figure { display: flex; flex-direction: column; gap: 2px; }
+
+.paidstrip .figure b {
+  font-size: var(--t-2xl);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.paidstrip .figure span {
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
