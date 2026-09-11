@@ -21,17 +21,25 @@ export default async function StaffHome() {
   // No user filter here: the grants policy already restricts this to the
   // signed-in person's own rows. A second filter would hide a policy
   // regression rather than let it surface.
+  // Two queries rather than an embed. The project name now comes from
+  // granted_projects, a view, and PostgREST can only embed across a real
+  // foreign key -- so the join happens here instead. The view is also what
+  // keeps budget and repo_url out of reach of a narrow grant.
   const { data: grants, error } = await client.from("project_grants")
-    .select("id, project_id, module, level, ends_at, projects(name, status, kind)")
+    .select("id, project_id, module, level, ends_at")
     .order("created_at", { ascending: false });
+
+  const { data: rooms } = await client.from("granted_projects")
+    .select("id, name, status, kind");
+  const roomById = new Map((rooms ?? []).map(room => [room.id as string, room]));
 
   // Grouped by project id rather than by name. Names are not unique and two
   // projects called "Website" would have collapsed into one row carrying both
   // their grants -- and there is no link to follow from a name.
   const byProject = new Map<string, { id: string; name: string; kind: string; modules: string[] }>();
   for (const grant of grants ?? []) {
-    const project = grant.projects as unknown as { name: string; status: string; kind: string } | null;
     const key = grant.project_id as string;
+    const project = roomById.get(key) as { name: string; status: string; kind: string } | undefined;
     const entry = byProject.get(key) ?? {
       id: key,
       name: project?.name ?? "Project not readable",

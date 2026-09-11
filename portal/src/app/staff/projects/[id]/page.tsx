@@ -35,7 +35,10 @@ export default async function StaffProjectPage({ params }: { params: Promise<{ i
   if (!client) throw new Error("Configure Supabase before opening a project.");
 
   const [project, grants, files] = await Promise.all([
-    client.from("projects")
+    // granted_projects, not projects. The view carries exactly the columns a
+    // project room renders; budget, repo_url, customer_id and owner_id are not
+    // in it at all, so a narrow grant cannot reach them by asking directly.
+    client.from("granted_projects")
       .select("id, name, description, status, progress, kind, starts_on, due_on, preview_url, staging_url")
       .eq("id", id).maybeSingle(),
     client.from("project_grants").select("module, level, ends_at").eq("project_id", id),
