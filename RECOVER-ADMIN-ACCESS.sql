@@ -20,7 +20,7 @@ begin;
 
 with me as (
   select id from auth.users
-  where email = lower(btrim('PUT_YOUR_EMAIL_HERE'))
+  where email = lower(btrim('founder@gmail.com'))
 ),
 org as (
   -- The existing workspace. If it was removed too, the insert below makes one.
