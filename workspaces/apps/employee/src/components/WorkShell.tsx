@@ -42,7 +42,7 @@ export function WorkShell({
       <a className="skip-link" href="#main">Skip to content</a>
 
       <header className="workhead">
-        <div className="bar">
+        <div className="header-row">
           <Link className="mark" href="/">
             <Image src="/logo-mark.svg" alt="" width={32} height={32} priority />
             <span>

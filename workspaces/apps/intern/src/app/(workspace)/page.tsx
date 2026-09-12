@@ -61,7 +61,7 @@ export default async function InternHome() {
       <section className="panel internhero">
         <Dial value={left} total={total} unit={left === 1 ? "day" : "days"} caption="until your end date" />
         <div className="stack-sm">
-          <h2>{firstName ? "Welcome back, " + firstName : "Welcome back"}</h2>
+          <h1>{firstName ? "Welcome back, " + firstName : "Welcome back"}</h1>
           <p>
             Your internship runs from {formatDate(internship.starts_at)} to{" "}
             {formatDate(internship.ends_at)}. Access becomes read-only after that date.

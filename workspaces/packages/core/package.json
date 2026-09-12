@@ -8,6 +8,7 @@
     "./server": "./src/server.ts",
     "./browser": "./src/browser.ts",
     "./proxy": "./src/proxy.ts",
+    "./preview-route": "./src/preview-route.ts",
     "./breach": "./src/breach.ts",
     "./breach-route": "./src/breach-route.ts"
   },

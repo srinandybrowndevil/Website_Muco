@@ -15,7 +15,7 @@ export default function LoginPage() {
           whether this visit is a switched-off account or somebody who arrived
           at the wrong front door — so it renders inside a boundary. */}
       <Suspense fallback={<p className="hint">Loading</p>}>
-        <SignInForm workspace="client" />
+        <SignInForm workspace="client" allowSignup />
       </Suspense>
     </AuthShell>
   );

@@ -11,6 +11,7 @@ import { defineConfig, devices } from "@playwright/test";
 // can be dropped into CI unchanged.
 export default defineConfig({
   testDir: "./tests",
+  testIgnore: "**/preview/**",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,

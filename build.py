@@ -38,30 +38,16 @@ PORTAL_DOMAIN = "https://client.mucolabs.com"
 # a link written today should name the address that exists.
 PORTAL_LIVE = True
 PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
-# Starting a project now goes to this site's own contact form rather than to a
-# sign-up page, because there is no longer a sign-up page to go to.
-#
-# That is a real change and worth stating plainly. The four workspaces are
-# invitation-only by design: section 11.1 of the specification lists sign in,
-# reset password and invite accept as the authentication screens, and does not
-# list self-service registration. A stranger can no longer create themselves a
-# customer account.
-#
-# Nothing about lead capture breaks. The contact form writes into
-# website_enquiries exactly as before, those land in the admin console under
-# Enquiries, and the founder converts one into a customer and sends an
-# invitation. What changes is that an account exists because the studio decided
-# it should, which is the rule every other workspace already followed.
-#
-# If the founder wants self-service sign-up back, it is this constant and a
-# sign-up page in apps/client -- not a redesign.
+# Starting a project goes straight to the customer workspace. The login page
+# offers both sign-in and customer sign-up, and keeps the intended destination
+# so a new account lands on the request form after verification.
 CONTACT_PAGE = "/contact"
-PORTAL_SIGNUP = CONTACT_PAGE
-# Every contact action on the site stays gated: WhatsApp, phone and email all
-# route through the contact form, so an enquiry arrives as a record rather than
-# as a message in somebody's phone. The legal pages are the one exemption --
-# see GATE_KEEP_EMAIL.
-PORTAL_CONTACT = CONTACT_PAGE
+PORTAL_SIGNUP = PORTAL_LOGIN + "?next=%2Fsupport"
+PORTAL_SIGNUP_PAGE = PORTAL_DOMAIN + "/signup?next=%2Fsupport"
+# Every sales contact action stays gated: WhatsApp, phone and email all route
+# through the client login, so the eventual request is attached to an account.
+# Legal pages keep email open; see GATE_KEEP_EMAIL below.
+PORTAL_CONTACT = PORTAL_LOGIN + "?next=%2Fsupport"
 PORTAL_SIGNUP_NOTE = ""
 NEWLINE = chr(10)
 PORTAL_LOGIN_LINK = "".join([

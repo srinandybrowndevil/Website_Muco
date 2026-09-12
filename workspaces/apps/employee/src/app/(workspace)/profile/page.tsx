@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isLocalPreview } from "@muco/core";
 import { requireAccount } from "@muco/core/server";
 import { formatDate, humanise } from "@muco/core";
 import { Fact, Facts, Icon, StatusPill } from "@muco/ui";
@@ -83,7 +84,7 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      <section className="panel">
+      {!isLocalPreview ? <section className="panel">
         <div className="panel-head"><h2>Signing in</h2></div>
         <div className="panel-body stack-sm">
           <Facts>
@@ -97,7 +98,7 @@ export default async function ProfilePage() {
             <a className="btn sm" href="/account/password">Change your password</a>
           </div>
         </div>
-      </section>
+      </section> : null}
     </div>
   );
 }

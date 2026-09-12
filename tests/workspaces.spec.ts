@@ -172,3 +172,21 @@ test.describe("public pages render", () => {
     }
   }
 });
+
+test.describe("customer account entry", () => {
+  test("client login offers a separate customer sign-up path", async ({ page }) => {
+    await page.goto("http://client.localhost:3104/login");
+    const signup = page.getByRole("link", { name: /create a customer account/i });
+    await expect(signup).toHaveAttribute("href", /\/signup\?next=/);
+  });
+
+  test("customer sign-up and verification onboarding stay public", async ({ page }) => {
+    await page.goto("http://client.localhost:3104/signup?next=%2Fsupport");
+    await expect(page.getByRole("heading", { name: /create your customer account/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /create customer account/i })).toBeVisible();
+
+    await page.goto("http://client.localhost:3104/onboarding?next=%2Fsupport");
+    await expect(page.getByRole("heading", { name: /finish your customer setup/i })).toBeVisible();
+    expect(page.url()).not.toContain("/login");
+  });
+});

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { PreviewBar } from "@muco/ui";
 import "@muco/ui/tokens.css";
 import "@muco/ui/base.css";
 import "@muco/ui/components.css";
@@ -28,7 +29,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-IN">
-      <body>{children}</body>
+      <body><PreviewBar />{children}</body>
     </html>
   );
 }

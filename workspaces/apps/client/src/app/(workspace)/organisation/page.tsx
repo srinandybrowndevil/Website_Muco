@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { isLocalPreview } from "@muco/core";
 import { requireAccount } from "@muco/core/server";
 import { formatDate } from "@muco/core";
 import { EmptyState, Fact, Facts, Icon, StatusPill } from "@muco/ui";
 import { ProfileForm } from "@muco/ui/forms";
 import { loadCustomer, loadProjects } from "@/lib/project";
 
-export const metadata: Metadata = { title: "Organisation" };
+export const metadata: Metadata = { title: "Profile & organisation" };
 
 // Your details and your company's, kept apart on purpose.
 //
@@ -15,13 +17,24 @@ export const metadata: Metadata = { title: "Organisation" };
 // Tuesday and an invoice raised on the Wednesday is a reconciliation problem
 // for both sides.
 export default async function OrganisationPage() {
-  const { supabase, userId, email, fullName, phone, avatarUrl } = await requireAccount("client");
+  const {
+    supabase,
+    userId,
+    email,
+    fullName,
+    phone,
+    avatarUrl,
+    linkedinUrl,
+    instagramUrl,
+  } = await requireAccount("client");
   const customer = await loadCustomer(supabase, userId);
 
   if (!customer) {
     return (
       <div className="page">
-        <EmptyState icon="building" title="Your organisation is not linked yet">
+        <div className="page-head"><h1>Profile &amp; organisation</h1></div>
+        <EmptyState icon="building" title="Your organisation is not linked yet"
+          action={<Link className="btn" href="/support">Contact support</Link>}>
           Your account exists but is not attached to a customer record. Tell the studio.
         </EmptyState>
       </div>
@@ -31,18 +44,24 @@ export default async function OrganisationPage() {
   const projects = await loadProjects(supabase, customer.id);
 
   return (
-    <div className="page">
+    <div className="page client-profile-page">
       <div className="page-head">
         <span className="eyebrow">Your details</span>
-        <h1>Organisation</h1>
+        <h1>Profile &amp; organisation</h1>
         <p className="lede">
-          Who you are, and who the studio is working for. The first is yours to keep current; the
-          second appears on your invoices, so it is changed by asking rather than by typing.
+          Make this workspace yours. Keep your photo and contact details up to date,
+          and check the business details we use for your project.
         </p>
       </div>
 
-      <section className="panel">
-        <div className="panel-head"><h2>You</h2></div>
+      <div className="client-profile-layout">
+      <section className="panel client-profile-panel" aria-labelledby="personal-profile-heading">
+        <div className="panel-head">
+          <div className="client-profile-heading">
+            <Icon name="user" size={22} />
+            <div><h2 id="personal-profile-heading">Your profile</h2><p>Your name, photo and ways to reach you.</p></div>
+          </div>
+        </div>
         <div className="panel-body">
           <ProfileForm
             userId={userId}
@@ -50,13 +69,17 @@ export default async function OrganisationPage() {
             phone={phone ?? ""}
             email={email ?? ""}
             avatarUrl={avatarUrl}
+            linkedinUrl={linkedinUrl}
+            instagramUrl={instagramUrl}
+            allowSocials
+            allowAvatarUpload
           />
         </div>
       </section>
 
-      <section className="panel">
+      <section className="panel client-profile-panel client-business-panel" aria-labelledby="business-profile-heading">
         <div className="panel-head">
-          <h2>{customer.company || customer.name}</h2>
+          <div className="stack-sm"><span className="eyebrow">Business record</span><h2 id="business-profile-heading">{customer.company || customer.name}</h2></div>
           <StatusPill value={customer.status} />
         </div>
         <div className="panel-body stack">
@@ -68,17 +91,15 @@ export default async function OrganisationPage() {
             <Fact label="Customer since">{formatDate(customer.created_at)}</Fact>
             <Fact label="Projects">{projects.length === 0 ? "None yet" : String(projects.length)}</Fact>
           </Facts>
-          <p className="notice">
-            <Icon name="info" size={14} />
-            <span>
-              These details appear on invoices and on anything the studio issues you. If one is
-              wrong, tell support and it is corrected at the source rather than in two places.
-            </span>
-          </p>
+          <div className="client-business-note">
+            <p>These details are used on invoices. Updating your personal profile does not change this business record.</p>
+            <Link className="btn" href="/support"><Icon name="message" size={16} /> Request a correction</Link>
+          </div>
         </div>
       </section>
+      </div>
 
-      <section className="panel">
+      {!isLocalPreview ? <section className="panel">
         <div className="panel-head"><h2>Signing in</h2></div>
         <div className="panel-body stack-sm">
           <Facts>
@@ -92,7 +113,7 @@ export default async function OrganisationPage() {
             <a className="btn sm" href="/account/password">Change your password</a>
           </div>
         </div>
-      </section>
+      </section> : null}
     </div>
   );
 }

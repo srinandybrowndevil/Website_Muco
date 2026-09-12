@@ -12,6 +12,12 @@
 
 **FAIL.** One S1 and one S2 finding remain open. Neither is a defect in the shipped code, and neither can be closed by this operator: one requires a credential change only the account holder can make, the other requires a paid plan.
 
+## Loop 2 addendum — 12 September 2026
+
+The current source tree passes typecheck, lint, four-app builds, schema contract checks and 152 Playwright cases. The targeted customer-auth, sales-CTA and learning regression tests also pass on desktop and mobile. Profile editing now covers name, phone, LinkedIn, Instagram and a square avatar upload.
+
+The live QA gate remains open for one operational reason: `admin.mucolabs.com`, `employee.mucolabs.com`, `intern.mucolabs.com`, `client.mucolabs.com` and `portal.mucolabs.com` all served the client workspace shell during the 12 September smoke check. Until Vercel project roots and custom domains are corrected, admin requests cannot be certified from production and `portal.mucolabs.com` is not behaving as the documented permanent redirect.
+
 Every finding raised against the code itself is now fixed and re-tested. F-01, F-02 and F-03 were closed in the first pass of this loop; F-06, F-07, F-08 and F-10 were closed in the second, on instruction. F-09 is partly closed — the work of closing it uncovered F-11, a real defect the administrator screens had been hiding.
 
 ## Findings table

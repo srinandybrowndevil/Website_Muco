@@ -32,17 +32,19 @@ file, or into a chat window.
    http://client.localhost:3104/auth/callback
    ```
 
-4. Test each path that exists. Somebody who already holds a membership should
-   reach their own workspace; somebody who does not should be told their
-   account is not part of a workspace yet, rather than being onboarded.
+4. Test each path that exists. A customer using **client** should be able to
+   finish `/onboarding` after Google sign-in and reach the destination they
+   started from. Admin, employee and intern accounts still need an invitation.
 
 ## What Google sign-in does not do here
 
-It does not create a membership. These four workspaces are invitation-only:
-signing in with Google proves who somebody is and nothing more, and an account
-with no membership is refused at the door with a sentence saying so. That is
-the same rule the password path follows, and it is why enabling Google is safe
-without also deciding who may join.
+For team workspaces it does not create a membership: signing in with Google
+proves who somebody is and nothing more, and an account without an invitation is
+refused at that door. Customer sign-up is the intentional exception. The client
+workspace sends a new Google account through `/onboarding`, where the verified
+account is attached to the single MUCO customer organisation by the
+`complete_customer_onboarding` function. The database function creates only a
+`client` membership; it cannot grant admin, employee or intern access.
 
 ## If Firebase must be the identity provider
 

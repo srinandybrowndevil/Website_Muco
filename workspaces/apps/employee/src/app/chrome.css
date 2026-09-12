@@ -23,7 +23,7 @@
   border-bottom: 1px solid var(--line);
 }
 
-.workhead > .bar {
+.workhead > .header-row {
   max-width: var(--content-max);
   margin-inline: auto;
   display: flex;
@@ -75,6 +75,173 @@
 .worknav a:hover { color: var(--text); }
 .worknav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
 .worknav a svg { color: currentColor; }
+
+/* -------------------------------------------------------------- mentoring */
+
+/* The mentoring overview follows the same dashboard rhythm as the other
+   workspaces: a short statement, a small set of useful numbers, then the
+   people that need a decision. The grid collapses to one card on a phone so
+   the next action never gets squeezed beside a status pill. */
+.mentor-page-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+.mentor-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  flex: 0 0 auto;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--text-dim);
+  font-size: var(--t-meta);
+  white-space: nowrap;
+}
+
+.mentor-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.mentor-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  min-height: 112px;
+  padding: var(--pad-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+
+.mentor-stat.attention {
+  border-color: color-mix(in srgb, var(--warn) 50%, transparent);
+  background: color-mix(in srgb, var(--warn) 5%, var(--surface));
+}
+
+.mentor-stat-label {
+  color: var(--text-dim);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mentor-stat-value {
+  color: var(--text);
+  font-size: var(--t-3xl);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mentor-stat-note {
+  margin-top: auto;
+  color: var(--text-2);
+  font-size: var(--t-meta);
+}
+
+.mentee-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.mentee-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+
+.mentee-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-1);
+}
+
+.mentee-card-head {
+  align-items: flex-start;
+  min-height: 80px;
+}
+
+.mentee-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: var(--s3);
+}
+
+.mentee-identity .avatar { flex: 0 0 auto; }
+.mentee-identity h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mentee-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--s5);
+}
+
+.mentee-progress { gap: var(--s3); }
+
+.mentee-percent {
+  color: var(--text);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mentee-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  min-height: 62px;
+  margin-top: auto;
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+
+.mentee-next-copy { min-width: 0; }
+
+.mentee-next-copy p {
+  max-width: 42ch;
+  color: var(--text-2);
+  font-size: var(--t-meta);
+  line-height: var(--lh-snug);
+}
+
+.mentor-state {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--s2);
+  color: var(--text-dim);
+  font-size: var(--t-meta);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .mentor-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mentee-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .mentor-page-head-row { flex-direction: column; gap: var(--s3); }
+  .mentor-scope { align-self: flex-start; }
+  .mentor-stats { gap: var(--s3); }
+  .mentor-stat { min-height: 100px; padding: var(--s4); }
+  .mentor-stat-value { font-size: var(--t-2xl); }
+  .mentee-card-head { padding: var(--s4); }
+  .mentee-card-body { padding: var(--s4); }
+  .mentee-next { align-items: flex-start; flex-direction: column; }
+}
 
 /* --------------------------------------------------------------- your pay */
 

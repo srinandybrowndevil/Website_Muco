@@ -164,7 +164,7 @@
   .internhero { grid-template-columns: auto 1fr; }
 }
 
-.internhero h2 {
+.internhero h1 {
   font-family: var(--font-serif);
   font-weight: 400;
   font-size: var(--t-2xl);

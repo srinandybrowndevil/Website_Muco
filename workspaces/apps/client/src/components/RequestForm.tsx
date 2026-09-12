@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@muco/core/browser";
 import { Icon } from "@muco/ui";
+import { isLocalPreview } from "@muco/core";
 
 const SERVICES = [
   "Website design and development",
@@ -83,10 +84,11 @@ export function RequestForm({
       <div className="callout ok" role="status">
         <Icon name="checkCircle" size={18} />
         <div>
-          <b>Sent to the studio.</b>
+          <b>{isLocalPreview ? "Saved to the local admin workspace." : "Sent to the studio."}</b>
           <p>
-            It appears in the list below straight away and someone reads it within working hours —
-            Monday to Saturday, 9am to 7pm.{" "}
+            {isLocalPreview
+              ? "Open Admin → Requests to review it. This sample request has not been sent to anyone. "
+              : "It appears in the list below straight away and someone reads it within working hours — Monday to Saturday, 9am to 7pm. "}
             <button className="btn sm quiet" type="button" onClick={() => setSent(false)}>
               Write another
             </button>

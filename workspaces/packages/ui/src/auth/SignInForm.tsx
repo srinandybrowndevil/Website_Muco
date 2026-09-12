@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@muco/core/browser";
-import { safeInternalPath, WORKSPACES, type WorkspaceKey } from "@muco/core";
+import { isLocalPreview, safeInternalPath, WORKSPACES, type WorkspaceKey } from "@muco/core";
 import { Icon } from "../Icon";
 
 /**
@@ -18,7 +18,25 @@ import { Icon } from "../Icon";
  * What each workspace supplies is the frame around this: its own art, its own
  * sentence, its own palette. Not this.
  */
-export function SignInForm({ workspace }: { workspace: WorkspaceKey }) {
+export function SignInForm({ workspace, allowSignup = false }: { workspace: WorkspaceKey; allowSignup?: boolean }) {
+  return isLocalPreview
+    ? <PreviewSignIn workspace={workspace} />
+    : <ConnectedSignIn workspace={workspace} allowSignup={allowSignup} />;
+}
+
+function PreviewSignIn({ workspace }: { workspace: WorkspaceKey }) {
+  const params = useSearchParams();
+  const next = safeInternalPath(params.get("next"), "/");
+  return (
+    <div className="stack">
+      <p>Explore the {WORKSPACES[workspace].name.toLowerCase()} workspace with sample records. No account or password is needed.</p>
+      <a className="btn primary lg block" href={next}>Sign in</a>
+      <p className="hint">Preview only. Nothing is sent to Supabase, Google or real customers.</p>
+    </div>
+  );
+}
+
+function ConnectedSignIn({ workspace, allowSignup }: { workspace: WorkspaceKey; allowSignup: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState("");
@@ -164,6 +182,11 @@ export function SignInForm({ workspace }: { workspace: WorkspaceKey }) {
       </button>
 
       <a className="hint" href="/forgot-password">Forgotten your password?</a>
+      {allowSignup ? (
+        <p className="auth-switch">
+          New customer? <a href={`/signup?next=${encodeURIComponent(next)}`}>Create a customer account</a>
+        </p>
+      ) : null}
     </form>
   );
 }

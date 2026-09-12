@@ -22,6 +22,7 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isLocalPreview } from "./preview-mode";
 import { isDemoAllowed, isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "./env";
 import { accessSwitchedOff, primaryMembership } from "./membership";
 import { PATH_HEADER, isPublicPath, safeInternalPath } from "./paths";
@@ -47,6 +48,25 @@ export function createWorkspaceProxy(workspace: WorkspaceKey, options: ProxyOpti
   return async function proxy(request: NextRequest) {
     const requestHost = request.headers.get("host");
     const path = request.nextUrl.pathname;
+    if (isLocalPreview) {
+      const hostname = request.nextUrl.hostname;
+      if (!(hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]" || hostname.endsWith(".localhost"))) {
+        return new NextResponse("Local preview is available on localhost only.", { status: 403 });
+      }
+      const credentials = ["/signup", "/onboarding", "/forgot-password", "/reset-password", "/accept-invite", "/account/password", "/auth/callback"];
+      if (credentials.includes(path)) {
+        const target = new URL("/login", request.url);
+        const next = safeInternalPath(request.nextUrl.searchParams.get("next"), "/");
+        if (next !== "/") target.searchParams.set("next", next);
+        return NextResponse.redirect(target);
+      }
+      const forwarded = new Headers(request.headers);
+      forwarded.set(PATH_HEADER, path);
+      const result = NextResponse.next({ request: { headers: forwarded } });
+      result.headers.set("Cache-Control", "no-store");
+      return result;
+    }
+    if (path === "/api/preview") return new NextResponse(null, { status: 404 });
 
     // A retired address keeps working by naming its successor, not by serving
     // the same pages under a second name. Two addresses for one product means
@@ -140,4 +160,3 @@ export function createWorkspaceProxy(workspace: WorkspaceKey, options: ProxyOpti
     return serve();
   };
 }
-

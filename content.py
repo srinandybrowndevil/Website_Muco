@@ -2597,7 +2597,7 @@ def build_contact():
         budgets=options(budgets, "Select a range"),
         timelines=options(timelines, "Select a timeline"),
         portal_contact=PORTAL_CONTACT,
-        portal_signup_contact=PORTAL_LOGIN,
+        portal_signup_contact=PORTAL_SIGNUP_PAGE,
     )
 
     contact_jsonld = """{
@@ -3454,11 +3454,13 @@ screenshots remain available inside each project's expanded details.
 ## Local preview and production setup
 
 Run `node scripts/dev-site.mjs` from the repository root for the website and its
-API endpoints at localhost:8123. Run `npm run dev` from `portal/` for the CRM.
+API endpoints at localhost:8123. Run `npm run dev` from `workspaces/` for the
+four workspace apps, or use `npm run dev:client` for the customer workspace.
 `serve.py` is a static-only fallback; it does not execute API functions.
 
-Vercel packages only public site assets with `node scripts/build-site.mjs` into
-`public-site/`. Deploy `portal/` as a separate Next.js project.
+Vercel packages the public site from the repository root. Deploy each workspace
+as its own Next.js project from the matching directory in
+`workspaces/DEPLOYMENT-CHECKLIST.md`.
 See `DEPLOYMENT_GUIDE_TA.md` for the complete Supabase + Vercel setup and checks.
 
 ## Capturing real project evidence
@@ -3531,7 +3533,7 @@ Free website review · Careers · Privacy · Terms · Refund · 404
 ## Enquiry form
 
 Enquiries are account-gated across the whole site. Every WhatsApp, phone and
-email action routes through portal sign-in, so a brief always arrives attached
+email action routes through client workspace sign-in, so a brief always arrives attached
 to a customer account and stays visible to that customer afterwards.
 
 Two layers do this. The shared fragments (`header_html`, `footer_html`,
@@ -3550,9 +3552,11 @@ leaves `mailto:` alone and still gates WhatsApp and phone:
   Asking a candidate to create a *customer* account to send a CV would close the
   recruitment funnel.
 
-There is no anonymous contact form. Every contact action goes through the
-portal, so an enquiry always arrives attached to an account rather than to an
-unverified email address.
+There is no anonymous contact form. Every sales contact action goes through the
+client workspace, so an enquiry always arrives attached to a verified customer
+account rather than to an unverified email address. New customers can create an
+account, confirm their email and complete the short onboarding form in the same
+flow; the team workspaces remain invitation-only.
 
 `api/lead.js` used to serve that form and was removed once nothing posted to
 it. An endpoint that accepts input and sends mail, with no caller and no
@@ -3562,7 +3566,7 @@ code that sat unused.
 
 Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in
 Vercel so accepted enquiries are stored in the MUCO CRM. These are required for
-the enquiry to appear in the portal's Enquiries inbox.
+the enquiry to appear in the admin workspace's Enquiries inbox.
 
 The browser opens WhatsApp *before* awaiting the request, because doing it
 afterwards loses the click gesture and pop-up blockers eat the window.
@@ -3601,14 +3605,14 @@ These are enforced by convention, not by code, so please keep to them:
 
 ## Deploy
 
-Push to `main`; Vercel builds from it and serves the result at
-<https://mucolabs-in.vercel.app>.
+Push to `main` for the public site. The four workspace apps are separate Vercel
+projects; set each project root exactly as documented in
+`workspaces/DEPLOYMENT-CHECKLIST.md` before assigning its custom domain.
 
-No custom domain is attached yet: `mucolabs.com` and `mucolabs.in` have no DNS
-records pointing anywhere, so neither resolves. There is no `CNAME` file — that
-is a GitHub Pages mechanism and GitHub Pages is not serving this repository.
-To go live on the real domain, add it in the Vercel project settings and point
-DNS at the records Vercel gives you.
+The public domain currently resolves, but the workspace smoke check found that
+all workspace hostnames serve the client project. Correct the Vercel project and
+custom-domain assignments, deploy the current commit, and repeat the checklist.
+`portal.mucolabs.com` is retained only as a redirect address for older links.
 
 ## Environment variables
 
@@ -3617,8 +3621,8 @@ DNS at the records Vercel gives you.
 | `NEXT_PUBLIC_SUPABASE_URL` | Optional. CRM / analytics project URL. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional. Publishable / anon key for CRM RPC calls. |
 
-No secret keys should be exposed in the browser bundle or in source. The portal
-Supabase project supplies the same public values.
+No secret keys should be exposed in the browser bundle or in source. The four
+workspace apps use the same public values from the Supabase project.
 """.format(brand=BRAND, tagline=TAGLINE, founder=FOUNDER,
            domain=DOMAIN, email=EMAIL, phone=PHONE, ga_id=GA_MEASUREMENT_ID,
            gtm_id=GTM_CONTAINER_ID)

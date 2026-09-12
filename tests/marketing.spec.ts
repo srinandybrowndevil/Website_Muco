@@ -131,6 +131,24 @@ test.describe("marketing site", () => {
     expect(broken, "internal links that 404").toEqual([]);
   });
 
+  test("sales contact actions require a client sign-in", async ({ request }) => {
+    const html = await (await request.get(`${BASE}/contact.html`)).text();
+    const directSalesLinks = html.match(/href="(?:https:\/\/wa\.me|mailto:|tel:)[^"]*"/gi) ?? [];
+    expect(directSalesLinks, "contact page must not expose direct sales channels").toEqual([]);
+    expect(html).toContain('href="https://client.mucolabs.com/login?next=%2Fsupport"');
+    expect(html).toContain('href="https://client.mucolabs.com/signup?next=%2Fsupport"');
+  });
+
+  test("learning page carries the tutor, Way2Me leadership and feedback", async ({ request }) => {
+    const html = await (await request.get(`${BASE}/learning.html`)).text();
+    expect(html).toContain("Srinivash Mahalingam");
+    expect(html).toContain("Tutor at Way2Me");
+    expect(html).toContain("Yogahari Haran");
+    expect(html).toContain("Founder &amp; CEO, Way2Me");
+    expect(html).toContain("What learners valued.");
+    expect(html).toContain("assets/yogahari.webp");
+  });
+
   test.describe("enquiry form", () => {
     // The endpoint is stubbed in every case below. These check the form the
     // visitor actually touches -- validation, focus, the honeypot, what each

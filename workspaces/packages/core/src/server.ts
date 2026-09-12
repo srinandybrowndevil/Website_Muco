@@ -16,6 +16,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { isLocalPreview } from "./preview-mode";
+import { PREVIEW_USERS, PREVIEW_ORG } from "./preview-data";
+import { previewServerClient, workspaceFromPort } from "./preview-server";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "./env";
 import { accessSwitchedOff, primaryMembership } from "./membership";
 import { PATH_HEADER } from "./paths";
@@ -28,6 +31,7 @@ import { urlForWorkspace, workspaceAdmits, workspaceForRole, type Role, type Wor
  * queries creates one client and one cookie read, not five.
  */
 export const createServerSupabase = cache(async (): Promise<SupabaseClient | null> => {
+  if (isLocalPreview) return previewServerClient(workspaceFromPort((await headers()).get("host")));
   if (!isSupabaseConfigured) return null;
   const store = await cookies();
   return createServerClient(supabaseUrl!, supabaseAnonKey!, {
@@ -57,6 +61,8 @@ export type Account = {
   fullName: string | null;
   avatarUrl: string | null;
   phone: string | null;
+  linkedinUrl: string | null;
+  instagramUrl: string | null;
 };
 
 /** The path this request asked for, as the proxy saw it. */
@@ -78,6 +84,14 @@ async function signInAgain(): Promise<never> {
  * product; naming the address that works reads as an answer.
  */
 export const requireAccount = cache(async (workspace: WorkspaceKey): Promise<Account> => {
+  if (isLocalPreview) {
+    const supabase = previewServerClient(workspace);
+    const userId = PREVIEW_USERS[workspace];
+    const { data: profile } = await supabase.from("profiles").select("*").eq("id", userId).single();
+    return { supabase, userId, email: profile?.email ?? `${workspace}@example.test`, role: workspace,
+      organizationId: PREVIEW_ORG, fullName: profile?.full_name ?? "Sample user", avatarUrl: profile?.avatar_url ?? null,
+      phone: profile?.phone ?? null, linkedinUrl: profile?.linkedin_url ?? null, instagramUrl: profile?.instagram_url ?? null };
+  }
   const supabase = await createServerSupabase();
   if (!supabase) redirect("/login");
 
@@ -109,7 +123,7 @@ export const requireAccount = cache(async (workspace: WorkspaceKey): Promise<Acc
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name,avatar_url,phone")
+    .select("full_name,avatar_url,phone,linkedin_url,instagram_url")
     .eq("id", userId!)
     .maybeSingle();
 
@@ -122,6 +136,8 @@ export const requireAccount = cache(async (workspace: WorkspaceKey): Promise<Acc
     fullName: profile?.full_name ?? null,
     avatarUrl: profile?.avatar_url ?? null,
     phone: profile?.phone ?? null,
+    linkedinUrl: profile?.linkedin_url ?? null,
+    instagramUrl: profile?.instagram_url ?? null,
   };
 });
 

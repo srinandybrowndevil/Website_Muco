@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createServerSupabase } from "@muco/core/server";
-import { formatDateLong, humanise } from "@muco/core";
+import { formatDateLong, humanise, isLocalPreview } from "@muco/core";
 import { Callout, Fact, Facts, Icon, StatusPill } from "@muco/ui";
 
 export const metadata: Metadata = {
@@ -45,9 +45,8 @@ export default async function VerifyPage({ params }: { params: Promise<{ serial:
         </Callout>
       ) : (
         <>
-          <Callout tone="ok" icon="checkCircle" title="This certificate is genuine">
-            It was issued by MUCO LABS and the record below is the one held in the studio&rsquo;s
-            system right now.
+          <Callout tone={isLocalPreview ? "info" : "ok"} icon="checkCircle" title={isLocalPreview ? "Sample certificate preview" : "This certificate is genuine"}>
+            {isLocalPreview ? "This fictional record is for reviewing the layout. It is not a valid certificate or evidence of an internship." : "It was issued by MUCO LABS and the record below is the one held in the studio’s system right now."}
           </Callout>
 
           <section className="panel">

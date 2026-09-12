@@ -5,6 +5,11 @@
 **Covers:** `admin.`, `employee.`, `intern.` and `client.mucolabs.com`, the retirement of `portal.mucolabs.com`, and the database changes those required
 **Status:** Built and verified locally. **Not deployed.** See section 7 before pushing.
 
+> **Historical note (12 September 2026):** This is the earlier four-workspace
+> split report. Its statement that self-service sign-up is gone is superseded by
+> the current client-only sign-up/onboarding flow documented in
+> `delivery/01-RND-BRIEF.md` and `workspaces/DEPLOYMENT-CHECKLIST.md`.
+
 ---
 
 ## 1. What was asked for

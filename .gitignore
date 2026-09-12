@@ -45,3 +45,5 @@ playwright-report/
 
 # Dependencies
 node_modules/
+/.local-logs/
+/.local-preview/

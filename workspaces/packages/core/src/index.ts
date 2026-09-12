@@ -9,3 +9,4 @@ export * from "./membership";
 export * from "./password";
 export * from "./paths";
 export * from "./workspaces";
+export { isLocalPreview, previewWorkspaces } from "./preview-mode";

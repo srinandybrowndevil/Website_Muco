@@ -56,6 +56,11 @@ Arriving at the wrong front door is not refused with a locked page. Each
 application recognises the role it does not serve and names the address that
 does.
 
+The client workspace is the one exception to the invitation-only rule: a new
+customer may use `/signup`, confirm their email (or continue with Google), and
+complete `/onboarding` before opening a request. Admin, employee and intern
+accounts remain invite-only.
+
 ## portal.mucolabs.com
 
 Retired as a workspace, kept as an address. The client application answers on

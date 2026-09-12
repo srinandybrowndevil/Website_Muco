@@ -65,7 +65,7 @@ export default async function ClientHome() {
       <section className="panel">
         <div className="statement">
           <span className="eyebrow">{customer.company || customer.name}</span>
-          <h2>{statusSentence(project.status, project.name)}</h2>
+          <h1>{statusSentence(project.status, project.name)}</h1>
           <p>{statusDetail(project.status)}</p>
         </div>
 

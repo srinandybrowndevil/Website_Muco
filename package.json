@@ -6,6 +6,9 @@
   "scripts": {
     "build": "node scripts/build-site.mjs",
     "dev": "node scripts/dev-site.mjs",
+    "preview": "node scripts/preview.mjs",
+    "preview:reset": "node scripts/reset-preview.mjs",
+    "test:preview": "playwright test --config playwright.preview.config.ts",
     "test": "node --test test-*.mjs",
     "test:e2e": "playwright test",
     "test:all": "npm test && npm run test:e2e"

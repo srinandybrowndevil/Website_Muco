@@ -6,6 +6,12 @@
 **Prepared for:** Srinivash Mahalingam, Founder and Chairman, MUCO LABS
 **Result:** Three S2 findings raised and fixed. One S4 remains open and needs a tool this environment does not have. Two migrations are written and verified against the schema but not applied, because the database connector is disconnected.
 
+## Current recheck — 12 September 2026
+
+The live host smoke check was repeated after the customer-auth work. `mucolabs.com`, `/contact` and `/learning` return HTTP 200 with the expected marketing pages. `portal.mucolabs.com/login`, `client.mucolabs.com/login`, `admin.mucolabs.com/login`, `employee.mucolabs.com/login` and `intern.mucolabs.com/login` also return HTTP 200, but all five render the same **MUCO LABS · Client Workspace** shell. This confirms the remaining production issue is Vercel project/custom-domain assignment: the four distinct source applications are not yet mapped to their intended hostnames, and the retired portal host is not issuing the documented permanent redirect.
+
+The local source tree and test suite are current: typecheck, lint, four-app builds, schema contract checks and 152 Playwright tests pass. This live mapping issue remains a deployment blocker and is tracked in `workspaces/DEPLOYMENT-CHECKLIST.md`.
+
 ---
 
 ## 1. Executive summary

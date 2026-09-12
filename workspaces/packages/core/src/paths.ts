@@ -29,6 +29,8 @@ export const PATH_HEADER = "x-muco-path";
 /** Paths reachable without a session, in every workspace. */
 export const PUBLIC_PATHS = [
   "/login",
+  "/signup",
+  "/onboarding",
   "/forgot-password",
   "/reset-password",
   "/accept-invite",

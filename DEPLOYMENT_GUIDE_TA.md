@@ -326,3 +326,9 @@ Port already in use என்றால் அந்த server-ஐ நிறு�
 Local checks: website API test cases, authentication callback regressions, CRM payload regressions, ESLint, TypeScript production build. Browser-ல் desktop/mobile image loading, form create/edit, failed-save recovery, incoming update மற்றும் search சோதிக்கப்பட்டது. CRM browser test-ல் database boundary mocked; இது real Supabase RLS / SMTP / Storage / publication end-to-end test-க்கு மாற்று அல்ல. `check:setup` மட்டும் connected Supabase-க்கு read-only request அனுப்பியது.
 
 Guide-ல் உள்ள setup directions official Supabase / Vercel documentation-ஐச் சரிபார்த்து, இந்த repository-ன் actual schema மற்றும் configuration-க்கு ஏற்ப எழுதப்பட்டவை. UI menu names மாறியிருந்தால் இணைக்கப்பட்ட official page-ஐப் பயன்படுத்தவும்.
+# Deployment guide status
+
+This guide describes the retired single `portal/` deployment and is retained
+for historical reference. The current deployment is four independent Next.js
+apps. Use `workspaces/DEPLOYMENT-CHECKLIST.md` for the authoritative project
+roots, domains, Supabase prerequisites and post-deploy smoke checks.

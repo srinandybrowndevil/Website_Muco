@@ -27,7 +27,7 @@ export function SignOutButton({ label = "Sign out", className = "btn quiet sm" }
   }
 
   return (
-    <button type="button" className={className} onClick={signOut} disabled={busy}>
+    <button type="button" className={className} onClick={signOut} disabled={busy} aria-label="Sign out">
       <Icon name="logout" size={15} />
       <span>{busy ? "Signing out" : label}</span>
     </button>

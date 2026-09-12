@@ -6,7 +6,8 @@ import lead from "../api/lead.js";
 import event from "../api/event.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-for (const name of [".env.local", ".env"]) {
+const preview = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_LOCAL_PREVIEW === "1";
+for (const name of preview ? [] : [".env.local", ".env"]) {
   const path = resolve(root, name);
   if (existsSync(path)) process.loadEnvFile(path);
 }
@@ -16,7 +17,19 @@ http.createServer(async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   try {
     const url = new URL(req.url, `http://localhost:${port}`);
+    if (preview && url.pathname === "/__preview") {
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
+      res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MUCO LABS · Local preview</title><style>body{margin:0;background:#0e1824;color:#edf4fb;font:17px/1.65 system-ui}main{max-width:900px;margin:auto;padding:60px 24px}h1{font-size:clamp(32px,5vw,56px);line-height:1.15}nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:32px 0}a{color:inherit;text-decoration:none;border:1px solid #48627e;background:#172a3b;border-radius:12px;padding:24px;display:block}a:hover,a:focus-visible{outline:2px solid #9cdbff}small,p{color:#b5c8dc}strong{display:block;font-size:21px}</style><main><small>MUCO LABS · DEVELOPMENT</small><h1>Explore every workspace.</h1><p>Click Sign in to enter. No email, password or Google account is needed. These are fictional sample records, with edits saved only on this computer.</p><nav><a href="/"><strong>Public website</strong>Services, learning and contact</a><a href="http://localhost:3104/login"><strong>Customer</strong>Projects, requests, billing and profile</a><a href="http://localhost:3101/login"><strong>Admin</strong>Requests, people and studio operations</a><a href="http://localhost:3102/login"><strong>Employee</strong>Tasks, projects and mentoring</a><a href="http://localhost:3103/login"><strong>Intern</strong>Learning, work log and internship</a></nav><p>Supabase authentication, emails and invitations are disconnected for this preview. The live websites have not been changed.</p></main></html>`);
+      return;
+    }
     if (["/api/lead", "/api/event"].includes(url.pathname)) {
+      if (preview) {
+        res.setHeader("Content-Type", "application/json");
+        if (url.pathname === "/api/event") res.writeHead(200).end(JSON.stringify({ ok: true, preview: true, recorded: false }));
+        else res.writeHead(409).end(JSON.stringify({ ok: false, error: "Use the local Customer workspace Support page to save a sample request. No email or WhatsApp message has been sent." }));
+        return;
+      }
       if (req.method === "POST" && req.headers.origin && ![`http://localhost:${port}`, `http://127.0.0.1:${port}`].includes(req.headers.origin)) { res.writeHead(403).end(); return; }
       let body = "";
       for await (const chunk of req) {
@@ -46,7 +59,17 @@ http.createServer(async (req, res) => {
       // HTTPS upgrade belongs to production; preserve the rest locally.
       res.setHeader(header.key, header.value.replace("; upgrade-insecure-requests", ""));
     }
-    if (req.method === "HEAD") res.end(); else res.end(readFileSync(selected));
+    if (req.method === "HEAD") res.end();
+    else if (preview && extname(selected) === ".html") {
+      let html = readFileSync(selected, "utf8");
+      const ports = { client: 3104, portal: 3104, admin: 3101, employee: 3102, intern: 3103 };
+      html = html.replace(/https:\/\/(client|portal|admin|employee|intern)\.mucolabs\.com/g, (_, name) => `http://localhost:${ports[name]}`);
+      html = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, script => /googletagmanager|google-analytics|analytics\.js/.test(script) ? "" : script);
+      html = html.replace(/<noscript>[\s\S]*?<\/noscript>/gi, block => block.includes("googletagmanager") ? "" : block);
+      html = html.replace("</body>", '<a href="/__preview" style="position:fixed;left:12px;bottom:12px;z-index:9999;background:#172b3a;color:#fff;padding:12px 16px;border:1px solid #9cdbff;border-radius:8px;font:14px system-ui;text-decoration:none">Local preview · Workspaces</a></body>');
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
+      res.end(html);
+    } else res.end(readFileSync(selected));
   } catch { if (!res.headersSent) res.writeHead(500); res.end("Local request failed. Check setup and try again."); }
 }).on("error", error => {
   // Without this the server dies on an unhandled 'error' event and prints a

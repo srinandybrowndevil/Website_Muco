@@ -17,8 +17,8 @@
 
 .masthead { border-bottom: 1px solid var(--line); background: var(--surface); }
 
-.masthead > .bar {
-  max-width: var(--content-max);
+.masthead > .header-row {
+  max-width: 1400px;
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -38,36 +38,103 @@
   color: var(--text-dim);
 }
 
-.masthead .who { margin-left: auto; text-align: right; }
+.masthead .who { margin-left: auto; text-align: right; min-width: 0; text-decoration: none; }
+.masthead .who:hover { color: var(--accent); }
 .masthead .who b { display: block; font-size: var(--t-meta); font-weight: 560; }
 .masthead .who small { display: block; font-size: var(--t-label); color: var(--text-dim); }
+.masthead .who b, .masthead .who small { max-width: 32ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.masthead .mark, .masthead .iconbtn { flex-shrink: 0; }
+.masthead .iconbtn { width: 44px; height: 44px; }
 
-.clientnav {
-  max-width: var(--content-max);
-  margin-inline: auto;
+.client-frame { width: 100%; max-width: 1400px; margin-inline: auto; flex: 1; }
+.client-frame > main { min-width: 0; }
+.client-navigation { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: var(--surface); }
+.client-menu-toggle {
   display: flex;
-  gap: var(--s4);
-  padding: 0 var(--s5);
-  overflow-x: auto;
-  scrollbar-width: none;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: var(--s2) var(--s3);
+  gap: var(--s3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r);
+  font-size: var(--t-sm);
+  text-align: left;
 }
-
-.clientnav::-webkit-scrollbar { display: none; }
-
+.client-menu-toggle > span:first-of-type { font-weight: 600; }
+.client-menu-caption { margin-left: auto; font-size: var(--t-meta); color: var(--text-dim); }
+.clientnav { display: none; padding-top: var(--s4); gap: var(--s5); }
+.clientnav[data-open="true"] { display: grid; }
+.client-nav-group { min-width: 0; display: flex; flex-direction: column; gap: var(--s1); }
+.client-nav-group .eyebrow { padding: 0 var(--s3) var(--s2); }
 .clientnav a {
-  padding: var(--s3) 0;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  min-height: 44px;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
   font-size: var(--t-sm);
   font-weight: 500;
-  white-space: nowrap;
   text-decoration: none;
-  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.clientnav a:hover { background: var(--surface-2); color: var(--text); }
+.clientnav a[aria-current="page"] { color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, var(--surface)); font-weight: 600; }
+.client-nav-dot { width: 5px; height: 5px; border-radius: 50%; margin-left: auto; background: currentColor; }
+
+@media (min-width: 600px) and (max-width: 1079px) {
+  .clientnav[data-open="true"] { grid-template-columns: 1.3fr 1fr 1fr; }
 }
 
-.clientnav a:hover { color: var(--text); }
-.clientnav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+@media (min-width: 1080px) {
+  .client-frame { display: grid; grid-template-columns: 208px minmax(0, 1fr); }
+  .client-navigation { border-bottom: 0; border-right: 1px solid var(--line); padding: var(--s5) var(--s3); }
+  .clientnav { display: grid; position: sticky; top: var(--s5); padding-top: 0; }
+  .client-menu-toggle { display: none; }
+}
+
+@media (max-width: 520px) {
+  .masthead > .header-row { padding: var(--s3) var(--s4); gap: var(--s2); }
+  .masthead .mark { gap: var(--s2); }
+  .masthead .who b { max-width: 14ch; }
+  .masthead .who small { max-width: 14ch; }
+  .masthead .mark small { max-width: 12ch; letter-spacing: 0.06em; }
+}
+
+/* ----------------------------------------------------------- profile page */
+.client-profile-page > .page-head h1 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -0.02em; }
+.client-profile-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s5); align-items: start; }
+.client-profile-layout > * { min-width: 0; }
+.client-profile-panel { border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.client-profile-panel .panel-head { border-radius: var(--r-lg) var(--r-lg) 0 0; align-items: flex-start; }
+.client-profile-panel .panel-head h2 { font-size: var(--t-lg); }
+.client-profile-panel .panel-head p { color: var(--text-2); font-size: var(--t-sm); margin-top: var(--s1); }
+.client-profile-heading { display: flex; align-items: center; gap: var(--s3); }
+.client-profile-heading > svg { color: var(--accent); }
+.client-business-panel .facts { grid-template-columns: minmax(0, 1fr); }
+.client-business-panel .fact dd { overflow-wrap: anywhere; }
+.client-business-panel .panel-head { flex-wrap: wrap; }
+.client-business-note { padding-top: var(--s4); border-top: 1px solid var(--line); display: grid; gap: var(--s3); }
+.client-business-note p { color: var(--text-2); font-size: var(--t-sm); }
+.client-business-note .btn { justify-self: start; min-height: 44px; }
+.client-profile-panel .profile-avatar-editor { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); padding: var(--s4); }
+.client-profile-panel .profile-avatar-editor .avatar.lg { width: 72px; height: 72px; font-size: var(--t-xl); }
+.client-profile-panel .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.client-profile-panel .btn { min-height: 44px; }
+.client-profile-panel .field input { min-height: 46px; }
+.client-profile-panel .profile-actions { background: var(--surface); padding: var(--s3); margin: 0 calc(-1 * var(--s3)); border: 1px solid var(--line); border-radius: var(--r); }
+.client-profile-panel .profile-actions[data-active="true"] { position: sticky; bottom: var(--s3); z-index: 2; box-shadow: var(--shadow-1); }
+
+@media (min-width: 1280px) {
+  .client-profile-layout { grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr); }
+}
+@media (max-width: 599px) {
+  .client-profile-panel .grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .client-profile-panel .field input { font-size: 16px; }
+  .client-profile-panel .profile-actions { bottom: calc(var(--s2) + env(safe-area-inset-bottom)); }
+}
 
 /* ------------------------------------------------------------------ status */
 
@@ -82,7 +149,7 @@
 
 .statement .eyebrow { display: block; margin-bottom: var(--s3); }
 
-.statement h2 {
+.statement h1 {
   font-family: var(--font-serif);
   font-weight: 400;
   font-size: clamp(1.75rem, 4.5vw, 2.5rem);

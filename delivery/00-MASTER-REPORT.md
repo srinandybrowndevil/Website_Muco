@@ -6,6 +6,12 @@
 **Prepared for:** Srinivash Mahalingam, founder, MUCO LABS
 **Result:** Not certified. One S1 finding remains open: an exposed administrator credential, which only the account holder can change. Every other finding is fixed.
 
+## Current loop addendum — 12 September 2026
+
+Source and local delivery now include customer sign-up/onboarding, a client-only sign-up link on login, authentication-gated sales CTAs, and editable customer profile links plus a 1:1 avatar upload. Typecheck, lint, builds, schema checks and the full Playwright suite pass (`152 passed`; customer-auth coverage `6 passed`; learning/contact coverage `4 passed`).
+
+Production is not yet certified. A live host audit found that every workspace hostname currently serves the client shell, so the admin request pages the founder expects are not reachable from `admin.mucolabs.com`. Correct the Vercel project/custom-domain mapping and deploy each workspace using `workspaces/DEPLOYMENT-CHECKLIST.md`; then repeat the smoke suite. The old Google error screenshot is no longer reproduced at the Supabase authorize endpoint, which now redirects to Google, but deployed callback allow-lists still need verification.
+
 ---
 
 ## 1. Executive summary

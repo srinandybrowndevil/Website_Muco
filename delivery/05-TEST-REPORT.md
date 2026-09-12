@@ -208,3 +208,20 @@ I6 is the finding this pass exists to justify. The certificate page had never be
 2. The security advisor output is attached to the QA station and contains further items below the failure line.
 3. Five test areas were not run. QA must carry them as unverified risk, not as absent risk.
 4. No case in this report was marked passing on inspection alone.
+
+## Loop 2 addendum — 12 September 2026
+
+The customer-auth and profile changes were verified against the current four-app source tree:
+
+| Check | Result |
+|---|---|
+| Workspace typecheck | Pass |
+| Workspace lint | Pass |
+| Four-app production builds | Pass |
+| Supabase schema contract (`222` query references) | Pass |
+| Full Playwright suite | **152 passed** |
+| Targeted marketing/workspace auth tests | **6 passed** |
+| Targeted learning/contact regression tests | **4 passed** |
+| Static sales CTA audit | Pass — no direct `mailto:`, `tel:` or `wa.me` sales escape |
+
+The live-domain smoke check is recorded separately as an operational failure: all five workspace hostnames currently return the client shell. This is a Vercel/custom-domain mapping issue, not a failing local build, and must be corrected before production certification.

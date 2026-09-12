@@ -527,6 +527,25 @@ a.item:hover { background: color-mix(in srgb, var(--text) 4%, transparent); }
 .avatar.sm { width: 26px; height: 26px; font-size: var(--t-label); }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
+.profile-avatar-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding-bottom: var(--s2);
+}
+
+.profile-avatar-editor .cluster { align-items: flex-start; }
+.profile-avatar-editor .stack-sm { align-items: flex-start; }
+.profile-photo-title { font-weight: 600; font-size: var(--t-sm); }
+.profile-section { min-width: 0; border: 0; padding: 0; }
+.profile-section legend { font-weight: 600; font-size: var(--t-sm); padding-bottom: var(--s3); }
+.profile-section legend .hint { margin-left: var(--s2); font-weight: 400; }
+.profile-section-note { margin-bottom: var(--s4); }
+.profile-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s3); border-top: 1px solid var(--line); padding-top: var(--s4); }
+.profile-actions .notice { flex-basis: 100%; }
+.profile-actions .cluster { margin-left: auto; }
+.profile-form .btn { min-height: 44px; }
+
 /* ---------------------------------------------------------------- progress */
 
 .bar {
@@ -824,3 +843,22 @@ kbd {
   height: 1px;
   background: var(--line);
 }
+
+.auth-switch {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--t-meta);
+  text-align: center;
+}
+
+.auth-switch a { color: var(--accent); font-weight: 560; }
+/* The local-only switcher stays in flow and wraps rather than covering navigation. */
+.local-preview { padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; background: #172b3a; color: #f4f8ff; font: 13px/1.5 system-ui, sans-serif; border-bottom: 1px solid #55768e; }
+.local-preview p { margin: 3px 0 0; color: #d5e1ed; font-size: 12px; }
+.local-preview nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.local-preview a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 12px; color: #fff; border-radius: 6px; text-decoration: none; }
+.local-preview a:hover { background: #2e485c; }
+.local-preview a:focus-visible { outline: 2px solid #9cdbff; outline-offset: 1px; }
+@media (min-width: 1024px) { .local-preview:has(+ .console) { margin-left: 236px; } }
+@media (max-width: 480px) { .local-preview { padding: 12px 16px; gap: 6px; } .local-preview a { padding: 8px 10px; } }
+@media print { .local-preview nav { display: none; } .local-preview { background: white; color: black; } .local-preview p { color: black; } }
