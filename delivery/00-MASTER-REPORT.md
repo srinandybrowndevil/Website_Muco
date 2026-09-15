@@ -185,7 +185,22 @@ Redirect: `/learning-portal` → `/learning` (301, permanent).
 - At `max-width: 360px`, reduce `Start a Project` button padding and font size to fit very narrow phones.
 - Verified after fixes: 0 horizontal overflow, 0 header overlaps across desktop, 390px and 360px viewports.
 
-## M. Deployment
+## M. Contact and global public UX fixes
+
+A second focused pass addressed the Contact / Free Consultation and free website review experiences. The full report is in `delivery/06-CONTACT-UX-REPORT.md`.
+
+Key fixes:
+- Removed `<fieldset disabled>` from the public lead forms so controls are not disabled on load.
+- Made `.form-error` and `.form-status` visible when they contain text, so validation and submission feedback appears.
+- Converted the honeypot wrapper to an off-screen, clipped, 1×1 absolute box with `aria-hidden="true"`, `tabindex="-1"` and `autocomplete="off"`.
+- Styled the optional-project `<details>/<summary>` with a custom chevron, hover and focus states.
+- Styled `.nav-actions .btn-accent` as a transparent/outline secondary CTA so the header has one dominant action.
+- Added the reusable `--header-height` token and wired it into `scroll-padding-top`, `header nav` height and `.public-lead-form` scroll margin.
+- Improved the consent label spacing, checkbox sizing and "Privacy Policy" link.
+- Switched submit buttons to `.btn-primary btn-lg`.
+- Verified across 320px, 390px, 768px and 1280px: 0 `h1`/header overlaps, 0 console errors, no horizontal page overflow from layout elements.
+
+## N. Deployment
 
 1. Commit the changes and push to the `main` branch.
 2. In Vercel, confirm the project uses `node scripts/build-site.mjs` as the build command and `public-site/` as the output directory.

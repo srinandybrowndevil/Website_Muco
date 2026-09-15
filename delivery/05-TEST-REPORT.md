@@ -30,7 +30,15 @@ Verify that the public website builds, the enquiry endpoint works without a data
 | Reduced-motion CSS | `style.css` search | `prefers-reduced-motion` media query present. |
 | Touch-target CSS | `style.css` search | `min-width` / `min-height` ≥ 44 px rules present. |
 | UI/UX alignment (Playwright) | `scripts/_ui-audit.mjs` over `http://localhost:8123` at 1280px, 390px and 360px | 0 horizontal overflow, 0 header overlaps, 0 console errors, 0 load failures across 27 pages. |
+| Contact page header clearance | Playwright at 1280px, 390px, 320px | No `h1` / header overlap on `/contact` or `/website-audit`. |
+| Contact form error visibility | Playwright empty-form submit on `/contact` | Field-level `.form-error` and `#lead-status` messages displayed. |
+| Honeypot visibility | Playwright `getBoundingClientRect` on `/contact` and `/website-audit` | Honeypot wrapper is 1×1 and off-screen; not visible or keyboard-focusable. |
+| Header CTA hierarchy | Playwright computed styles on `/contact` | `Start a Project` is accent-filled; secondary `Free Consultation` is transparent with accent border. |
+| Contact form end-to-end | `node --test test-lead.mjs` | 20 passed — server validation, honeypot, rate-limit and Resend path verified. |
+| Global overflow regression | Playwright across 27 pages at 320px, 390px, 768px, 1280px | No horizontal page overflow caused by layout elements. |
 
 ## Defects
 
 No S0–S2 defects found in the public-website scope. Lighthouse and real-device testing remain as declared skips.
+
+See `delivery/06-CONTACT-UX-REPORT.md` for the contact/global UX root-cause and fix list.
