@@ -317,12 +317,20 @@ def asset_v(name):
 
     Without this a returning visitor can keep an old style.css against new
     markup, which looks like a layout bug and is impossible to reproduce.
+
+    The bytes are normalised to LF before hashing. Git stores LF but checks out
+    CRLF on Windows, so hashing the raw file gave one hash on a Windows machine
+    and a different one in Linux CI -- for a file whose committed content is
+    identical. The generated HTML therefore never matched what CI rebuilt, and
+    the "build left the tree dirty" gate failed on every push regardless of what
+    had changed.
     """
     path = os.path.join(ROOT, name)
     try:
-        digest = hashlib.sha256(open(path, "rb").read()).hexdigest()[:10]
+        raw = open(path, "rb").read()
     except OSError:
         return name
+    digest = hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()[:10]
     return "%s?v=%s" % (name, digest)
 
 
