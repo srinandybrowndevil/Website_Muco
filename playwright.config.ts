@@ -1,14 +1,19 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Five servers in one run: the marketing site and the four workspaces.
+// Playwright starts every webServer entry regardless of which spec you asked
+// for. The marketing-site CI job installs the root package only, so a run of
+// tests/marketing.spec.ts there sat waiting on four Next servers whose
+// dependencies were never installed -- four times 180 seconds -- and failed on
+// the clock with nothing to say about the marketing site.
 //
-// They are exercised together because the failures that matter cross between
-// them. The marketing site links into client.mucolabs.com, the four workspaces
-// redirect between each other, and portal.mucolabs.com has to keep answering.
-// None of those is visible to a suite that tests one application at a time.
-//
-// Playwright starts all five itself, so a run needs nothing set up by hand and
-// can be dropped into CI unchanged.
+// MARKETING_ONLY=1 says "this run needs the static site and nothing else". It
+// is set explicitly by that CI step rather than inferred from the filesystem,
+// because a cwd-relative probe quietly does the wrong thing when someone runs
+// Playwright from a subdirectory. Everywhere else all five servers still come
+// up, so the cross-application failures this suite exists to catch stay
+// covered.
+const marketingOnly = process.env.MARKETING_ONLY === "1";
+
 export default defineConfig({
   testDir: "./tests",
   testIgnore: "**/preview/**",
@@ -58,29 +63,15 @@ export default defineConfig({
     // Host header rather than the port, so admin.localhost:3101 and
     // portal.localhost:3104 both reach the right application without DNS or a
     // hosts file -- every current browser resolves *.localhost.
-    {
-      command: "npm run dev --workspace @muco/admin --prefix workspaces",
-      url: "http://localhost:3101/login",
-      reuseExistingServer: true,
-      timeout: 180_000,
-    },
-    {
-      command: "npm run dev --workspace @muco/employee --prefix workspaces",
-      url: "http://localhost:3102/login",
-      reuseExistingServer: true,
-      timeout: 180_000,
-    },
-    {
-      command: "npm run dev --workspace @muco/intern --prefix workspaces",
-      url: "http://localhost:3103/login",
-      reuseExistingServer: true,
-      timeout: 180_000,
-    },
-    {
-      command: "npm run dev --workspace @muco/client --prefix workspaces",
-      url: "http://localhost:3104/login",
-      reuseExistingServer: true,
-      timeout: 180_000,
-    },
+    ...(marketingOnly ? [] : [
+      { command: "npm run dev --workspace @muco/admin --prefix workspaces",
+        url: "http://localhost:3101/login", reuseExistingServer: true, timeout: 180_000 },
+      { command: "npm run dev --workspace @muco/employee --prefix workspaces",
+        url: "http://localhost:3102/login", reuseExistingServer: true, timeout: 180_000 },
+      { command: "npm run dev --workspace @muco/intern --prefix workspaces",
+        url: "http://localhost:3103/login", reuseExistingServer: true, timeout: 180_000 },
+      { command: "npm run dev --workspace @muco/client --prefix workspaces",
+        url: "http://localhost:3104/login", reuseExistingServer: true, timeout: 180_000 },
+    ]),
   ],
 });
