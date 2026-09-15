@@ -19,6 +19,7 @@ import os
 import re
 from datetime import date
 from urllib.parse import quote
+from html import escape, unescape
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -31,37 +32,52 @@ DOMAIN = "https://mucolabs.com"
 PHONE = "+91 6381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
+
+# BLOCKER — needs an owner-approved URL before LinkedIn appears anywhere.
+# Guessing a LinkedIn profile risks linking the public site to somebody else's
+# page, so the site renders no LinkedIn link at all while this is empty. Set it
+# to the verified company or founder URL and it appears in the footer, the
+# contact page and the Organization sameAs at once, because every surface reads
+# SOCIAL_PROFILES below.
+LINKEDIN = ""
+
+# One list, so the footer, the contact page and the schema cannot drift apart.
+SOCIAL_PROFILES = [
+    ("Instagram", INSTAGRAM),
+    ("LinkedIn", LINKEDIN),
+]
+SOCIAL_LINKS = [(name, url) for name, url in SOCIAL_PROFILES if url]
+
+# The public website no longer gates anything behind an account. The four
+# workspace applications still exist at client.mucolabs.com for customers who
+# are already engaged, but a visitor arriving from search is never asked to sign
+# in: every conversion path ends at the public enquiry form. PORTAL_DOMAIN stays
+# only so existing prose can reference the workspace where that is genuinely the
+# subject; no navigation, footer or CTA points at it.
 PORTAL_DOMAIN = "https://client.mucolabs.com"
-# The client workspace moved from portal.mucolabs.com to client.mucolabs.com
-# when the one portal became four. The old hostname still answers and redirects
-# here permanently, path intact, so links already published keep working -- but
-# a link written today should name the address that exists.
-PORTAL_LIVE = True
-PORTAL_LOGIN = PORTAL_DOMAIN + "/login"
-# Starting a project goes straight to the customer workspace. The login page
-# offers both sign-in and customer sign-up, and keeps the intended destination
-# so a new account lands on the request form after verification.
+PORTAL_LIVE = False
+PORTAL_LOGIN = CONTACT_ANCHOR = "/contact#start-project"
+
+# One canonical conversion. Everything that used to be "Free Consultation",
+# "Get Free Consultation" or a portal sign-up now resolves to this single
+# concept, so the site presents one primary business action rather than three
+# competing ones.
 CONTACT_PAGE = "/contact"
-PORTAL_SIGNUP = PORTAL_LOGIN + "?next=%2Fsupport"
-PORTAL_SIGNUP_PAGE = PORTAL_DOMAIN + "/signup?next=%2Fsupport"
-# Every sales contact action stays gated: WhatsApp, phone and email all route
-# through the client login, so the eventual request is attached to an account.
-# Legal pages keep email open; see GATE_KEEP_EMAIL below.
-PORTAL_CONTACT = PORTAL_LOGIN + "?next=%2Fsupport"
+START_PROJECT_URL = "/contact#start-project"
+START_PROJECT_LABEL = "Start a Project"
+PORTAL_SIGNUP = START_PROJECT_URL
+PORTAL_SIGNUP_PAGE = START_PROJECT_URL
+PORTAL_CONTACT = START_PROJECT_URL
 PORTAL_SIGNUP_NOTE = ""
+CONSULTATION_URL = START_PROJECT_URL
+WEBSITE_REVIEW_URL = "/website-audit#lead-form"
+WHATSAPP_URL = "https://wa.me/916381809844?text=" + quote("Hello MUCO LABS, I would like to start a project.")
+CALL_URL = "tel:+916381809844"
 NEWLINE = chr(10)
-PORTAL_LOGIN_LINK = "".join([
-    '          <a href="' + PORTAL_LOGIN + '" class="nav-portal-link" aria-label="Sign in to customer portal">',
-    NEWLINE,
-    '            <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>',
-    NEWLINE, '          </a>', NEWLINE,
-]) if PORTAL_LIVE else ""
-MOBILE_PORTAL_LOGIN_LINK = "".join([
-    '        <a href="' + PORTAL_LOGIN + '" class="nav-portal-link mobile-portal-link" aria-label="Sign in to customer portal">',
-    NEWLINE,
-    '          <span aria-hidden="true">↗</span> Sign in<span class="visually-hidden"> (opens customer portal)</span>',
-    NEWLINE, '        </a>', NEWLINE,
-]) if PORTAL_LIVE else ""
+# The public site shows no sign-in. Kept as empty strings rather than deleted so
+# the header and footer templates that interpolate them stay unchanged.
+PORTAL_LOGIN_LINK = ""
+MOBILE_PORTAL_LOGIN_LINK = ""
 FOUNDER = "Srinivash Mahalingam"
 CITY = "Erode"
 REGION = "Tamil Nadu"
@@ -91,8 +107,8 @@ SERVICE_CATALOG = [
 # date.today() on every build told crawlers every page changed today and put a
 # false revision date on the legal pages. Bump these by hand when the content
 # actually changes; PAGE_REVISED overrides SITE_REVISED for a single page.
-SITE_REVISED = "2026-09-09"   # last substantive content change anywhere on the site
-LEGAL_REVISED = "2026-09-09"  # privacy, terms and refund wording
+SITE_REVISED = "2026-09-14"   # public contact flow and commercial content revised
+LEGAL_REVISED = "2026-09-14"  # public enquiry and attribution disclosure
 PAGE_REVISED = {}             # e.g. {"work.html": "2026-10-02"} — key "" is the home page
 
 # ---------------------------------------------------------------------------
@@ -105,7 +121,7 @@ GA_INLINE_SCRIPT = """  window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', '%s');""" % GA_MEASUREMENT_ID
+  gtag('config', '%s', {send_page_view: false});""" % GA_MEASUREMENT_ID
 GTM_CONTAINER_ID = "GTM-W2XZ8QNQ"
 # Microsoft Clarity is loaded by the GTM container, not by a tag in this repo,
 # so nothing here can switch it off -- that is done in Tag Manager. This flag
@@ -125,14 +141,52 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 # a hash that matched nothing, so the browser blocked the tag and the site
 # measured zero -- silently, because a blocked inline script reports no error to
 # the page. Both sides now derive from one string so they cannot drift again.
+# Consent Mode v2. This has to be the first thing on the dataLayer, before the
+# Google tag and before the Tag Manager loader, or the tags take their first
+# measurement before the default is known. main.js reads the stored choice and
+# calls gtag('consent', 'update', ...); with no stored choice everything stays
+# denied and the tags run cookieless.
+CONSENT_INLINE_SCRIPT = """  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'granted',
+    security_storage: 'granted',
+    wait_for_update: 500
+  });"""
+
 GA_INLINE_BODY = "\n%s\n" % GA_INLINE_SCRIPT
 GTM_INLINE_BODY = "\n%s\n" % GTM_INLINE_SCRIPT
+CONSENT_INLINE_BODY = "\n%s\n" % CONSENT_INLINE_SCRIPT
 
 
 def inline_script_hash(body):
     """CSP source expression for an inline <script> with exactly this content."""
     digest = hashlib.sha256(body.encode("utf-8")).digest()
     return "'sha256-%s'" % base64.b64encode(digest).decode("ascii")
+
+
+def consent_mode_tag():
+    """Return the Consent Mode v2 default, which must run before any other tag.
+
+    Google Analytics, Tag Manager and anything Tag Manager loads (Microsoft
+    Clarity included) previously started measuring on first paint, before the
+    visitor had been asked anything. This denies every storage purpose up front,
+    so those tags run cookieless until main.js records a choice and calls
+    gtag('consent', 'update', ...). wait_for_update holds the tags briefly so a
+    returning visitor's stored choice is applied before the first hit.
+    """
+    if not (GA_MEASUREMENT_ID or GTM_CONTAINER_ID):
+        return ""
+    return "<!-- Consent Mode v2 default -->\n<script>%s</script>\n" % CONSENT_INLINE_BODY
+
+
+def consent_mode_csp_hash():
+    """Return the CSP hash required for the inline Consent Mode bootstrap."""
+    return inline_script_hash(CONSENT_INLINE_BODY)
 
 
 def google_analytics_tag():
@@ -367,6 +421,9 @@ FOOTER_COLS = [
                  ("maintenance.html", "Maintenance"),
                  ("services-websites.html", "Website development"),
                  ("services-software.html", "Custom software"),
+                 ("business-website-growth.html", "Website & local search setup"),
+                 ("textile-software.html", "Textile workflow software"),
+                 ("website-cost-erode.html", "Website cost guide"),
                  ("website-development-erode.html", "Websites in Erode")]),
 ]
 
@@ -406,7 +463,17 @@ def header_html(current, key):
         </ul>
 
         <div class="nav-actions">
-{portal_login_link}          <a href="{portal_signup}" class="btn btn-accent btn-sm"><span class="cta-long">Start a Project</span><span class="cta-short">Start</span></a>
+{portal_login_link}          <a href="{start_project}" class="btn btn-accent btn-sm">{start_label}</a>
+          <details class="contact-dock" id="contact-dock">
+            <summary class="contact-dock-trigger" aria-label="Contact MUCO LABS by WhatsApp or phone">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span class="contact-dock-label">Contact</span>
+            </summary>
+            <div class="contact-dock-panel">
+              <a href="{whatsapp}" data-whatsapp>WhatsApp</a>
+              <a href="{call}">Call {phone}</a>
+            </div>
+          </details>
           <button id="menu-toggle" class="menu-toggle" aria-label="Open navigation menu"
                   aria-expanded="false" aria-controls="mobile-menu">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -425,8 +492,8 @@ def header_html(current, key):
         <a href="careers.html">Careers</a>
       </div>
       <div class="mobile-menu-actions">
-        <a href="{portal_signup}" class="btn btn-accent">Start a Project</a>
-        <a href="{portal_contact}" class="btn btn-whatsapp">WhatsApp, call or email</a>
+        <a href="{start_project}" class="btn btn-accent">{start_label}</a>
+        <a href="{whatsapp}" class="btn btn-whatsapp" data-whatsapp>WhatsApp MUCO LABS</a>
 {mobile_portal_login_link}      </div>
     </div>
   </header>
@@ -436,10 +503,15 @@ def header_html(current, key):
         logo=LOGO_SVG.replace("{k}", key),
         desktop=nav_html(current),
         mobile=nav_html(current, mobile=True),
-        portal_contact=PORTAL_CONTACT,
+        portal_contact=WHATSAPP_URL,
         portal_login_link=PORTAL_LOGIN_LINK,
         mobile_portal_login_link=MOBILE_PORTAL_LOGIN_LINK,
-        portal_signup=PORTAL_SIGNUP,
+        portal_signup=START_PROJECT_URL,
+        start_project=START_PROJECT_URL,
+        start_label=START_PROJECT_LABEL,
+        whatsapp=WHATSAPP_URL,
+        call=CALL_URL,
+        phone=PHONE,
     )
 
 
@@ -467,10 +539,12 @@ def footer_html():
         <div class="footer-col footer-brand">
           <strong class="lede">{brand}</strong>
           <p>{tagline} Software, AI systems and automation built for businesses in {city} and across {region}.</p>
+          <p class="footer-place">{city}, {region}, India &mdash; serving India and remote clients worldwide.</p>
+          <p class="footer-reach"><a href="{call}">{phone}</a> &middot; <a href="mailto:{email}">{email}</a></p>
           <div class="btn-group mt-5">
-            <a href="{ig}" target="_blank" rel="noopener noreferrer" class="btn btn-instagram btn-sm">{ig_svg} @muco_labs</a>
-            <a href="{portal_contact}" class="btn btn-whatsapp btn-sm">Contact us</a>
+            <a href="{whatsapp}" class="btn btn-whatsapp btn-sm" data-whatsapp>WhatsApp MUCO LABS</a>
           </div>
+          <nav class="footer-social" aria-label="MUCO LABS on social media">{social}</nav>
         </div>
 
 {cols}
@@ -478,11 +552,11 @@ def footer_html():
         <div class="footer-col">
           <p class="footer-col-label">Contact</p>
           <ul>
-            <li><span class="note">{phone}</span></li>
-            <li><span class="note">{email}</span></li>
+            <li><a href="tel:+916381809844">{phone}</a></li>
+            <li><a href="mailto:{email}">{email}</a></li>
             <li><span class="note">{city}, {region}, India</span></li>
             <li><span class="note">{hours}</span></li>
-            <li><a href="{portal_contact}">Sign in to contact us</a></li>
+            <li><a href="/contact#start-project">Start a Project</a></li>
           </ul>
         </div>
       </div>
@@ -494,6 +568,33 @@ def footer_html():
     </div>
   </footer>
 
+  <!-- One contact control, two viewports: the header dock on desktop and this
+       dock on mobile. Both offer exactly WhatsApp and Call, both are quieter
+       than Start a Project, and neither floats over page content. -->
+  <nav class="mobile-contact-bar" aria-label="Contact MUCO LABS">
+    <a href="{whatsapp}" data-whatsapp>{wa_svg} WhatsApp</a>
+    <a href="{call}">Call</a>
+    <a href="{start_project}" class="mobile-contact-primary">{start_label}</a>
+  </nav>
+
+  <!-- Analytics consent. Hidden until main.js finds no stored choice, so it
+       never flashes for a returning visitor and costs no layout shift. Until a
+       choice is made, Consent Mode keeps every storage purpose denied. -->
+  <div class="consent-bar" id="consent-bar" role="dialog" aria-modal="false"
+       aria-labelledby="consent-title" aria-describedby="consent-text" hidden>
+    <div class="consent-inner">
+      <div class="consent-copy">
+        <p class="consent-title" id="consent-title">Analytics on this site</p>
+        <p class="consent-text" id="consent-text">We would like to measure which pages help
+          people find what they need. Analytics only runs if you allow it, and we never put
+          your enquiry details into it. See our <a href="/privacy">privacy policy</a>.</p>
+      </div>
+      <div class="consent-actions">
+        <button type="button" class="btn btn-secondary btn-sm" id="consent-decline">Decline</button>
+        <button type="button" class="btn btn-accent btn-sm" id="consent-accept">Allow analytics</button>
+      </div>
+    </div>
+  </div>
   <script src="{js}" defer></script>
 </body>
 </html>
@@ -505,7 +606,17 @@ def footer_html():
         region=REGION,
         ig=INSTAGRAM,
         ig_svg=IG_SVG,
-        portal_contact=PORTAL_CONTACT,
+        start_project=START_PROJECT_URL,
+        start_label=START_PROJECT_LABEL,
+        # Only verified profiles render. LINKEDIN is empty until the owner
+        # supplies the real URL, so no dead or guessed icon ever ships.
+        social="".join(
+            '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>' % (url, name)
+            for name, url in SOCIAL_LINKS),
+        call=CALL_URL,
+        whatsapp=WHATSAPP_URL,
+        portal_contact=WHATSAPP_URL,
+        wa_svg=WA_SVG,
         cols="\n\n".join(cols),
         phone=PHONE,
         email=EMAIL,
@@ -520,7 +631,7 @@ def footer_html():
 # ---------------------------------------------------------------------------
 ORG_JSONLD = """{
   "@context": "https://schema.org",
-  "@type": "ProfessionalService",
+  "@type": "Organization",
   "@id": "%(domain)s/#organization",
   "name": "%(brand)s",
   "alternateName": "MUCO Labs",
@@ -531,26 +642,19 @@ ORG_JSONLD = """{
   "logo": "%(domain)s/logo-full.svg",
   "telephone": "%(phone)s",
   "email": "%(email)s",
-  "founder": { "@type": "Person", "name": "%(founder)s" },
+  "founder": { "@type": "Person", "@id": "%(domain)s/about#founder", "name": "%(founder)s", "url": "%(domain)s/about" },
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "%(city)s",
     "addressRegion": "%(region)s",
     "addressCountry": "IN"
   },
-  "geo": { "@type": "GeoCoordinates", "latitude": "%(lat)s", "longitude": "%(lon)s" },
   "areaServed": [%(areas)s],
   "sameAs": ["%(ig)s"],
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
     "name": "Services",
     "itemListElement": [%(catalog)s]
-  },
-  "openingHoursSpecification": {
-    "@type": "OpeningHoursSpecification",
-    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-    "opens": "09:00",
-    "closes": "19:00"
   },
   "knowsAbout": ["Website development","Mobile app development","Custom software","SaaS","AI automation","Digital marketing","SEO"]
 }""" % {
@@ -608,34 +712,27 @@ def service_jsonld(name, description, slug):
   "serviceType": "%s",
   "provider": { "@id": "%s/#organization" },
   "areaServed": [%s],
-  "url": "%s/services.html#%s",
+  "url": "%s/%s",
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "%s/contact.html",
-    "servicePhone": "%s"
+    "servicePhone": {"@type": "ContactPoint", "telephone": "%s"}
   }
 }""" % (name, description.replace('"', "'"), name, DOMAIN,
         ",".join('{"@type":"City","name":"%s"}' % m for m in MARKETS),
-        DOMAIN, slug, DOMAIN, PHONE)
+        DOMAIN, "services-" + slug if slug in ["websites", "mobile", "product-design", "software", "business-systems", "marketing", "ai-automation", "support"] else slug, DOMAIN, PHONE)
 
 
 def speakable_jsonld(url, selectors):
-    """Marks the passages a voice assistant should read aloud."""
-    return """{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "url": "%s",
-  "speakable": {
-    "@type": "SpeakableSpecification",
-    "cssSelector": [%s]
-  }
-}""" % (url, ",".join('"%s"' % c for c in selectors))
+    """Describe the page; commercial copy has no promised voice-search feature."""
+    return json.dumps({"@context": "https://schema.org", "@type": "WebPage", "url": url,
+                       "about": {"@id": DOMAIN + "/#organization"}, "inLanguage": "en-IN"})
 
 
 def faq_jsonld(pairs):
     els = []
     for q, a in pairs:
-        plain = re.sub(r"<[^>]+>", "", a).replace('"', "'").strip()
+        plain = unescape(re.sub(r"<[^>]+>", "", a)).replace('"', "'").strip()
         plain = re.sub(r"\s+", " ", plain)
         els.append(
             '{"@type":"Question","name":"%s","acceptedAnswer":{"@type":"Answer","text":"%s"}}'
@@ -655,7 +752,7 @@ SHELL = """<!DOCTYPE html>
 <title>{title}</title>
 <meta name="description" content="{description}" />
 <meta name="theme-color" content="#05070b" />
-{robots}<link rel="canonical" href="{domain}/{canonical}" />
+{robots}{canonical_tag}
 <link rel="alternate" hreflang="en-in" href="{domain}/{canonical}" />
 <link rel="alternate" hreflang="x-default" href="{domain}/{canonical}" />
 
@@ -719,11 +816,15 @@ def gate_contact_links(html, mode=GATE_ALL):
 
 
 def render(slug, title, description, body, current=None, og_type="website",
-           schema_blocks=None, noindex=False, contact_gate=GATE_ALL):
+           schema_blocks=None, noindex=False, contact_gate=None):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
     canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
-    analytics = '<script src="%s" defer></script>\n%s' % (
-        asset_v("analytics.js"), google_analytics_tag())
+    # Consent Mode first, then the Google tag, then Tag Manager further down the
+    # head. Order is the whole point: a consent default pushed after a tag has
+    # already fired has not gated anything.
+    analytics = '%s<script src="%s" defer></script>\n<script src="%s" defer></script>\n%s' % (
+        consent_mode_tag(), asset_v("attribution.js"), asset_v("analytics.js"),
+        google_analytics_tag())
 
     body = band_sections(body)
 
@@ -733,13 +834,19 @@ def render(slug, title, description, body, current=None, og_type="website",
 
     html = SHELL.format(
         css=asset_v("style.css"),
-        title=title,
-        description=description,
+        title=escape(unescape(title)),
+        description=escape(unescape(description), quote=True),
         robots='<meta name="robots" content="noindex, follow" />\n' if noindex else "",
         domain=DOMAIN,
+        # A noindex page gets no canonical. The two together are contradictory
+        # instructions -- "do not index this" and "this is the preferred URL for
+        # this content" -- and search engines are free to resolve that either
+        # way. The 404 page was carrying both.
+        canonical_tag="" if noindex else
+            '<link rel="canonical" href="%s/%s" />' % (DOMAIN, canonical),
         canonical=canonical,
         og_type=og_type,
-        og_title=title,
+        og_title=escape(unescape(title), quote=True),
         brand=BRAND,
         tagline=TAGLINE,
         schema=schema,
@@ -752,8 +859,6 @@ def render(slug, title, description, body, current=None, og_type="website",
     )
 
     html = clean_urls(html)
-    if contact_gate:
-        html = gate_contact_links(html, contact_gate)
 
     with open(os.path.join(ROOT, slug), "w", encoding="utf-8") as f:
         f.write(html)
@@ -763,7 +868,7 @@ def render(slug, title, description, body, current=None, og_type="website",
 # ---------------------------------------------------------------------------
 # Shared page fragments
 # ---------------------------------------------------------------------------
-def final_cta(heading, sub, primary_label="Start a Project", primary=PORTAL_SIGNUP):
+def final_cta(heading, sub, primary_label=START_PROJECT_LABEL, primary=START_PROJECT_URL):
     return """    <section class="section-divider">
       <div class="container">
         <div class="cta-box reveal-on-scroll">
@@ -772,7 +877,7 @@ def final_cta(heading, sub, primary_label="Start a Project", primary=PORTAL_SIGN
           <p class="mb-6">{sub}</p>
           <div class="btn-group btn-group-center">
             <a href="{primary}" class="btn btn-accent btn-lg">{primary_label}</a>
-            <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp, call or email</a>
+            <a href="{portal_contact}" class="btn btn-whatsapp btn-lg" data-whatsapp>{wa_svg} WhatsApp MUCO LABS</a>
           </div>
         </div>
       </div>
@@ -782,7 +887,7 @@ def final_cta(heading, sub, primary_label="Start a Project", primary=PORTAL_SIGN
         sub=sub,
         primary=primary,
         primary_label=primary_label,
-        portal_contact=PORTAL_CONTACT,
+        portal_contact=WHATSAPP_URL,
         wa_svg=WA_SVG,
     )
 

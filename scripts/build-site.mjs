@@ -1,8 +1,31 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, copyFileSync, rmSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolve, join } from "node:path";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+
+// Generate the pages before packaging them. This step used to be missing: the
+// deploy copied whatever .html happened to be committed, so an edit to
+// content.py that nobody rebuilt locally shipped nothing and the site could sit
+// arbitrarily far behind its own source -- CI caught the drift only after a
+// push. Running the generator here makes the deployed HTML the source, by
+// construction.
+// Pick the interpreter before building, rather than trying build.py with each
+// candidate in turn. On Windows "python3" is an App Execution Alias that exits
+// 9009 instead of ENOENT, so a "try it and catch ENOENT" fallback never moves on
+// -- and worse, a genuine build.py failure would be indistinguishable from a
+// missing interpreter. Probing --version separates the two.
+const python = ["python3", "python"].find(candidate => {
+  try {
+    execFileSync(candidate, ["--version"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+});
+if (!python) throw new Error("No working python3 or python on PATH; cannot generate the site from build.py.");
+execFileSync(python, ["build.py"], { cwd: root, stdio: "inherit" });
 const output = resolve(root, "public-site");
 if (existsSync(output)) rmSync(output, { recursive: true });
 mkdirSync(output, { recursive: true });

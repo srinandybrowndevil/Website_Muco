@@ -651,25 +651,73 @@
     var empty = document.getElementById('course-empty');
     var emptyReset = document.getElementById('course-empty-reset');
     var cards = Array.from(grid.querySelectorAll('[data-course]'));
+    var chips = Array.from(document.querySelectorAll('[data-course-chip]'));
+    var chipBar = document.querySelector('[data-course-chips]');
+    var more = document.getElementById('course-more');
+    var moreWrap = more ? more.parentElement : null;
     document.querySelector('[data-course-controls]').hidden = false;
+    if (chipBar) chipBar.hidden = false;
+
+    // All 65 listings ship in the HTML so crawlers and no-JavaScript visitors
+    // see the whole catalogue. Paging is applied here, on top of that, purely so
+    // the first screen is a set of choices rather than a wall of cards.
+    var PAGE = 12;
+    var shown = PAGE;
+
     function filter() {
       var words = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
-      var visible = 0;
+      var matched = 0;
+      var painted = 0;
       cards.forEach(function (card) {
         var text = card.querySelector('h3').textContent.toLocaleLowerCase();
         var matches = (!category.value || card.dataset.category === category.value) &&
           words.every(function (word) { return text.indexOf(word) !== -1; });
-        card.hidden = !matches;
-        if (matches) visible += 1;
+        if (matches) {
+          matched += 1;
+          // Paging applies to the matched set, not the original order, so a
+          // filter never leaves a page of hidden results behind a Load more.
+          var withinPage = painted < shown;
+          card.hidden = !withinPage;
+          if (withinPage) painted += 1;
+        } else {
+          card.hidden = true;
+        }
       });
-      count.textContent = visible + ' of ' + cards.length + ' courses shown';
-      empty.hidden = visible !== 0;
+      count.textContent = matched === cards.length && !words.length && !category.value
+        ? 'Showing ' + painted + ' of ' + cards.length + ' courses'
+        : painted + ' of ' + matched + ' matching courses shown';
+      empty.hidden = matched !== 0;
+      if (moreWrap) moreWrap.hidden = painted >= matched;
+      chips.forEach(function (chip) {
+        var active = (chip.dataset.courseChip || '') === category.value;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
     }
-    search.addEventListener('input', filter);
-    category.addEventListener('change', filter);
+
+    chips.forEach(function (chip) {
+      chip.setAttribute('aria-pressed', 'false');
+      chip.addEventListener('click', function () {
+        category.value = chip.dataset.courseChip || '';
+        shown = PAGE;
+        filter();
+      });
+    });
+
+    if (more) more.addEventListener('click', function () {
+      shown += PAGE;
+      filter();
+      // Move focus to the first newly revealed card so a keyboard user is not
+      // dropped back at the top of the list.
+      var next = cards.filter(function (c) { return !c.hidden; })[shown - PAGE];
+      if (next) { next.setAttribute('tabindex', '-1'); next.focus({preventScroll: true}); }
+    });
+    search.addEventListener('input', function () { shown = PAGE; filter(); });
+    category.addEventListener('change', function () { shown = PAGE; filter(); });
     reset.addEventListener('click', function () {
       search.value = '';
       category.value = '';
+      shown = PAGE;
       filter();
       search.focus();
     });
@@ -678,6 +726,7 @@
       button.addEventListener('click', function () {
         search.value = button.dataset.courseSuggestion || '';
         category.value = '';
+        shown = PAGE;
         filter();
         search.focus();
       });
@@ -686,121 +735,205 @@
   }
 
   /* ------------------------------------------------------------------ boot */
-  // The enquiry form. Every visitor who fills this in becomes a lead in the
-  // CRM without needing an account, which is the point: an account is a
-  // reasonable thing to ask of a client and an unreasonable thing to ask of
-  // someone deciding whether to talk to us at all.
-  //
-  // Contact details stay behind sign-in. This collects rather than exposes, so
-  // it adds a way in without giving scrapers an address to harvest.
+  function initContactLinks() {
+    document.querySelectorAll('a[href^="https://wa.me/916381809844"]').forEach(function (link) {
+      var topic = document.querySelector('h1');
+      link.href = 'https://wa.me/916381809844?text=' + encodeURIComponent(
+        'Hello MUCO LABS, I am interested in ' + (topic ? topic.textContent.trim() : 'a project consultation') +
+        '. Page: https://mucolabs.com' + location.pathname);
+    });
+  }
+
   function initLeadForm() {
     var form = document.getElementById('lead-form');
     if (!form) return;
-
+    form.querySelector('fieldset').disabled = false;
     var status = document.getElementById('lead-status');
     var submit = document.getElementById('lead-submit');
-    var FIELDS = ['name', 'business', 'phone', 'email', 'location', 'service',
-                  'website', 'budget', 'timeline', 'message'];
-
-    function clearErrors() {
-      FIELDS.concat(['consent']).forEach(function (field) {
-        var slot = document.getElementById('err-' + field);
-        if (slot) slot.textContent = '';
-        var input = form.elements[field];
-        if (input && input.removeAttribute) input.removeAttribute('aria-invalid');
-      });
-      form.classList.remove('is-error');
+    var fields = ['name', 'business', 'phone', 'service', 'email', 'website', 'budget', 'timeline', 'message'];
+    var kind = form.dataset.formType;
+    var pending = false;
+    var submissionId = crypto.randomUUID ? crypto.randomUUID() : '';
+    var completed = false;
+    function track(name, params) {
+      if (window.mucoTrackEvent) window.mucoTrackEvent(name, Object.assign({form_type: kind}, params || {}));
     }
-
+    var selected = new URLSearchParams(location.search).get('service');
+    if (selected && form.elements.service.tagName === 'SELECT') {
+      var option = Array.from(form.elements.service.options).find(function (item) { return item.value === selected; });
+      if (option) form.elements.service.value = selected;
+    }
+    form.addEventListener('input', function () {
+      if (completed) {
+        completed = false;
+        submissionId = crypto.randomUUID ? crypto.randomUUID() : '';
+        submit.disabled = false;
+        status.textContent = '';
+      }
+    });
     function showErrors(errors) {
-      var first = null;
-      Object.keys(errors).forEach(function (field) {
-        var slot = document.getElementById('err-' + field);
-        if (slot) slot.textContent = errors[field];
-        var input = form.elements[field];
-        if (input && input.setAttribute) input.setAttribute('aria-invalid', 'true');
-        if (!first && input && input.focus) first = input;
+      var first;
+      Object.keys(errors).forEach(function (name) {
+        var input = form.elements[name];
+        var slot = document.getElementById('err-' + name);
+        if (slot) slot.textContent = errors[name];
+        if (input) {
+          input.setAttribute('aria-invalid', 'true');
+          var disclosure = input.closest('details');
+          if (disclosure) disclosure.open = true;
+          if (!first) first = input;
+        }
       });
-      // Send focus to the first thing that needs fixing, rather than leaving
-      // someone to hunt for the red text.
       if (first) first.focus();
     }
-
-    function param(name) {
-      try {
-        return new URLSearchParams(window.location.search).get(name) || '';
-      } catch (err) {
-        return '';
-      }
-    }
-
-    form.addEventListener('submit', function (event) {
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();
-      clearErrors();
-
-      var payload = {
-        consent: form.elements.consent && form.elements.consent.checked,
-        company_website: form.elements.company_website ? form.elements.company_website.value : '',
-        page: window.location.pathname,
-        referrer: document.referrer || '',
-        utm_source: param('utm_source'),
-        utm_medium: param('utm_medium'),
-        utm_campaign: param('utm_campaign')
-      };
-      FIELDS.forEach(function (field) {
-        var input = form.elements[field];
-        payload[field] = input ? String(input.value || '').trim() : '';
+      if (pending || completed) return;
+      fields.concat(['consent']).forEach(function (name) {
+        var slot = document.getElementById('err-' + name);
+        if (slot) slot.textContent = '';
+        if (form.elements[name]) form.elements[name].removeAttribute('aria-invalid');
       });
-
+      var payload = Object.assign({}, window.mucoAttribution ? window.mucoAttribution() : {}, {
+        page: location.pathname, form_type: kind, submission_id: submissionId,
+        consent: form.elements.consent.checked, company_website: form.elements.company_website.value
+      });
+      fields.forEach(function (name) { payload[name] = form.elements[name] ? form.elements[name].value.trim() : ''; });
+      var errors = {};
+      if (!payload.name) errors.name = 'Please enter your name.';
+      if (!payload.business) errors.business = 'Please enter your business or planned business name.';
+      var digits = payload.phone.replace(/[^0-9]/g, '');
+      if (!/^[+0-9().\s-]+$/.test(payload.phone) || digits.length < 7 || digits.length > 15) errors.phone = 'Enter a valid phone number with 7 to 15 digits.';
+      if (!payload.service) errors.service = 'Please choose a requirement.';
+      if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) errors.email = 'Please check your email address.';
+      if (kind === 'audit' && !payload.website) errors.website = 'Please enter the website to review.';
+      if (payload.website) {
+        try { var website = new URL(payload.website); if (!/^https?:$/.test(website.protocol) || website.username || website.password || !website.hostname.includes('.')) throw Error(); }
+        catch (_) { errors.website = 'Enter a full website address, such as https://example.com.'; }
+      }
+      if (!payload.consent) errors.consent = 'Please confirm we may contact you about this enquiry.';
+      if (Object.keys(errors).length) {
+        showErrors(errors);
+        status.className = 'form-status form-status-err';
+        status.textContent = 'Please check the highlighted fields.';
+        track('cta_click', {action: 'form_validation_error'});
+        return;
+      }
+      pending = true;
       submit.disabled = true;
+      form.setAttribute('aria-busy', 'true');
       var original = submit.textContent;
       submit.textContent = 'Sending…';
       status.className = 'form-status';
-      status.textContent = '';
-
-      fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(function (response) {
-        return response.json().catch(function () { return {}; }).then(function (body) {
-          return { status: response.status, body: body };
-        });
-      }).then(function (result) {
-        submit.disabled = false;
-        submit.textContent = original;
-
-        if (result.status === 400 && result.body.errors) {
-          form.classList.add('is-error');
-          showErrors(result.body.errors);
-          status.className = 'form-status form-status-err';
-          status.textContent = 'Please check the highlighted fields.';
-          return;
-        }
-        if (result.status === 429) {
-          status.className = 'form-status form-status-err';
-          status.textContent = 'That is a lot of enquiries at once. Wait a minute and try again.';
-          return;
-        }
-        if (!result.body.ok) {
-          // Never a dead end: if the enquiry could not be saved, say so and
-          // leave a way through that does not depend on this form working.
-          status.className = 'form-status form-status-err';
-          status.textContent = 'We could not save that. Please try again, or sign in to the portal and send it there.';
-          return;
-        }
-
-        form.reset();
+      status.textContent = 'Sending your enquiry…';
+      track('cta_click', {action: 'form_submit_attempt'});
+      var handoff = '';
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, 20000);
+      try {
+        var response = await fetch('/api/lead', {method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload), signal: controller.signal});
+        var result = await response.json();
+        handoff = result.whatsapp || '';
+        if (response.status === 400 && result.errors) { showErrors(result.errors); throw Error('Please check the highlighted fields.'); }
+        if (response.status === 429) throw Error('Please wait a minute before trying again, or use a direct contact option below.');
+        if (!response.ok || !result.ok || !result.emailed) throw Error(result.error || 'We could not confirm your enquiry reached us. Please retry, or use WhatsApp, call or email below.');
+        completed = true;
         status.className = 'form-status form-status-ok';
-        status.textContent = 'Thank you — your enquiry has reached us. We usually reply the same working day.';
-        status.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }).catch(function () {
-        submit.disabled = false;
-        submit.textContent = original;
+        status.textContent = result.recorded
+          ? (kind === 'audit' ? 'Your website review request has been saved. We will contact you to agree a review time.' : 'Your enquiry has been saved. We will review your requirement and contact you about the next step.')
+          : 'Your enquiry was delivered by email. You can also contact us directly using the options below.';
+        // lead_submit maps to the GA generate_lead conversion in analytics.js, so
+        // it fires whenever the enquiry actually reached us. It used to be gated
+        // on result.recorded, which meant it silently stopped counting once the
+        // site moved from a database to email-only delivery.
+        track('lead_submit', {action: kind === 'audit' ? 'audit_submitted' : 'project_form_submitted', service: payload.service});
+        form.reset();
+        status.focus({preventScroll: true});
+        status.scrollIntoView({behavior: 'auto', block: 'center'});
+      } catch (error) {
         status.className = 'form-status form-status-err';
-        status.textContent = 'That did not send — check your connection and try again.';
-      });
+        status.textContent = error.name === 'AbortError' ? 'Receipt is not confirmed yet. Please retry; your details are still here, or use the contact options below.'
+          : (error instanceof TypeError || error instanceof SyntaxError ? 'We could not confirm delivery. Check your connection and retry, or contact us directly below.' : error.message);
+        // When delivery fails the server returns a WhatsApp link with this
+        // enquiry already prefilled. Offering it here is the difference between
+        // the customer retyping everything and tapping once -- and it is the
+        // only reason a failed send does not lose the enquiry, since we
+        // deliberately keep their details out of our logs.
+        if (handoff) {
+          var rescue = document.createElement('a');
+          rescue.className = 'btn btn-whatsapp mt-3';
+          rescue.href = handoff;
+          rescue.setAttribute('data-whatsapp', '');
+          rescue.textContent = 'Send this enquiry on WhatsApp';
+          status.insertAdjacentElement('afterend', rescue);
+          rescue.focus();
+        }
+        track('cta_click', {action: 'form_submit_error'});
+      } finally {
+        clearTimeout(timeout);
+        pending = false;
+        submit.disabled = completed;
+        submit.textContent = original;
+        form.removeAttribute('aria-busy');
+      }
     });
+  }
+
+  /* ------------------------------------------------------------- consent */
+  // Consent Mode v2 is defaulted to denied in the page head, so Google
+  // Analytics, Tag Manager and anything Tag Manager loads run cookieless until
+  // this records a choice. Storing the choice is a genuine per-visitor
+  // preference, so localStorage is the right place for it: it is never read
+  // back by us and never leaves the browser.
+  var CONSENT_KEY = 'muco_consent_analytics';
+
+  function readConsent() {
+    try { return window.localStorage.getItem(CONSENT_KEY); }
+    catch (e) { return null; }  // private window, or site data blocked
+  }
+
+  function applyConsent(granted) {
+    if (typeof window.gtag !== 'function') return;
+    window.gtag('consent', 'update', {
+      analytics_storage: granted ? 'granted' : 'denied'
+    });
+  }
+
+  function initConsent() {
+    var bar = document.getElementById('consent-bar');
+    if (!bar) return;
+
+    // A Do Not Track or Global Privacy Control signal is already an answer.
+    // Asking again would be ignoring it.
+    if (navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes' ||
+        window.doNotTrack === '1' || navigator.globalPrivacyControl === true) {
+      applyConsent(false);
+      return;
+    }
+
+    var stored = readConsent();
+    if (stored === 'granted' || stored === 'denied') {
+      applyConsent(stored === 'granted');
+      return;
+    }
+
+    function choose(granted) {
+      try { window.localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied'); }
+      catch (e) { /* the choice still applies to this page view */ }
+      applyConsent(granted);
+      bar.hidden = true;
+    }
+
+    var accept = document.getElementById('consent-accept');
+    var decline = document.getElementById('consent-decline');
+    if (accept) accept.addEventListener('click', function () { choose(true); });
+    if (decline) decline.addEventListener('click', function () { choose(false); });
+    bar.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') choose(false);
+    });
+
+    bar.hidden = false;
   }
 
   function init() {
@@ -816,7 +949,9 @@
     initLivePlatform();
     initClock();
     initLearningCourses();
+    initContactLinks();
     initLeadForm();
+    initConsent();
   }
 
   if (document.readyState === 'loading') {

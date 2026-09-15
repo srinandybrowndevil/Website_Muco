@@ -44,6 +44,18 @@ http.createServer(async (req, res) => {
       return;
     }
     if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405).end(); return; }
+    // Mirror the vercel.json routing that used to exist only in production. A
+    // trailing slash 404'd here while Vercel served a 308, and the redirects
+    // block was not honoured at all -- so a link could work locally and break
+    // live, or the reverse, which is the whole reason this server exists.
+    const settings = JSON.parse(readFileSync(resolve(root, "vercel.json"), "utf8"));
+    const rule = (settings.redirects || []).find(r => r.source === url.pathname);
+    if (rule) { res.writeHead(rule.permanent === false ? 307 : 308, { Location: rule.destination }).end(); return; }
+    if (settings.trailingSlash === false && url.pathname.length > 1 && url.pathname.endsWith("/")) {
+      res.writeHead(308, { Location: url.pathname.replace(/\/+$/, "") + url.search }).end();
+      return;
+    }
+
     let name = decodeURIComponent(url.pathname).replace(/^\/+/, "");
     if (!name) name = "index.html";
     if (!extname(name)) name += ".html";

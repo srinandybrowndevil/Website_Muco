@@ -123,44 +123,18 @@ Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
-Enquiries are account-gated across the whole site. Every WhatsApp, phone and
-email action routes through client workspace sign-in, so a brief always arrives attached
-to a customer account and stays visible to that customer afterwards.
+Initial enquiries and website reviews are public. WhatsApp, telephone and email
+links work directly. Existing customers retain a separate workspace sign-in.
+`growth_content.py` owns the short forms and new commercial resources.
+`main.js` preserves visit attribution and posts to `/api/lead`. A confirmed CRM
+record is required for the recorded-lead conversion. Failures preserve the form
+and expose direct contact options. Email-only delivery is labelled separately.
 
-Two layers do this. The shared fragments (`header_html`, `footer_html`,
-`final_cta`) and the page bodies link to `PORTAL_CONTACT` and are labelled for
-what they now do &mdash; no button says "Call us" and opens a login page. On top
-of that, `render()` applies `gate_contact_links()` to the finished HTML as a
-backstop, so a stale `mailto:` written inline in a page body cannot slip out.
-
-Two page groups are exempt, both via `contact_gate=GATE_KEEP_EMAIL`, which
-leaves `mailto:` alone and still gates WhatsApp and phone:
-
-- **Legal** (privacy, terms, refund) &mdash; a data-protection, cancellation or
-  refund request has to be sendable by someone with no account and no reason to
-  open one.
-- **Careers** &mdash; applying for a role is a hiring channel, not a sales one.
-  Asking a candidate to create a *customer* account to send a CV would close the
-  recruitment funnel.
-
-There is no anonymous contact form. Every sales contact action goes through the
-client workspace, so an enquiry always arrives attached to a verified customer
-account rather than to an unverified email address. New customers can create an
-account, confirm their email and complete the short onboarding form in the same
-flow; the team workspaces remain invitation-only.
-
-`api/lead.js` used to serve that form and was removed once nothing posted to
-it. An endpoint that accepts input and sends mail, with no caller and no
-traffic to compare against, is surface nobody is watching. If an anonymous
-form returns, it should come back with its own review rather than by reviving
-code that sat unused.
-
-Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in
-Vercel so accepted enquiries are stored in the MUCO CRM. These are required for
-the enquiry to appear in the admin workspace's Enquiries inbox.
-
-The browser opens WhatsApp *before* awaiting the request, because doing it
-afterwards loses the click gesture and pop-up blockers eat the window.
+Configure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+on the hosting runtime. The optional Resend configuration sends notifications;
+no live test emails are sent by the automated tests. Deploy the growth enquiry
+migration before relying on shared rate limiting, idempotency and extended
+attribution. See `delivery/growth/04-BACKEND-HANDOFF.md`.
 
 ## Analytics
 

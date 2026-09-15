@@ -1,12 +1,16 @@
 /**
- * MUCO LABS — first-party, privacy-conscious analytics.
+ * MUCO LABS — event translation for Google Analytics.
  *
- * - No cookies, no localStorage, no third-party scripts, no fingerprinting.
- * - Uses a random session UUID held only in sessionStorage for the visit.
- * - Honours Do Not Track and Global Privacy Control signals.
- * - Sends only allowlisted, bounded events to /api/event via sendBeacon or a
- *   fetch keepalive call that cannot block navigation.
+ * This file used to run a first-party analytics pipeline alongside GA. That
+ * store is gone, so all it does now is turn site interactions into named GA
+ * events. It writes nothing to the visitor's browser and posts to no endpoint
+ * of ours.
+ *
+ * - No cookies, no localStorage, no sessionStorage, no fingerprinting.
+ * - Honours Do Not Track and Global Privacy Control: when either is set this
+ *   file does nothing at all, and no GA events are sent from it.
  * - Never collects form field contents, only page-level context and link text.
+ * - Google Analytics itself is loaded by build.py and gated by Consent Mode.
  */
 (function () {
   'use strict';
@@ -21,40 +25,12 @@
     return;
   }
 
-  var ENDPOINT = '/api/event';
   var page = location.pathname || '/';
 
-  function uuid() {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      try {
-        return crypto.randomUUID();
-      } catch (e) {
-        /* fall through */
-      }
-    }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = (Math.random() * 16) | 0;
-      var v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
-
-  // A single anonymous random id for the current browser session only.
-  function getSessionId() {
-    try {
-      var key = 'muco_anon_session';
-      var existing = window.sessionStorage.getItem(key);
-      if (existing) return existing;
-      var id = uuid();
-      window.sessionStorage.setItem(key, id);
-      return id;
-    } catch (e) {
-      // sessionStorage may be unavailable or blocked; generate a per-page id.
-      return uuid();
-    }
-  }
-
-  var sessionId = getSessionId();
+  // The anonymous session id that used to live here has been removed along with
+  // the first-party analytics store it was written for. Nothing read it once
+  // /api/event stopped recording, so it was writing an identifier into every
+  // visitor's browser storage for no purpose.
 
   function utmParams() {
     var out = {};
@@ -74,29 +50,6 @@
 
   function sendEvent(name, params) {
     try {
-      var payload = {
-        event_name: name,
-        path: page,
-        referrer: utm.referrer || '',
-        session_id: sessionId,
-        occurred_at: new Date().toISOString(),
-        metadata: {}
-      };
-      if (utm.utm_source) payload.utm_source = utm.utm_source;
-      if (utm.utm_medium) payload.utm_medium = utm.utm_medium;
-      if (utm.utm_campaign) payload.utm_campaign = utm.utm_campaign;
-
-      if (params && typeof params === 'object') {
-        for (var k in params) {
-          if (Object.prototype.hasOwnProperty.call(params, k)) {
-            var value = params[k];
-            if (typeof value === 'string') {
-              payload.metadata[k] = value.slice(0, 120);
-            }
-          }
-        }
-      }
-
       // Explicit events keep form values, WhatsApp text and query strings out of GA.
       var gaNames = {form_start: params && params.form_type === 'audit' ? 'audit_started' : 'project_form_started',
         lead_submit: params && params.form_type === 'audit' ? 'audit_submitted' : 'project_form_submitted',
@@ -112,27 +65,10 @@
         window.gtag('event', gaName, ga);
         if (name === 'lead_submit') window.gtag('event', 'generate_lead', ga);
       }
-      var body = JSON.stringify(payload);
-      var sent = false;
-
-      if (typeof navigator.sendBeacon === 'function') {
-        try {
-          sent = navigator.sendBeacon(ENDPOINT, new Blob([body], { type: 'application/json' }));
-        } catch (e) {
-          sent = false;
-        }
-      }
-
-      if (!sent && typeof window.fetch === 'function') {
-        window.fetch(ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: body,
-          keepalive: true
-        }).catch(function () {
-          /* measurement must never break the page */
-        });
-      }
+      // Google Analytics above is now the only destination. Every event used to
+      // be beaconed to /api/event as well, which accepted the payload and threw
+      // it away -- one request and one billed function invocation per page view,
+      // for nothing.
     } catch (e) {
       /* never break the page for analytics */
     }

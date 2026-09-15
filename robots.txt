@@ -1,12 +1,15 @@
 # https://mucolabs.com
 # Everything here is public marketing content. Search engines and answer engines
-# are both welcome; llms.txt carries a clean summary for language models.
+# are welcome. The existing llms.txt summary is informational, not a ranking mechanism.
 
 User-agent: *
 Allow: /
-Disallow: /404.html
+# /404.html is deliberately not disallowed. It carries <meta name="robots"
+# content="noindex">, and a crawler has to be able to fetch the page to read
+# that. Blocking it here left the noindex unread, so the URL could still surface
+# in results with no description.
 
-# OpenAI — ChatGPT training and browsing
+# OpenAI — model-training crawler
 User-agent: GPTBot
 Allow: /
 
@@ -34,7 +37,7 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-# Google — Gemini and AI Overviews
+# Google — selected AI training and grounding uses; Googlebot controls Search
 User-agent: Google-Extended
 Allow: /
 

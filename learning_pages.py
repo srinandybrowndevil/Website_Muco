@@ -1,6 +1,8 @@
 """Public learning discovery and the separate Way2Me learner portal entry."""
-from html import escape
-from build import render, page_header, ORG_JSONLD, breadcrumbs
+import json
+from collections import Counter
+from html import escape, unescape
+from build import render, page_header, ORG_JSONLD, breadcrumbs, DOMAIN
 from learning_catalog import COURSE_GROUPS, SOURCE_URL, CONTACT_URL, DASHBOARD_URL, REGISTRATION_URL, LMS_COURSE_URL
 from learning_feedback import TUTOR_PROFILE, WAY2ME_PROFILE, FEEDBACK_SUMMARY, FEEDBACK_THEMES
 
@@ -8,14 +10,23 @@ from learning_feedback import TUTOR_PROFILE, WAY2ME_PROFILE, FEEDBACK_SUMMARY, F
 def build_learning(services):
     categories = sorted({group for group, _ in COURSE_GROUPS})
     options = ''.join(f'<option value="{escape(group)}">{escape(group)}</option>' for group in categories)
+    counts = Counter(group for group, _ in COURSE_GROUPS)
+    # Category cards are the primary way in. The full grid still ships in the
+    # HTML underneath them so search engines and no-JavaScript visitors see
+    # every listing -- the chips filter what is already on the page rather than
+    # being the only route to it.
+    chips = ''.join(
+        f'<button type="button" class="learning-chip" data-course-chip="{escape(group)}">'
+        f'{escape(group)}<span>{counts[group]}</span></button>'
+        for group in categories)
     cards = ''.join(f'''
-      <article class="learning-course" data-course data-category="{escape(group)}">
+      <article class="learning-course" data-course data-category="{escape(group)}" data-index="{index}">
         <p class="eyebrow">{escape(group)}</p>
         <h3>{escape(title)}</h3>
         <p class="learning-provider">Way2Me {'LMS course' if title == 'Advanced Engineering Design Techniques' else 'course'}</p>
         {('<a href="' + LMS_COURSE_URL + '">View course at Way2Me ↗</a>') if title == 'Advanced Engineering Design Techniques' else ''}
         <a href="{CONTACT_URL}" class="learning-enquiry" aria-label="Enquire at Way2Me about {escape(title)}">Enquire at Way2Me <span aria-hidden="true">↗</span></a>
-      </article>''' for group, title in COURSE_GROUPS)
+      </article>''' for index, (group, title) in enumerate(COURSE_GROUPS))
     service_cards = ''.join(f'''
       <article class="learning-course learning-service">
         <p class="eyebrow">MUCO LABS service</p><h3>{escape(s['title'])}</h3>
@@ -44,8 +55,14 @@ def build_learning(services):
           <label for="course-category">Subject<select id="course-category" aria-controls="course-grid"><option value="">All subjects</option>{options}</select></label>
           <button class="btn btn-secondary" type="button" id="course-reset">Clear filters</button>
         </div>
+        <div class="learning-chips" data-course-chips hidden>
+          <button type="button" class="learning-chip is-active" data-course-chip="">All subjects<span>{len(COURSE_GROUPS)}</span></button>{chips}
+        </div>
         <p id="course-count" role="status" aria-live="polite">{len(COURSE_GROUPS)} courses listed</p>
         <div class="learning-grid" id="course-grid">{cards}</div>
+        <div class="learning-more" hidden>
+          <button class="btn btn-secondary" type="button" id="course-more">Load more courses</button>
+        </div>
         <div class="learning-empty" id="course-empty" hidden><div class="learning-empty-icon" aria-hidden="true">⌕</div><div><h3>No course matches yet.</h3><p>That’s okay. Try one of these popular searches or ask the tutor to point you in the right direction.</p><p class="learning-suggestions"><button type="button" data-course-suggestion="Python">Python</button><button type="button" data-course-suggestion="AI">AI</button><button type="button" data-course-suggestion="design">Design</button></p><div class="btn-group"><button class="btn btn-secondary" type="button" id="course-empty-reset">Clear filters</button><a class="btn btn-accent" href="{CONTACT_URL}">Ask Way2Me <span aria-hidden="true">↗</span></a></div></div></div>
         <p class="learning-source">Catalogue checked 9 September 2026. Listings describe published course topics; batch availability is confirmed by Way2Me.</p>
       </div>
@@ -73,7 +90,7 @@ def build_learning(services):
     </section>
     <section class="section-divider" id="way2me-founder" aria-labelledby="way2me-founder-title">
       <div class="container learning-founder-layout">
-        <figure class="learning-portrait"><picture><source srcset="assets/yogahari.webp" type="image/webp" /><img src="assets/yogahari.png" width="1086" height="1448" loading="lazy" decoding="async" alt="Yogahari Haran, founder and CEO of Way2Me" /></picture><figcaption>{escape(WAY2ME_PROFILE['name'])} · {escape(WAY2ME_PROFILE['role'])}</figcaption></figure>
+        <figure class="learning-portrait"><picture><source srcset="assets/yogahari.webp" type="image/webp" /><img src="assets/yogahari.jpg" width="720" height="960" loading="lazy" decoding="async" alt="Yogahari Haran, founder and CEO of Way2Me" /></picture><figcaption>{escape(WAY2ME_PROFILE['name'])} · {escape(WAY2ME_PROFILE['role'])}</figcaption></figure>
         <div>
           <span class="eyebrow">Way2Me leadership</span>
           <h2 id="way2me-founder-title">{escape(WAY2ME_PROFILE['name'])}</h2>
@@ -95,7 +112,42 @@ def build_learning(services):
     </div></section>'''
     return render('learning.html', 'Learning &amp; Courses | Way2Me &amp; MUCO LABS',
         'Browse Way2Me courses and all eight MUCO LABS services. Enquire directly at Way2Me or open the separate learning portal.', body,
-        schema_blocks=[ORG_JSONLD, breadcrumbs([('Home', ''), ('Learning & Courses', 'learning.html')])])
+        schema_blocks=[ORG_JSONLD, breadcrumbs([('Home', ''), ('Learning & Courses', 'learning.html')]),
+                       course_catalogue_jsonld()])
+
+
+def course_catalogue_jsonld():
+    """Mark up the course listings so they are legible to search engines.
+
+    Two things this deliberately does not claim. The provider is Way2Me, not
+    MUCO LABS -- these are Way2Me's courses and this page is a directory of
+    them, so naming ourselves as provider would be false. And there is no
+    hasCourseInstance: learning_catalog.py records that the titles come from a
+    published poster catalogue and are "not confirmation of currently open
+    batches", so asserting a schedule, price or mode would be inventing facts to
+    win a richer result.
+    """
+    return json.dumps({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Way2Me course listings",
+        "url": DOMAIN + "/learning",
+        "numberOfItems": len(COURSE_GROUPS),
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": index,
+                "item": {
+                    "@type": "Course",
+                    "name": unescape(title),
+                    "about": unescape(group),
+                    "url": LMS_COURSE_URL if title == 'Advanced Engineering Design Techniques' else CONTACT_URL,
+                    "provider": {"@type": "Organization", "name": "Way2Me", "url": SOURCE_URL},
+                },
+            }
+            for index, (group, title) in enumerate(COURSE_GROUPS, start=1)
+        ],
+    })
 
 
 def build_learning_portal():
@@ -109,7 +161,7 @@ def build_learning_portal():
         <article class="learning-course"><span class="eyebrow">02 · Learn</span><h2>Open your dashboard</h2><p>Sign in using your Way2Me learner account. Registration and access are managed by Way2Me.</p><a href="{DASHBOARD_URL}">Continue to Way2Me ↗</a></article>
         <article class="learning-course"><span class="eyebrow">03 · Get help</span><h2>Speak to Way2Me</h2><p>Ask about course suitability, fees, batches, enrolment or account access.</p><a class="learning-enquiry" href="{CONTACT_URL}">Enquire at Way2Me ↗</a></article>
       </div>
-      <div class="learning-account-note"><h2>Use the right account.</h2><p>Use your Way2Me account for learning. Your MUCO LABS customer account is for business projects, requests and files.</p><a href="https://client.mucolabs.com/login">Go to the MUCO client workspace →</a><p>If the Way2Me dashboard is unavailable, <a href="{CONTACT_URL}">contact the Way2Me team</a>.</p></div>
+      <div class="learning-account-note"><h2>Learning accounts live at Way2Me.</h2><p>Courses, enrolment and your learner dashboard are all handled by Way2Me. MUCO LABS does not hold a learning account for you and you do not need one here.</p><p>If the Way2Me dashboard is unavailable, <a href="{CONTACT_URL}">contact the Way2Me team</a>. For a business project rather than a course, <a href="/contact#start-project">start a project with MUCO LABS</a>.</p></div>
     </div></section>'''
     return render('learning-portal.html', 'Learning Portal | Way2Me access | MUCO LABS',
         'Open your Way2Me learner dashboard, register for a learner account, browse courses or contact Way2Me for support.', body,

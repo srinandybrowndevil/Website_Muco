@@ -9,6 +9,7 @@ Editing rules that keep this site trustworthy:
 """
 
 from build import *  # noqa: F401,F403 — shared shell, tokens and helpers
+from growth_content import GROWTH_PAGES, SERVICE_SEARCH_TITLES, build_growth_page, build_public_contact, public_lead_form, home_growth_sections, service_resources
 
 # ===========================================================================
 # Project archive → portfolio
@@ -89,12 +90,12 @@ PROJECTS = [
         "id": "beauty-brand",
         "featured": True,
         "name": "Natural beauty brand website",
-        "kicker": "Client project — retail, named on request",
-        "stage": "client",
-        "tags": ["web", "client", "retail"],
+        "kicker": "Retail website — implementation example",
+        "stage": "build",
+        "tags": ["web", "retail"],
         "summary": "A mobile-first product storytelling website for a natural and organic beauty "
                    "brand, built to convert search and social visitors into WhatsApp enquiries "
-                   "rather than force early e-commerce. Client named on request.",
+                   "rather than force early e-commerce. Presented as a technical implementation example.",
         "problem": "The brand existed only on social media, and unverified ingredient or benefit "
                    "copy carries real trust and compliance risk.",
         "scope": "Home, products index, product detail pages, about and contact; structured "
@@ -490,7 +491,7 @@ SERVICE_DETAIL = {
         "meta": 'Local and technical SEO, conversion optimisation and honest monthly reporting for Tamil Nadu businesses. No guaranteed rankings, because nobody can.',
         "who": ['A business invisible on Google for what it actually sells', 'A site with traffic that produces no enquiries', 'A brand competing locally against bigger advertising budgets'],
         "deliverables": ['Local SEO and Google Business Profile setup', 'Technical SEO: speed, crawlability, structured data, indexation', 'Keyword and intent research grounded in what people actually search', 'On-page content and conversion rate optimisation', 'Analytics, event tracking and monthly reporting you can read'],
-        "faqs": [('How long before I see results?', '<p>Local SEO usually shows movement in weeks; competitive terms take months. Anyone promising page one in thirty days is either lucky or lying. We report what actually changed, including when it is nothing.</p>'), ('Do you guarantee rankings?', "<p>No. Rankings depend on competition, domain history and Google's own changes, none of which a supplier controls. What we commit to is the work that makes ranking possible.</p>"), ('Do you run paid ads too?', '<p>Where they make sense for the business, yes. We will tell you honestly when your budget would do more in organic and conversion work than in ad spend.</p>')],
+        "faqs": [('How long before I see results?', '<p>SEO results depend on the starting point, competition and search-engine decisions. We agree the work and report indexed pages, relevant queries and enquiries over time, including when there is no improvement.</p>'), ('Do you guarantee rankings?', "<p>No. Rankings depend on competition, domain history and Google's own changes, none of which a supplier controls. What we commit to is the work that makes ranking possible.</p>"), ('Do you run paid ads too?', '<p>Where they make sense for the business, yes. We will tell you honestly when your budget would do more in organic and conversion work than in ad spend.</p>')],
         "related": ['muco-platform', 'beauty-brand'],
     },
     "ai-automation": {
@@ -1137,7 +1138,7 @@ def industry_matrix():
                    '<a class="card-cta matrix-cta" href="{portal_contact}">'
                    'Talk about {name} &rarr;</a></div>').format(
                        i=i, hid="" if i == 0 else " hidden", name=name, reality=reality,
-                       start=start, portal_contact=PORTAL_CONTACT,
+                       start=start, portal_contact=WHATSAPP_URL,
                        mods="".join("<span>%s</span>" % mo for mo in modules))
     return ('<div class="matrix reveal-on-scroll">'
             '<div class="matrix-list" role="tablist" aria-label="Industries">%s</div>'
@@ -1262,17 +1263,17 @@ def build_home():
               <span class="pulse-dot" aria-hidden="true"></span>
               Founder-led studio &middot; {city}, {region}
             </div>
-            <h1>We turn business ideas into software that <span class="accent-serif">actually</span> ships.</h1>
+            <h1>Websites, software and systems that help real businesses <span class="accent-serif">grow.</span></h1>
             <p class="lead">
-              Websites, mobile apps, custom software and AI automation for businesses in
-              {city} and across {region} &mdash; built by the person you talk to, priced
-              from a written scope, and handed over with the code in your name.
+              Founder-led from {city}, {region} &mdash; building business websites, custom software,
+              mobile apps, automation and digital growth for clients across India and remotely
+              worldwide. Talk directly to the founder, agree a written scope, and own the code on
+              final payment.
             </p>
 
             <div class="btn-group">
-              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project{portal_signup_note}</a>
-              <a href="work.html" class="btn btn-secondary btn-lg">View our work</a>
-              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp, call or email</a>
+              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a Project</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp MUCO LABS</a>
             </div>
 
             {trust}
@@ -1315,18 +1316,13 @@ def build_home():
       </div>
     </section>
 
-    <section class="section-tight">
-      <div class="container">
-        <p class="strip-label">What we work in</p>
-        <div class="cap-strip reveal-on-scroll">{cap_strip}</div>
-      </div>
-    </section>
+{growth_sections}
 
     <section class="section-divider">
       <div class="container">
         <div class="section-head reveal-on-scroll">
           <span class="eyebrow">What we do</span>
-          <h2>Eight things we build, and what each one is for</h2>
+          <h2>More ways to improve how your business works</h2>
           <p class="section-sub">Every engagement starts with the business outcome. The technology
             follows from that, not the other way round.</p>
         </div>
@@ -1407,7 +1403,7 @@ def build_home():
                 and what is not. If your site is fine, we will say so.</p>
             </div>
             <div class="stack center">
-              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg btn-block">{wa_svg} Sign in to send your website</a>
+              <a href="website-audit.html#lead-form" class="btn btn-accent btn-lg btn-block">Get a Free Website Review</a>
               <a href="website-audit.html" class="btn btn-secondary btn-block">See what we check &rarr;</a>
               <p class="note">Reviewed by a person, not an automated
                 score generator. We will tell you when we can get to it.</p>
@@ -1430,19 +1426,19 @@ def build_home():
     </section>
 
 {cta}""".format(
-        cap_strip=cap_strip,
+        cap_strip=cap_strip, growth_sections=home_growth_sections(),
         industry_matrix=industry_matrix(),
         home_faq_html=home_faq_html,
         city=CITY,
         region=REGION,
         wa_svg=WA_SVG,
-        portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE,
+        portal_signup=CONSULTATION_URL, portal_signup_note=PORTAL_SIGNUP_NOTE,
         trust=trust_row(),
         services=services_html,
         industries=industries,
         featured=featured_html,
         process=process,
-        portal_contact=PORTAL_CONTACT,
+        portal_contact=WHATSAPP_URL,
         cta=final_cta(
             "Tell us what you want to build",
             "Send a short description and we will come back with questions, an approach and a "
@@ -1452,9 +1448,11 @@ def build_home():
 
     return render(
         "index.html",
-        "%s | Software, AI &amp; Automation in %s, %s" % (BRAND, CITY, REGION),
-        "Websites, mobile apps, custom software and AI automation for businesses in %s and across "
-        "%s. Founder-led, written scope, code you own." % (CITY, REGION),
+        # The homepage carries the India-level intent; /website-development-erode
+        # owns the local query, so repeating "in Erode" here made the two pages
+        # compete for the same result instead of covering two layers.
+        "Website & Software Development Company in India | MUCO LABS",
+        "MUCO LABS builds business websites, mobile apps, custom software and AI automation. Founder-led from Erode, Tamil Nadu, delivering across India and remotely.",
         body,
         schema_blocks=[ORG_JSONLD, WEBSITE_JSONLD,
                        speakable_jsonld(DOMAIN + "/", ["h1", ".lead"])],
@@ -1587,7 +1585,7 @@ def build_service_page(sv):
       <div class="container">
         <div class="section-head">
           <span class="eyebrow">Related work</span>
-          <h2>Where we have done this</h2>
+          <h2>Related builds and technical examples</h2>
         </div>
         <div class="grid grid-%d">
 %s        </div>
@@ -1611,8 +1609,8 @@ def build_service_page(sv):
             <p class="lead">{outcome}</p>
             <p>{bodytext}</p>
             <div class="btn-group mt-6">
-              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a project{portal_signup_note}</a>
-              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} Sign in to ask</a>
+              <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a Project</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp MUCO LABS</a>
             </div>
           </div>
           <div class="card card-lg">
@@ -1644,7 +1642,7 @@ def build_service_page(sv):
       </div>
     </section>
 
-{related}    <section class="section-divider">
+{related}{resources}    <section class="section-divider">
       <div class="container container-narrow">
         <div class="section-head">
           <span class="eyebrow">Questions</span>
@@ -1666,11 +1664,11 @@ def build_service_page(sv):
 {cta}""".format(
         crumbs=crumb_nav([("Home", "index.html"), ("Services", "services.html"),
                           (sv["title"], None)]),
-        title=sv["title"], outcome=sv["outcome"], bodytext=sv["body"], q=q,
-        portal_contact=PORTAL_CONTACT,
-        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
+        title=sv["title"], outcome=sv["outcome"], bodytext=sv["body"] + ' Based in Erode, Tamil Nadu, with remote delivery available.', q=q,
+        portal_contact=WHATSAPP_URL,
+        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup="/contact?service=" + q + "#lead-form", portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
-        others=others,
+        others=others, resources=service_resources(sv["slug"]),
         cta=final_cta(
             "Tell us what you need",
             "Describe the problem and we will come back with questions, an approach and a written "
@@ -1680,7 +1678,7 @@ def build_service_page(sv):
 
     return render(
         slug_file,
-        "%s | %s" % (sv["title"], BRAND),
+        SERVICE_SEARCH_TITLES[sv["slug"]],
         d["meta"],
         body,
         schema_blocks=[
@@ -1722,7 +1720,7 @@ def build_work():
     body = page_header(
         "Work",
         "Six things we are <span class='accent-serif'>actually</span> building",
-        "One client project and five of our own products. Each one says plainly what stage it is "
+        "Internal products and active implementation examples. Each one says plainly what stage it is "
         "at, because a specification is not a shipped product and we are not going to pretend "
         "otherwise.",
         extra="""        <div class="card card-quiet mt-6">
@@ -1799,7 +1797,7 @@ def build_pricing():
           </article>
 """.format(cls="price-card-featured" if featured else "", name=name, sub=sub,
            points="".join("<li>%s</li>" % p for p in points),
-           btn="btn-accent" if featured else "btn-secondary", portal_signup=PORTAL_SIGNUP)
+           btn="btn-accent" if featured else "btn-secondary", portal_signup=CONSULTATION_URL)
 
     affects = [
         ("Page and screen count", "Ten pages is not twice the work of five, and a dashboard is not a page."),
@@ -1958,8 +1956,8 @@ def build_local_erode():
           with the code in your name.</p>
 
         <div class="btn-group">
-          <a href="{portal_signup}" class="btn btn-accent btn-lg">Start your project{portal_signup_note}</a>
-          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp, call or email</a>
+          <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a Project</a>
+          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp MUCO LABS</a>
         </div>
 
         {trust}
@@ -2040,8 +2038,8 @@ def build_local_erode():
 {cta}""".format(
         crumbs=crumb_nav([("Home", "index.html"), ("Website development in Erode", None)]),
         brand=BRAND, city=CITY, region=REGION, phone=PHONE,
-        portal_contact=PORTAL_CONTACT,
-        wa_svg=WA_SVG, portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE, trust=trust_row(), sectors=sectors_html, faqs=faqs,
+        portal_contact=WHATSAPP_URL,
+        wa_svg=WA_SVG, portal_signup=CONSULTATION_URL, portal_signup_note=PORTAL_SIGNUP_NOTE, trust=trust_row(), sectors=sectors_html, faqs=faqs,
         markets=", ".join(MARKETS),
         cta=final_cta(
             "Let us look at what you need",
@@ -2132,7 +2130,7 @@ def build_maintenance():
             "Tell us what is running and where, and we will quote a maintenance arrangement that "
             "matches it. We also take over sites built by someone else.",
             primary_label="Request a maintenance quote",
-            primary=PORTAL_SIGNUP,
+            primary=CONSULTATION_URL,
         ),
     )
 
@@ -2195,7 +2193,7 @@ def build_about():
 
             <div class="btn-group mt-6">
               <a href="work.html" class="btn btn-secondary">See the work &rarr;</a>
-              <a href="{portal_signup}" class="btn btn-accent">Start a project{portal_signup_note}</a>
+              <a href="{portal_signup}" class="btn btn-accent">Start a Project</a>
             </div>
 
             {trust}
@@ -2259,7 +2257,7 @@ def build_about():
         markets=", ".join(MARKETS),
         counts=portfolio_counts(),
         trust=trust_row(),
-        portal_signup=PORTAL_SIGNUP, portal_signup_note=PORTAL_SIGNUP_NOTE,
+        portal_signup=CONSULTATION_URL, portal_signup_note=PORTAL_SIGNUP_NOTE,
         values=vhtml,
         cta=final_cta(
             "Want to talk it through first?",
@@ -2300,324 +2298,7 @@ def build_learning_portal():
 
 
 def build_contact():
-    service_opts = ["Website design & development", "Mobile app development",
-                    "UI/UX and product design", "Custom software & SaaS",
-                    "CRM / ERP / HRMS / LMS / billing", "Digital marketing & SEO",
-                    "AI & business automation", "Branding, IT & cloud support",
-                    "Website review / audit", "Maintenance & support", "Something else"]
-    budgets = ["Under ₹25,000", "₹25,000 – ₹75,000", "₹75,000 – ₹2,00,000",
-               "₹2,00,000 – ₹5,00,000", "Above ₹5,00,000", "Not decided yet"]
-    timelines = ["As soon as possible", "Within 1 month", "1–3 months", "3–6 months",
-                 "Just exploring"]
-
-    def options(items, empty):
-        out = '<option value="">%s</option>' % empty
-        return out + "".join('<option value="%s">%s</option>' % (i, i) for i in items)
-
-    # Spec 29 CONTACT 02. Each channel says what it is actually good for and what
-    # to expect back, so the choice is obvious before the tap.
-    channels = [
-        ("WhatsApp", PORTAL_CONTACT,
-         PHONE, WA_SVG, "channel-whatsapp",
-         "Quick questions, sharing screenshots, and everything after we start.",
-         "Sign in to open &middot; fastest during working hours", ""),
-        ("Phone", PORTAL_CONTACT, PHONE,
-         icon('<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.2a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>', 20),
-         "", "When it is easier to explain than to type.",
-         "Sign in to call &middot; " + HOURS, ""),
-        ("Email", PORTAL_CONTACT, EMAIL,
-         icon('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5L12 13l9.5-6.5"/>', 20),
-         "", "Detailed briefs, documents, quotes and anything you want on record.",
-         "Sign in to open &middot; usually the same working day", ""),
-        ("Instagram", INSTAGRAM, "@muco_labs", IG_SVG, "channel-instagram",
-         "Recent work and what we are building. Not the place for a scope.",
-         "Checked less often", "_blank"),
-    ]
-
-    channel_cards = ""
-    for name, href, label, svg, extra, best, expect, target in channels:
-        tgt = ' target="_blank" rel="noopener noreferrer"' if target else ""
-        channel_cards += """
-            <a class="channel-card spotlight-card reveal-on-scroll {extra}" href="{href}"{tgt}>
-              <span class="channel-icon">{svg}</span>
-              <h3>{name}</h3>
-              <span class="channel-value">{label}</span>
-              <p>{best}</p>
-              <span class="channel-expect">{expect}</span>
-            </a>""".format(extra=extra, href=href, tgt=tgt, svg=svg, name=name,
-                           label=label, best=best, expect=expect)
-
-    # Spec 29 CONTACT 04. Removing the guesswork from "what should I even send?"
-    send_items = [
-        ("What the business does", "One or two lines. Industry, who buys from you, roughly how big."),
-        ("The problem, not the solution", "“Orders come by phone and we lose them” tells us more than “we need an app”."),
-        ("Anything that already exists", "A current website, a spreadsheet you run on, screenshots, a competitor you like."),
-        ("Budget and timeline, honestly", "Even a rough range. It changes what we propose, and it stops us wasting your time."),
-    ]
-    send_rows = "".join(
-        '<div class="def-row"><dt>%s</dt><dd>%s</dd></div>' % (t, d) for t, d in send_items)
-
-    steps = [
-        ("You send the enquiry",
-         "Form, WhatsApp, phone or email &mdash; all of them reach the same person. "
-         "Nothing sits in a shared inbox waiting for someone to claim it."),
-        ("We read it and come back with questions",
-         "Usually the same working day. The questions are the point: they are how a vague "
-         "idea turns into something that can actually be priced."),
-        ("You get a written scope and a price",
-         "Inclusions, exclusions, milestones, what we need from you and what it costs. "
-         "You decide with that in front of you, not from a sales call."),
-    ]
-    step_html = "".join(
-        '<div class="process-step reveal-on-scroll"><div><h3>%s</h3><p>%s</p></div></div>' % (t, d)
-        for t, d in steps)
-
-    contact_faqs = [
-        ("Do I have to pay for the first conversation?",
-         "No. The first conversation, the questions that follow and the written scope are free. "
-         "You only pay once you accept the scope and we start work."),
-        ("What if I do not know what I need yet?",
-         "That is normal and it is fine. Describe the problem in plain words &mdash; what is slow, "
-         "what gets lost, what you are doing by hand. Working out the right solution is part of "
-         "the job, not something you have to arrive with."),
-        ("Can we meet in person?",
-         "Yes, in %s and around %s. Everywhere else we work over calls and shared documents, "
-         "which for most projects is faster anyway." % (CITY, ", ".join(MARKETS[:4]))),
-        ("Will I be handed to someone else after I sign?",
-         "No. %s replies to the enquiry, writes the scope and builds the work. There is no "
-         "account manager in between." % FOUNDER),
-    ]
-    faq_html = "".join(
-        '<details class="faq-item"><summary><h2>%s</h2></summary>'
-        '<div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>%s</p></div></div></div>'
-        '</details>' % (q, a) for q, a in contact_faqs)
-
-    body = """    <section>
-      <div class="container">
-        <span class="eyebrow">Contact</span>
-        <h1>Tell us what you want to <span class="accent-serif">build</span>.</h1>
-        <p class="lead">Send a short description and we will come back with questions, a suggested
-          approach and a written scope. If we are not the right people for it, we will tell you that
-          instead of taking the project.</p>
-
-        <h2 class="visually-hidden">Ways to reach us</h2>
-        <div class="grid grid-4 channel-grid">{channel_cards}
-        </div>
-      </div>
-    </section>
-
-    <section class="section-divider" id="enquiry">
-      <div class="container">
-        <div class="section-head">
-          <span class="eyebrow">Tell us about it</span>
-          <h2>Send an enquiry</h2>
-          <p class="section-sub form-intro">No account needed. Fill this in and it reaches
-            {founder} directly &mdash; usually answered the same working day.
-            Nothing here is shared with anyone outside {brand}.</p>
-        </div>
-
-        <form class="form-card" id="lead-form" novalidate>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="lead-name">Your name <span class="form-req">*</span></label>
-              <input class="form-control" id="lead-name" name="name" type="text"
-                     autocomplete="name" required maxlength="100" />
-              <p class="form-error" id="err-name" role="alert"></p>
-            </div>
-            <div class="form-group">
-              <label for="lead-business">Business name</label>
-              <input class="form-control" id="lead-business" name="business" type="text"
-                     autocomplete="organization" maxlength="120" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="lead-phone">Phone <span class="form-req">*</span></label>
-              <input class="form-control" id="lead-phone" name="phone" type="tel"
-                     autocomplete="tel" required maxlength="32" />
-              <p class="form-hint">A number we can reach you on, with country code if outside India.</p>
-              <p class="form-error" id="err-phone" role="alert"></p>
-            </div>
-            <div class="form-group">
-              <label for="lead-email">Email</label>
-              <input class="form-control" id="lead-email" name="email" type="email"
-                     autocomplete="email" maxlength="160" />
-              <p class="form-error" id="err-email" role="alert"></p>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="lead-service">What do you need?</label>
-              <select class="form-control" id="lead-service" name="service">{services}</select>
-            </div>
-            <div class="form-group">
-              <label for="lead-location">City / location</label>
-              <input class="form-control" id="lead-location" name="location" type="text"
-                     maxlength="100" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="lead-budget">Budget range</label>
-              <select class="form-control" id="lead-budget" name="budget">{budgets}</select>
-              <p class="form-hint">A rough range is fine. It changes what we propose.</p>
-            </div>
-            <div class="form-group">
-              <label for="lead-timeline">Timeline</label>
-              <select class="form-control" id="lead-timeline" name="timeline">{timelines}</select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="lead-website">Current website, if you have one</label>
-            <input class="form-control" id="lead-website" name="website" type="url"
-                   inputmode="url" placeholder="https://" maxlength="300" />
-          </div>
-
-          <div class="form-group">
-            <label for="lead-message">About the project <span class="form-req">*</span></label>
-            <textarea class="form-control" id="lead-message" name="message" rows="5"
-                      required maxlength="4000"></textarea>
-            <p class="form-hint">The problem is more useful than the solution. What goes wrong
-              today, and what should happen instead?</p>
-            <p class="form-error" id="err-message" role="alert"></p>
-          </div>
-
-          <!-- Left empty by people, filled by bots. Hidden from both sight and
-               screen readers, and never reported as an error. -->
-          <div class="hp-field" aria-hidden="true">
-            <label for="lead-company-website">Company website</label>
-            <input id="lead-company-website" name="company_website" type="text"
-                   tabindex="-1" autocomplete="off" />
-          </div>
-
-          <div class="form-consent">
-            <input id="lead-consent" name="consent" type="checkbox" required />
-            <label for="lead-consent">You may contact me about this enquiry. <span class="form-req">*</span></label>
-            <p class="form-error" id="err-consent" role="alert"></p>
-          </div>
-
-          <button class="btn btn-primary" type="submit" id="lead-submit">Send enquiry</button>
-          <p class="form-status" id="lead-status" role="status" aria-live="polite"></p>
-        </form>
-      </div>
-    </section>
-
-    <section class="section-divider">
-      <div class="container">
-        <div class="split">
-          <div class="stack">
-            <div class="card card-lg">
-              <span class="eyebrow">Before you write</span>
-              <h2 class="h2-sm">What to send us</h2>
-              <p class="section-sub">You do not need a specification. Four things are enough for us
-                to give you a useful answer instead of a generic one.</p>
-              <dl class="def-list def-list-wide">{send_rows}</dl>
-            </div>
-
-            <div class="card card-lg">
-              <span class="eyebrow">Details</span>
-              <h2 class="h2-sm">Where we are</h2>
-              <dl class="def-list">
-                <div class="def-row"><dt>Based in</dt><dd>{city}, {region}, India</dd></div>
-                <div class="def-row"><dt>Hours</dt><dd>{hours}</dd></div>
-                <div class="def-row"><dt>In person</dt><dd>{markets} and across {region}</dd></div>
-                <div class="def-row"><dt>Remote</dt><dd>Anywhere &mdash; calls and shared documents</dd></div>
-                <div class="def-row"><dt>Languages</dt><dd>English and Tamil</dd></div>
-                <div class="def-row"><dt>You will talk to</dt><dd>{founder}, who also builds the work</dd></div>
-              </dl>
-            </div>
-
-            <div class="callout">
-              <p class="fs-sm"><strong>No response-time promise.</strong> We read every
-              enquiry ourselves and reply as fast as we honestly can &mdash; usually the same working
-              day. We do not advertise a guaranteed hour figure, because we would rather meet a
-              commitment than publish one.</p>
-            </div>
-          </div>
-
-          <div class="form-card">
-            <span class="eyebrow">Project enquiry</span>
-            <h2 class="h2-sm">Send the details</h2>
-            <p class="form-intro">Enquiries go through your customer account, so your brief,
-              our replies and the project itself all stay in one place.</p>
-
-            <div class="contact-auth-gate">
-              <h3>Sign in to send your enquiry</h3>
-              <p>Creating an account takes a minute. It is also where your request,
-                our replies, quotes and files live once we start.</p>
-              <div class="btn-group mt-3">
-                <a class="btn btn-accent btn-lg grow" href="{portal_contact}">Sign in to continue</a>
-                <a class="btn btn-secondary btn-lg" href="{portal_signup_contact}">Create customer account</a>
-              </div>
-              <p class="form-hint mt-4">Once you are signed in you can send the brief, email us
-                or carry on over WhatsApp &mdash; and everything stays against your account.
-                We use your details to reply and quote, nothing else &mdash; see the
-                <a href="privacy.html">privacy policy</a>.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-divider">
-      <div class="container container-narrow">
-        <div class="section-head">
-          <span class="eyebrow">After you send it</span>
-          <h2>What actually happens next</h2>
-          <p class="section-sub">Three steps, and you can stop after any of them at no cost.</p>
-        </div>
-        <div class="process-list">{step_html}</div>
-      </div>
-    </section>
-
-    <section class="section-divider">
-      <div class="container container-narrow">
-        <div class="section-head">
-          <span class="eyebrow">Before you ask</span>
-          <h2>Contact questions</h2>
-        </div>
-        {faq_html}
-        <p class="section-sub mt-5">More in the
-          <a href="faq.html" class="text-link">full FAQ</a>.</p>
-      </div>
-    </section>
-""".format(
-        channel_cards=channel_cards,
-        send_rows=send_rows,
-        step_html=step_html,
-        faq_html=faq_html,
-        wa_svg=WA_SVG,
-        city=CITY, region=REGION, hours=HOURS, brand=BRAND, founder=FOUNDER,
-        markets=", ".join(MARKETS),
-        services=options(service_opts, "Select a service"),
-        budgets=options(budgets, "Select a range"),
-        timelines=options(timelines, "Select a timeline"),
-        portal_contact=PORTAL_CONTACT,
-        portal_signup_contact=PORTAL_SIGNUP_PAGE,
-    )
-
-    contact_jsonld = """{
-  "@context": "https://schema.org",
-  "@type": "ContactPage",
-  "url": "%s/contact.html",
-  "about": { "@id": "%s/#organization" }
-}""" % (DOMAIN, DOMAIN)
-
-    return render(
-        "contact.html",
-        "Contact | Start a Project | %s" % BRAND,
-        "Contact %s in %s, %s. WhatsApp %s, call, email %s, or send a project enquiry with your "
-        "scope and budget." % (BRAND, CITY, REGION, PHONE, EMAIL),
-        body,
-        schema_blocks=[ORG_JSONLD, contact_jsonld,
-                       faq_jsonld(contact_faqs),
-                       breadcrumbs([("Home", ""), ("Contact", "contact.html")]),
-                       speakable_jsonld(DOMAIN + "/contact.html", ["h1", ".def-list"])],
-    )
+    return build_public_contact()
 
 
 def build_faq():
@@ -2722,7 +2403,7 @@ def build_careers():
               ourselves to.</p>
             <div class="btn-group mt-5">
               <a href="mailto:{email}?subject=Freelance%20collaboration" class="btn btn-secondary">Email us</a>
-              <a href="{portal_contact}" class="btn btn-whatsapp">{wa_svg} Sign in for WhatsApp</a>
+              <a href="{portal_contact}" class="btn btn-whatsapp">{wa_svg} WhatsApp MUCO LABS</a>
             </div>
           </div>
           <div class="card card-lg">
@@ -2742,7 +2423,7 @@ def build_careers():
 
 {cta}""".format(
         brand=BRAND, roles=rhtml, email=EMAIL, wa_svg=WA_SVG,
-        portal_contact=PORTAL_CONTACT,
+        portal_contact=WHATSAPP_URL,
         cta=final_cta(
             "Nothing above matches you?",
             "If you are strong at something we have not listed, tell us what it is and what you have "
@@ -2766,24 +2447,38 @@ def build_careers():
 # The privacy page has to describe what the site actually does, so keep this
 # text beside the analytics configuration rather than letting it go stale.
 ANALYTICS_PRIVACY_TEXT = (
-    "This site runs its own first-party operational analytics to count visits and see which "
-    "pages and calls-to-action are useful. It also loads Google Analytics and Google Tag Manager "
-    "for page visits, referrals, campaign links and interactions, and through Google Tag Manager "
-    "it loads Microsoft Clarity. Clarity records how pages are used &mdash; pointer movement, "
-    "clicks, scrolling and the content of the pages you view &mdash; and replays those sessions "
-    "to us so we can see where a page is confusing. Clarity is operated by Microsoft and "
-    "processes this information under Microsoft's privacy terms. Google Analytics may use "
-    "cookies and process this information under Google's privacy terms. Neither Google nor Microsoft receives the "
-    "contents of an enquiry you send from your customer account. For our first-party analytics, the site stores a random "
-    "anonymous session identifier only in sessionStorage while the browser tab is open; the "
-    "identifier is not linked to any name, email address, phone number or other personal "
-    "information. The data collected is limited to the pages viewed, the site that referred "
-    "you, any campaign tags in the link, and which links or forms were used. We use this only "
-    "to understand which of our pages are useful and to respond to enquiries. Our first-party "
-    "analytics data is retained for approximately 90 days and then deleted automatically. If "
-    "your browser sends a Do Not Track signal or you have enabled Global Privacy Control, our "
-    "first-party analytics events are not sent; Google Analytics follows its own configuration "
-    "and browser controls. The site works exactly the same either way."
+    "Nothing on this site measures you until you say yes. We load Google Analytics and Google "
+    "Tag Manager, and Tag Manager may in turn load Microsoft Clarity, which records how pages "
+    "are used &mdash; pointer movement, clicks, scrolling and the content of the pages you view "
+    "&mdash; and replays those sessions to us so we can see where a page is confusing. All of "
+    "these start in a denied state under Google Consent Mode, which means they set no cookies "
+    "and store nothing on your device. When you first visit, we ask. If you decline, or simply "
+    "ignore the question, they stay denied for as long as you use the site. If your browser "
+    "sends a Do Not Track signal or you have enabled Global Privacy Control, we treat that as a "
+    "decline and never ask. The site works exactly the same either way, and the only thing we "
+    "keep in your browser is your answer to that question, which we cannot read from our end. "
+    "If you allow analytics, the data collected is limited to the pages viewed, the site that "
+    "referred you, any campaign tags in the link, and which links or forms were used; we never "
+    "send the contents of an enquiry to Google or Microsoft. Google Analytics processes this "
+    "information under Google's privacy terms and Clarity under Microsoft's. This site no "
+    "longer runs any analytics store of its own: there is no first-party analytics database, "
+    "and no visit data is written to our own systems."
+)
+
+# Every third party that receives something about a visitor. A privacy notice
+# that names four processors while a fifth quietly handles every enquiry is the
+# failure worth guarding against, so keep this list beside the code that calls
+# them: api/lead.js (Resend) and build.py (Google).
+PROCESSOR_DISCLOSURE = (
+    "We use three outside companies, and no others. <strong>Vercel</strong> hosts this website "
+    "and keeps standard technical request logs, such as your IP address and browser type, as "
+    "part of serving the pages; we do not control those logs. <strong>Resend</strong> delivers "
+    "your enquiry to us as an email &mdash; when you submit the enquiry or website review form, "
+    "everything you typed passes through Resend to reach our inbox, and is processed under "
+    "Resend's privacy terms. <strong>Google</strong> provides Analytics and Tag Manager, which "
+    "run only with your consent as described above; Tag Manager may load Microsoft Clarity on "
+    "the same basis. We do not sell your information, rent it, or share it with advertisers, "
+    "and we do not add you to a marketing list because you asked a question."
 )
 
 LEGAL_NOTICE = """      <div class="callout callout-warn mb-7">
@@ -2818,7 +2513,7 @@ def legal_page(slug, nav_title, h1, eyebrow, description, sections):
       </div>
     </section>
 """.format(eyebrow=eyebrow, h1=h1, updated=LEGAL_REVISED, notice=LEGAL_NOTICE, blocks=blocks,
-           email=EMAIL, portal_contact=PORTAL_CONTACT)
+           email=EMAIL, portal_contact=WHATSAPP_URL)
 
     return render(
         slug,
@@ -2838,26 +2533,25 @@ def build_privacy():
         "WhatsApp, email or phone." % BRAND,
         [
             ("What this website itself collects", [
-                "This site is a set of static pages with a small amount of server code: the "
-                "endpoint that receives an enquiry, a first-party analytics endpoint, "
-                "Google Analytics, Google Tag Manager and Microsoft Clarity. "
-                "There are no user accounts on this website; enquiries are made from a signed-in "
-                "customer account on the portal.",
-                "When you send an enquiry from your customer account, what you typed is stored "
-                "against that account so you and we can both refer back to it. The "
-                "form shows an error and keeps the next step available if neither delivery path "
-                "accepts the submission.",
-                "Alongside your answers we record the page you submitted from, the site that "
-                "referred you and any campaign tags in the link, so we know which of our pages are "
-                "actually useful. Your IP address is recorded with the submission as a basic "
-                "anti-abuse measure.",
-                "Our hosting provider, GitHub, records standard technical request logs such as IP "
-                "address and browser type as part of serving the site. We do not control or have "
-                "access to those logs. The Google Analytics and Google Tag Manager scripts are "
-                "loaded from Google, and Microsoft Clarity from Microsoft, when you visit a page; "
-                "the rest of the site's stylesheets, "
-                "scripts, typefaces and images are served from this domain.",
+                "This site is a set of static pages with one piece of server code: the endpoint "
+                "that receives an enquiry. There is no database behind this website. Initial "
+                "enquiries need no account. A separate customer workspace is used for agreed "
+                "project work.",
+                "When you send the public enquiry or website review form, the details are checked "
+                "and then emailed to us through Resend, our email delivery provider. That email, "
+                "in our own inbox, is the only copy we keep &mdash; there is no CRM and no "
+                "customer record is created. If the email cannot be delivered, the form says so "
+                "and offers you WhatsApp and phone instead, so your enquiry is never silently "
+                "lost. No customer account is created by the form.",
+                "We retain the first landing page, referring site and campaign tags in session storage during "
+                "your visit and include them with your enquiry to understand its source. Referrer query strings "
+                "and fragments are discarded. Your IP address is used for anti-abuse rate limiting.",
+                "Google's scripts are loaded from Google, and Microsoft Clarity from Microsoft, "
+                "only once you have allowed analytics. Everything else &mdash; the site's "
+                "stylesheets, scripts, typefaces and images &mdash; is served from this domain, "
+                "so a visit with analytics declined contacts no one but us.",
                 ANALYTICS_PRIVACY_TEXT,
+                PROCESSOR_DISCLOSURE,
             ]),
             ("What we collect when you contact us", [
                 "When you message us on WhatsApp, email us, call us or send an enquiry, we receive "
@@ -2873,14 +2567,14 @@ def build_privacy():
                 "and deliver the project if you go ahead with it.",
                 "For an active project, to keep the records any working relationship needs: the "
                 "agreed scope, milestones, invoices and correspondence.",
-                "We do not sell your information, rent it, or share it with advertisers. We do not "
-                "add you to a marketing list because you asked a question.",
             ]),
             ("Where it is stored", [
-                "Enquiries, project correspondence and first-party analytics data live in our own "
-                "Supabase project. Google Analytics data is processed by Google under its own "
-                "privacy terms. We do not put enquiry contents into Google Analytics or Clarity, and "
-                "access to our own records is limited to the people working on your project.",
+                "Your enquiry is stored as an email in our own business inbox, and passes through "
+                "Resend on its way there. This website has no database, so there is no other copy "
+                "of it on our systems. Google Analytics data, if you allowed analytics, is "
+                "processed by Google under its own privacy terms. We do not put enquiry contents "
+                "into Google Analytics or Clarity, and access to our records is limited to the "
+                "people working on your project.",
                 "WhatsApp messages and emails are stored in the respective services we use to "
                 "communicate with you.",
                 "Where a project requires a third-party service such as a payment gateway or "
@@ -2890,9 +2584,9 @@ def build_privacy():
             ("How long we keep it", [
                 "Enquiries that do not become projects are kept while there is a realistic chance "
                 "of the conversation continuing, and removed on request at any time.",
-                "First-party analytics data is retained for approximately 90 days and then deleted "
-                "automatically. Google Analytics retention follows the settings of the Google "
-                "Analytics property.",
+                "We keep no analytics data of our own, so there is nothing on our side to retain "
+                "or delete. Google Analytics retention follows the settings of the Google "
+                "Analytics property, and applies only if you allowed analytics.",
                 "Records relating to a project we delivered are kept for as long as we may need "
                 "them for accounting, tax or contractual reasons.",
             ]),
@@ -2902,6 +2596,10 @@ def build_privacy():
                 "confirm what we have done. If deleting something would conflict with a legal or "
                 "accounting obligation, we will tell you which part and why.",
                 "You can stop hearing from us at any time by saying so in any channel.",
+                "You can change your mind about analytics whenever you like. Clearing this site's "
+                "data in your browser settings removes the answer you gave, and we will ask again "
+                "on your next visit. Turning on Do Not Track or Global Privacy Control in your "
+                "browser tells us not to ask at all, and we treat it as a decline.",
             ]),
             ("Children", [
                 "This website and our services are aimed at businesses. We do not knowingly "
@@ -3079,12 +2777,12 @@ def build_404():
 
         <div class="btn-group btn-group-center">
           <a href="index.html" class="btn btn-accent btn-lg">Back to home</a>
-          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} Sign in to ask us</a>
+          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp MUCO LABS us</a>
         </div>
       </div>
     </section>
 """.format(links=links.replace("<li>", '<li class="chip bare">'),
-           portal_contact=PORTAL_CONTACT, wa_svg=WA_SVG)
+           portal_contact=WHATSAPP_URL, wa_svg=WA_SVG)
 
     return render(
         "404.html", "Page not found | %s" % BRAND,
@@ -3245,7 +2943,7 @@ SITEMAP_PAGES = [
 
 def build_sitemap():
     urls = ""
-    pages = list(SITEMAP_PAGES)
+    pages = list(SITEMAP_PAGES) + [(slug + ".html", "0.7", "monthly") for slug in GROWTH_PAGES]
     idx = [i for i, p in enumerate(pages) if p[0] == "services.html"][0] + 1
     for sv in reversed(SERVICES):
         pages.insert(idx, ("services-%s.html" % sv["slug"], "0.8", "monthly"))
@@ -3271,14 +2969,14 @@ def build_robots():
     explicitly rather than left to a wildcard that could change meaning later.
     """
     ai_agents = [
-        ("GPTBot", "OpenAI — ChatGPT training and browsing"),
+        ("GPTBot", "OpenAI — model-training crawler"),
         ("OAI-SearchBot", "OpenAI — ChatGPT search index"),
         ("ChatGPT-User", "OpenAI — user-initiated page fetches"),
         ("ClaudeBot", "Anthropic — Claude"),
         ("Claude-Web", "Anthropic — user-initiated page fetches"),
         ("anthropic-ai", "Anthropic"),
         ("PerplexityBot", "Perplexity"),
-        ("Google-Extended", "Google — Gemini and AI Overviews"),
+        ("Google-Extended", "Google — selected AI training and grounding uses; Googlebot controls Search"),
         ("Applebot-Extended", "Apple Intelligence"),
         ("Bingbot", "Microsoft Bing and Copilot"),
         ("CCBot", "Common Crawl"),
@@ -3291,11 +2989,14 @@ def build_robots():
 
     txt = """# {domain}
 # Everything here is public marketing content. Search engines and answer engines
-# are both welcome; llms.txt carries a clean summary for language models.
+# are welcome. The existing llms.txt summary is informational, not a ranking mechanism.
 
 User-agent: *
 Allow: /
-Disallow: /404.html
+# /404.html is deliberately not disallowed. It carries <meta name="robots"
+# content="noindex">, and a crawler has to be able to fetch the page to read
+# that. Blocking it here left the noindex unread, so the URL could still surface
+# in results with no description.
 {blocks}
 Sitemap: {domain}/sitemap.xml
 """.format(domain=DOMAIN, blocks=blocks)
@@ -3321,6 +3022,12 @@ def build_vercel_json():
     script_src = "'self'"
     connect_src = "'self'"
     img_src = "'self' data:"
+    # The Consent Mode default is its own inline script and runs before both the
+    # Google tag and the Tag Manager loader, so it needs its own hash. Miss this
+    # and the browser blocks it silently: the tags then fall back to their own
+    # defaults and measure before the visitor has chosen anything.
+    if GA_MEASUREMENT_ID or GTM_CONTAINER_ID:
+        script_src += " " + consent_mode_csp_hash()
     if GA_MEASUREMENT_ID:
         script_src += " https://www.googletagmanager.com " + google_analytics_csp_hash()
         connect_src += " https://www.google-analytics.com https://region1.google-analytics.com"
@@ -3532,44 +3239,18 @@ Free website review · Careers · Privacy · Terms · Refund · 404
 
 ## Enquiry form
 
-Enquiries are account-gated across the whole site. Every WhatsApp, phone and
-email action routes through client workspace sign-in, so a brief always arrives attached
-to a customer account and stays visible to that customer afterwards.
+Initial enquiries and website reviews are public. WhatsApp, telephone and email
+links work directly. Existing customers retain a separate workspace sign-in.
+`growth_content.py` owns the short forms and new commercial resources.
+`main.js` preserves visit attribution and posts to `/api/lead`. A confirmed CRM
+record is required for the recorded-lead conversion. Failures preserve the form
+and expose direct contact options. Email-only delivery is labelled separately.
 
-Two layers do this. The shared fragments (`header_html`, `footer_html`,
-`final_cta`) and the page bodies link to `PORTAL_CONTACT` and are labelled for
-what they now do &mdash; no button says "Call us" and opens a login page. On top
-of that, `render()` applies `gate_contact_links()` to the finished HTML as a
-backstop, so a stale `mailto:` written inline in a page body cannot slip out.
-
-Two page groups are exempt, both via `contact_gate=GATE_KEEP_EMAIL`, which
-leaves `mailto:` alone and still gates WhatsApp and phone:
-
-- **Legal** (privacy, terms, refund) &mdash; a data-protection, cancellation or
-  refund request has to be sendable by someone with no account and no reason to
-  open one.
-- **Careers** &mdash; applying for a role is a hiring channel, not a sales one.
-  Asking a candidate to create a *customer* account to send a CV would close the
-  recruitment funnel.
-
-There is no anonymous contact form. Every sales contact action goes through the
-client workspace, so an enquiry always arrives attached to a verified customer
-account rather than to an unverified email address. New customers can create an
-account, confirm their email and complete the short onboarding form in the same
-flow; the team workspaces remain invitation-only.
-
-`api/lead.js` used to serve that form and was removed once nothing posted to
-it. An endpoint that accepts input and sends mail, with no caller and no
-traffic to compare against, is surface nobody is watching. If an anonymous
-form returns, it should come back with its own review rather than by reviving
-code that sat unused.
-
-Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in
-Vercel so accepted enquiries are stored in the MUCO CRM. These are required for
-the enquiry to appear in the admin workspace's Enquiries inbox.
-
-The browser opens WhatsApp *before* awaiting the request, because doing it
-afterwards loses the click gesture and pop-up blockers eat the window.
+Configure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+on the hosting runtime. The optional Resend configuration sends notifications;
+no live test emails are sent by the automated tests. Deploy the growth enquiry
+migration before relying on shared rate limiting, idempotency and extended
+attribution. See `delivery/growth/04-BACKEND-HANDOFF.md`.
 
 ## Analytics
 
@@ -3734,12 +3415,12 @@ def build_website_audit():
         "you. You get a written list of what is worth fixing and what is not. No charge, no "
         "obligation, and no automated score.",
         extra="""        <div class="btn-group mt-5">
-          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} Sign in to send your website</a>
-          <a href="{portal_signup}" class="btn btn-secondary btn-lg">Request it by form</a>
+          <a href="#lead-form" class="btn btn-accent btn-lg">Get a Free Website Review</a>
+          <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp MUCO LABS</a>
         </div>
         {trust}
-""".format(portal_contact=PORTAL_CONTACT, portal_signup=PORTAL_SIGNUP, wa_svg=WA_SVG, trust=trust_row())
-    ) + """    <section class="section-divider">
+""".format(portal_contact=WHATSAPP_URL, portal_signup=CONSULTATION_URL, wa_svg=WA_SVG, trust=trust_row())
+    ) + '<section class="section-divider"><div class="container container-narrow">' + public_lead_form(audit=True) + '</div></section>' + """    <section class="section-divider">
       <div class="container">
         <div class="section-head">
           <span class="eyebrow">What we look at</span>
@@ -3786,7 +3467,7 @@ def build_website_audit():
             "One message with the address is enough. We will come back with what we find and "
             "what, if anything, we think you should do about it.",
             primary_label="Request the review",
-            primary=PORTAL_SIGNUP,
+            primary="#lead-form",
         ),
     )
 
@@ -3839,6 +3520,7 @@ def build_all():
     ]
     jobs += [("services-%s.html" % sv["slug"], (lambda v: lambda: build_service_page(v))(sv))
              for sv in SERVICES]
+    jobs += [(slug + ".html", (lambda key: lambda: build_growth_page(key))(slug)) for slug in GROWTH_PAGES]
     total = 0
     for name, fn in jobs:
         size = fn()

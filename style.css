@@ -3810,6 +3810,66 @@ main {
 .project-illustration figcaption { position: absolute; inset: auto 0 0; display: flex; justify-content: space-between; gap: 12px; padding: 28px 16px 12px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.8)); font-size: 11px; }
 .project-illustration figcaption span:last-child { opacity: .85; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .work-card:hover .project-illustration img { transform: scale(1.025); } }
+/* Analytics consent. Sits above the mobile contact bar (z-index 70) but below
+   the nav overlay, and stays display:none until main.js removes [hidden], so it
+   costs no layout shift and never flashes for a visitor who already chose. */
+.consent-bar { position: fixed; inset: auto 0 0; z-index: 90; padding: 16px;
+  background: var(--surface); border-top: 1px solid var(--line-strong);
+  box-shadow: 0 -8px 32px rgba(0,0,0,.35); }
+.consent-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: space-between; gap: 16px 24px; }
+.consent-copy { flex: 1 1 320px; min-width: 0; }
+.consent-title { margin: 0 0 4px; font-weight: 600; color: var(--text); }
+.consent-text { margin: 0; font-size: 14px; line-height: 1.55; color: var(--text-2); max-width: 70ch; }
+.consent-actions { display: flex; flex-wrap: wrap; gap: 10px; flex: 0 0 auto; }
+.consent-actions .btn { min-height: 44px; }
+/* The mobile contact bar is also fixed to the bottom and measures 66px, so lift
+   clear of it rather than resting on its top edge. */
+@media (max-width: 860px) { .consent-bar { bottom: 66px; } }
+
+/* One contact control. WhatsApp and Call live together behind a single quiet
+   trigger in the header, so they never compete with Start a Project and never
+   become two floating buttons in opposite corners. */
+.contact-dock { position: relative; }
+.contact-dock-trigger { display: inline-flex; align-items: center; gap: 7px; min-height: 40px;
+  padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--radius);
+  color: var(--text-2); font-size: 14px; cursor: pointer; list-style: none; white-space: nowrap; }
+.contact-dock-trigger::-webkit-details-marker { display: none; }
+.contact-dock-trigger:hover, .contact-dock[open] .contact-dock-trigger { color: var(--text); border-color: var(--accent); }
+.contact-dock-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 120;
+  display: grid; min-width: 210px; padding: 6px; background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px rgba(0,0,0,.45); }
+.contact-dock-panel a { padding: 11px 14px; min-height: 44px; display: flex; align-items: center;
+  color: var(--text-2); border-radius: var(--radius); font-size: 14px; }
+.contact-dock-panel a:hover, .contact-dock-panel a:focus-visible { background: var(--accent-soft); color: var(--text); }
+@media (max-width: 860px) { .contact-dock { display: none; } }
+
+/* Scroll anchor for /contact#start-project. Offset so the fixed header does not
+   sit on top of the form heading when the link lands. */
+.anchor-target { display: block; position: relative; top: -96px; visibility: hidden; height: 0; }
+
+/* Category navigation for the course catalogue. These are the primary way into
+   65 listings, so they come before the grid and carry real counts. */
+.learning-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 8px; }
+.learning-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface); color: var(--text-2); font: inherit; font-size: 14px; cursor: pointer; }
+.learning-chip span { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.learning-chip:hover, .learning-chip:focus-visible { border-color: var(--accent); color: var(--text); }
+.learning-chip.is-active { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+.learning-chip.is-active span { color: var(--accent-bright); }
+.learning-more { display: flex; justify-content: center; margin-top: 28px; }
+.learning-course:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 3px; }
+
+.footer-place, .footer-reach { color: var(--text-3); font-size: 14px; margin: 10px 0 0; }
+.footer-reach a { color: var(--text-2); }
+.footer-reach a:hover { color: var(--accent-bright); }
+.footer-social { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.footer-social a { padding: 8px 14px; min-height: 40px; display: inline-flex; align-items: center;
+  border: 1px solid var(--line-strong); border-radius: 999px; color: var(--text-2); font-size: 13px; }
+.footer-social a:hover, .footer-social a:focus-visible { border-color: var(--accent); color: var(--text); }
+
 /* Public enquiry flow: keep contact reachable without covering page content. */
 .mobile-contact-bar { display: none; }
 .lead-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
@@ -3901,6 +3961,9 @@ main {
   .mobile-contact-bar a { display: flex; flex: 1; gap: .5rem; justify-content: center; align-items: center;
     min-height: 46px; padding: .5rem; color: #f7fbff; background: #203c43; border-radius: .5rem;
     font-size: .9rem; font-weight: 600; text-decoration: none; }
+  /* Start a Project stays the loudest action here too, so the dock never
+     out-shouts the primary conversion. */
+  .mobile-contact-bar a.mobile-contact-primary { flex: 1.4; background: var(--accent); color: #14171c; }
   body:has(#menu-toggle[aria-expanded="true"]) .mobile-contact-bar { display: none; }
   .public-lead-form .form-row { display: grid; grid-template-columns: minmax(0, 1fr); }
   .public-lead-form .btn { white-space: normal; }
