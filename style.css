@@ -111,9 +111,12 @@
   .learning-feedback-stat { text-align:left; }
 }
 
-/* Keep the menu reachable on very narrow phones. Sign-in remains in the menu. */
+/* Very narrow phones: keep the menu reachable and prevent header overflow. */
 @media (max-width:360px) {
-  .nav-actions > .nav-portal-link { display:none; }
+  .nav-actions > .btn-primary {
+    padding: 9px 12px;
+    font-size: 12.5px;
+  }
 }
 
 :root {
@@ -195,6 +198,7 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--nav-h) + 24px);
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -3698,6 +3702,9 @@ main {
 
   .logo-badge { display: none; }
 
+  /* Two CTA buttons plus the menu toggle overflow common phone widths. */
+  .nav-actions .btn-accent { display: none; }
+
   .card,
   .spotlight-card,
   .form-card,
@@ -3788,4 +3795,34 @@ main {
 .project-illustration figcaption { position: absolute; inset: auto 0 0; display: flex; justify-content: space-between; gap: 12px; padding: 28px 16px 12px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.8)); font-size: 11px; }
 .project-illustration figcaption span:last-child { opacity: .85; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .work-card:hover .project-illustration img { transform: scale(1.025); } }
-
+/* Public enquiry flow: keep contact reachable without covering page content. */
+.mobile-contact-bar { display: none; }
+.lead-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.lead-fields:disabled { opacity: .7; }
+.lead-honeypot { display: none; }
+.lead-optional { margin: 1.25rem 0; }
+.lead-optional > summary { cursor: pointer; padding: .8rem 0; font-weight: 600; }
+.lead-optional[open] > summary { margin-bottom: .75rem; }
+.consent-label { display: flex; gap: .75rem; align-items: flex-start; }
+.consent-label input { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; margin-top: .2rem; }
+.public-lead-form { scroll-margin-top: 6rem; }
+.public-lead-form [aria-invalid="true"] { border-color: #ffaaa0; }
+.public-lead-form .form-status:empty { display: none; }
+.public-lead-form .lead-fallback { align-items: center; }
+.public-lead-form .form-error:not(:empty) { color: #ffaaa0; }
+.growth-copy h2 { margin-bottom: 1.5rem; }
+.growth-copy p + p { margin-top: 1rem; }
+.growth-copy .table-scroll { overflow-x: auto; }
+.footer-col a, .card p { overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .mobile-contact-bar { display: flex; position: fixed; inset: auto 0 0; z-index: 70;
+    gap: .5rem; padding: .6rem .75rem calc(.6rem + env(safe-area-inset-bottom));
+    background: #101d27; border-top: 1px solid #445363; }
+  .mobile-contact-bar a { display: flex; flex: 1; gap: .5rem; justify-content: center; align-items: center;
+    min-height: 46px; padding: .5rem; color: #f7fbff; background: #203c43; border-radius: .5rem;
+    font-size: .9rem; font-weight: 600; text-decoration: none; }
+  body:has(#menu-toggle[aria-expanded="true"]) .mobile-contact-bar { display: none; }
+  .public-lead-form .form-row { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .public-lead-form .btn { white-space: normal; }
+}

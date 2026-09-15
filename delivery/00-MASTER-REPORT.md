@@ -159,6 +159,7 @@ Redirect: `/learning-portal` → `/learning` (301, permanent).
 | Viewport / title / description / canonical | Static parser over `public-site/*.html` | Present on all 27 public pages. |
 | Reduced-motion CSS | `style.css` search | `prefers-reduced-motion` media query present. |
 | Touch-target CSS | `style.css` search | `min-width` / `min-height` ≥ 44 px rules present. |
+| UI/UX alignment (Playwright) | `scripts/_ui-audit.mjs` at 1280px, 390px and 360px | 0 horizontal overflow, 0 header overlaps, 0 console errors, 0 load failures across 27 pages. |
 | Lint / typecheck | Not run. | This static site has no TypeScript/lint pipeline at the root. |
 | Lighthouse / Core Web Vitals | Not run in this session. | A field measurement should be run after Vercel deployment. |
 | Real-device responsive / cross-browser | Not run in this session. | Existing responsive CSS and semantic HTML were preserved; manual device testing is recommended before final certification. |
@@ -176,6 +177,13 @@ Redirect: `/learning-portal` → `/learning` (301, permanent).
 - Email delivery depends on a valid Resend API key and a verified sender domain.
 - The public enquiry endpoint has per-instance rate limiting; a shared store would be required for stronger abuse protection if traffic grows.
 - The existing `learning-portal-callout` CSS class name remains in `learning.html` and `style.css` but is no longer a portal link.
+
+## UI/UX alignment fixes applied
+
+- Added `overflow-x: hidden` to `html` to clip the decorative `ambient-glow` fixed layer and prevent unintentional horizontal scroll on every page.
+- At `max-width: 480px`, hide the secondary `Enquire` button in `header nav` so only `Start a Project` and the menu toggle remain in the bar.
+- At `max-width: 360px`, reduce `Start a Project` button padding and font size to fit very narrow phones.
+- Verified after fixes: 0 horizontal overflow, 0 header overlaps across desktop, 390px and 360px viewports.
 
 ## M. Deployment
 

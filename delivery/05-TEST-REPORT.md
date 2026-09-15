@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Verify that the public website builds, the enquiry endpoint works without a database, the analytics endpoint is a no-op, and no portal links remain in the published HTML.
+Verify that the public website builds, the enquiry endpoint works without a database, the analytics endpoint is a no-op, no portal links remain in the published HTML, and the UI/UX alignment is clean on desktop, mobile and very narrow viewports.
 
 ## Declared skips
 
@@ -25,10 +25,11 @@ Verify that the public website builds, the enquiry endpoint works without a data
 | Internal link integrity | Static parser over `public-site/*.html` | 0 broken internal links out of 1,698 checked. |
 | Alt text | Static parser over `public-site/*.html` | 0 images missing `alt`. |
 | Form labels | Static parser over `public-site/*.html` | 0 unlabelled inputs. |
-| Heading hierarchy | Static parser over `public-site/*.html` | No duplicate `h1`; no skipped heading levels. |
+| Heading hierarchy | Static parser over `public-site/*.html` | No duplicate `h1`; no skipped levels. |
 | Viewport / title / description / canonical | Static parser over `public-site/*.html` | All 27 pages present. |
 | Reduced-motion CSS | `style.css` search | `prefers-reduced-motion` media query present. |
 | Touch-target CSS | `style.css` search | `min-width` / `min-height` ≥ 44 px rules present. |
+| UI/UX alignment (Playwright) | `scripts/_ui-audit.mjs` over `http://localhost:8123` at 1280px, 390px and 360px | 0 horizontal overflow, 0 header overlaps, 0 console errors, 0 load failures across 27 pages. |
 
 ## Defects
 
