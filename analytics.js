@@ -70,14 +70,14 @@
     return out;
   }
 
-  var utm = utmParams();
+  var utm = window.mucoAttribution ? window.mucoAttribution() : utmParams();
 
   function sendEvent(name, params) {
     try {
       var payload = {
         event_name: name,
         path: page,
-        referrer: document.referrer || '',
+        referrer: utm.referrer || '',
         session_id: sessionId,
         occurred_at: new Date().toISOString(),
         metadata: {}
@@ -97,6 +97,21 @@
         }
       }
 
+      // Explicit events keep form values, WhatsApp text and query strings out of GA.
+      var gaNames = {form_start: params && params.form_type === 'audit' ? 'audit_started' : 'project_form_started',
+        lead_submit: params && params.form_type === 'audit' ? 'audit_submitted' : 'project_form_submitted',
+        project_detail_open: 'case_study_view'};
+      var gaName = gaNames[name] || name;
+      if (name === 'cta_click' && params && params.action) gaName = params.action;
+      if (typeof window.gtag === 'function') {
+        var ga = {page_location: location.origin + page, page_referrer: utm.referrer || '',
+          form_type: params && params.form_type, service: params && params.service,
+          link_text: params && params.link_text, campaign_source: utm.utm_source,
+          campaign_medium: utm.utm_medium, campaign_name: utm.utm_campaign,
+          campaign_content: utm.utm_content, campaign_id: utm.utm_id};
+        window.gtag('event', gaName, ga);
+        if (name === 'lead_submit') window.gtag('event', 'generate_lead', ga);
+      }
       var body = JSON.stringify(payload);
       var sent = false;
 
@@ -129,6 +144,7 @@
 
   /* ------------------------------------------------------------------ page view */
   sendEvent('page_view');
+  if (/^\/pricing(?:\.html)?$/.test(page)) sendEvent('cta_click', {action: 'pricing_view'});
 
   /* ---------------------------------------------------------- outbound + CTA clicks */
   document.addEventListener(
@@ -138,7 +154,8 @@
       if (!a) return;
       var href = (a.getAttribute('href') || '').trim();
       var label = (a.innerText || a.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60);
-      var params = { link_text: label };
+      var params = { link_text: label, placement: a.closest('header') ? 'header' : a.closest('footer') ? 'footer' : a.closest('.mobile-contact-bar') ? 'mobile_bar' : 'content' };
+      if (href.indexOf('/contact') === 0 && a.classList.contains('btn')) sendEvent('contact_click', {action: 'consultation_click', link_text: label});
 
       if (href.indexOf('wa.me') !== -1) {
         sendEvent('whatsapp_click', params);
@@ -150,8 +167,6 @@
         sendEvent('contact_click', params);
       } else if (href.indexOf('instagram.com') !== -1) {
         sendEvent('instagram_click', params);
-      } else if (/\bsignup\b|portal\.mucolabs\.com\/signup|\/signup/.test(href)) {
-        sendEvent('signup_click', params);
       }
 
       if (a.classList.contains('btn-accent') || a.classList.contains('btn-primary')) {
@@ -162,7 +177,7 @@
   );
 
   /* ---------------------------------------------------------------- enquiry form */
-  var form = document.getElementById('enquiry-form');
+  var form = document.getElementById('lead-form');
   if (form) {
     var started = false;
     form.addEventListener(
@@ -170,7 +185,7 @@
       function () {
         if (started) return;
         started = true;
-        sendEvent('form_start');
+        sendEvent('form_start', {form_type: form.dataset.formType});
       },
       { once: false }
     );

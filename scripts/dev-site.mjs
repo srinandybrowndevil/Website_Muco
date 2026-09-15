@@ -20,7 +20,7 @@ http.createServer(async (req, res) => {
     if (preview && url.pathname === "/__preview") {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("X-Robots-Tag", "noindex, nofollow");
-      res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MUCO LABS · Local preview</title><style>body{margin:0;background:#0e1824;color:#edf4fb;font:17px/1.65 system-ui}main{max-width:900px;margin:auto;padding:60px 24px}h1{font-size:clamp(32px,5vw,56px);line-height:1.15}nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:32px 0}a{color:inherit;text-decoration:none;border:1px solid #48627e;background:#172a3b;border-radius:12px;padding:24px;display:block}a:hover,a:focus-visible{outline:2px solid #9cdbff}small,p{color:#b5c8dc}strong{display:block;font-size:21px}</style><main><small>MUCO LABS · DEVELOPMENT</small><h1>Explore every workspace.</h1><p>Click Sign in to enter. No email, password or Google account is needed. These are fictional sample records, with edits saved only on this computer.</p><nav><a href="/"><strong>Public website</strong>Services, learning and contact</a><a href="http://localhost:3104/login"><strong>Customer</strong>Projects, requests, billing and profile</a><a href="http://localhost:3101/login"><strong>Admin</strong>Requests, people and studio operations</a><a href="http://localhost:3102/login"><strong>Employee</strong>Tasks, projects and mentoring</a><a href="http://localhost:3103/login"><strong>Intern</strong>Learning, work log and internship</a></nav><p>Supabase authentication, emails and invitations are disconnected for this preview. The live websites have not been changed.</p></main></html>`);
+      res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MUCO LABS · Local preview</title><style>body{margin:0;background:#0e1824;color:#edf4fb;font:17px/1.65 system-ui}main{max-width:900px;margin:auto;padding:60px 24px}h1{font-size:clamp(32px,5vw,56px);line-height:1.15}nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:32px 0}a{color:inherit;text-decoration:none;border:1px solid #48627e;background:#172a3b;border-radius:12px;padding:24px;display:block}a:hover,a:focus-visible{outline:2px solid #9cdbff}small,p{color:#b5c8dc}strong{display:block;font-size:21px}</style><main><small>MUCO LABS · DEVELOPMENT</small><h1>Public website preview</h1><p>This local server previews the static public website only. Portals, authentication and database features have been removed from this architecture.</p><nav><a href="/"><strong>Public website</strong>Services, learning and contact</a></nav></main></html>`);
       return;
     }
     if (["/api/lead", "/api/event"].includes(url.pathname)) {
@@ -49,7 +49,7 @@ http.createServer(async (req, res) => {
     if (!extname(name)) name += ".html";
     const path = resolve(root, name);
     const allowed = path.startsWith(root.endsWith(sep) ? root : root + sep) && !name.split(/[\\/]/).some(part => part.startsWith("."))
-      && (name.startsWith("assets/") || (!/[\\/]/.test(name) && (name.endsWith(".html") || ["style.css", "main.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg"].includes(name))));
+      && (name.startsWith("assets/") || (!/[\\/]/.test(name) && (name.endsWith(".html") || ["style.css", "main.js", "attribution.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg"].includes(name))));
     const found = allowed && existsSync(path) && statSync(path).isFile();
     res.statusCode = found ? 200 : 404;
     const selected = found ? path : resolve(root, "404.html");
@@ -62,11 +62,8 @@ http.createServer(async (req, res) => {
     if (req.method === "HEAD") res.end();
     else if (preview && extname(selected) === ".html") {
       let html = readFileSync(selected, "utf8");
-      const ports = { client: 3104, portal: 3104, admin: 3101, employee: 3102, intern: 3103 };
-      html = html.replace(/https:\/\/(client|portal|admin|employee|intern)\.mucolabs\.com/g, (_, name) => `http://localhost:${ports[name]}`);
       html = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, script => /googletagmanager|google-analytics|analytics\.js/.test(script) ? "" : script);
       html = html.replace(/<noscript>[\s\S]*?<\/noscript>/gi, block => block.includes("googletagmanager") ? "" : block);
-      html = html.replace("</body>", '<a href="/__preview" style="position:fixed;left:12px;bottom:12px;z-index:9999;background:#172b3a;color:#fff;padding:12px 16px;border:1px solid #9cdbff;border-radius:8px;font:14px system-ui;text-decoration:none">Local preview · Workspaces</a></body>');
       res.setHeader("X-Robots-Tag", "noindex, nofollow");
       res.end(html);
     } else res.end(readFileSync(selected));

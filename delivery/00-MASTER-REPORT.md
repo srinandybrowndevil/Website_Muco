@@ -1,155 +1,188 @@
-# Master Report — MUCO LABS Website and Portal
+# MUCO LABS — Public Website Rebuild: QA Master Report
 
-**Product type:** Website (mucolabs.com) and Software (portal.mucolabs.com)
-**Loop:** 1
-**Date:** 10 September 2026
+**Product type:** Website (https://mucolabs.com)
+**Loop:** 3
+**Date:** 15 September 2026
 **Prepared for:** Srinivash Mahalingam, founder, MUCO LABS
-**Result:** Not certified. One S1 finding remains open: an exposed administrator credential, which only the account holder can change. Every other finding is fixed.
+**Result:** Ready for Vercel deployment under the public-website-only scope. The previous four-workspace portal architecture is no longer built or deployed by the root `vercel.json`.
 
-## Current loop addendum — 12 September 2026
+## Executive summary
 
-Source and local delivery now include customer sign-up/onboarding, a client-only sign-up link on login, authentication-gated sales CTAs, and editable customer profile links plus a 1:1 avatar upload. Typecheck, lint, builds, schema checks and the full Playwright suite pass (`152 passed`; customer-auth coverage `6 passed`; learning/contact coverage `4 passed`).
+The repository was refactored so that only the public business website and a small server-side enquiry email function remain in production scope. All public-facing portal links were removed, the contact form now sends enquiries directly by email through Resend, the first-party analytics endpoint no longer writes to a database, and the static site build now clears stale output before packaging. The build succeeds, contract tests pass, and no `login`, `signup`, `client.mucolabs.com` or `/learning-portal` links remain in the published HTML.
 
-Production is not yet certified. A live host audit found that every workspace hostname currently serves the client shell, so the admin request pages the founder expects are not reachable from `admin.mucolabs.com`. Correct the Vercel project/custom-domain mapping and deploy each workspace using `workspaces/DEPLOYMENT-CHECKLIST.md`; then repeat the smoke suite. The old Google error screenshot is no longer reproduced at the Supabase authorize endpoint, which now redirects to Google, but deployed callback allow-lists still need verification.
+## A. Architecture
 
----
+- **Framework:** Static HTML, CSS and JavaScript built by `scripts/build-site.mjs`.
+- **Deployment:** Vercel using `vercel.json` with `framework: null` and `outputDirectory: public-site`.
+- **Database:** None required for normal public website operation.
+- **Email provider:** Resend (https://resend.com) via `api/lead.js`.
+- **Analytics:** Google Analytics 4 and Google Tag Manager tags remain in each page `<head>`; first-party events are accepted by `api/event.js` but are intentionally not persisted to a database.
+- **No production database dependency confirmed.** The site renders every public page and processes enquiries without Supabase or any other database.
 
-## 1. Executive summary
+## B. Removed or disabled systems
 
-MUCO LABS now runs two properties: a public marketing website and a private portal with four separate workspaces for the founder, clients, interns and employees. The portal work specified across ten phases is complete. This report covers the testing and audit of that work.
+- Customer/client portal links (`https://client.mucolabs.com/login`) from desktop and mobile navigation, plus the contact, learning and work pages.
+- `/learning-portal` page and footer link; replaced by a 301 redirect to `/learning`.
+- Learning portal call-to-action on `/learning`.
+- Customer workspace mention on `/contact` and `/work`.
+- Supabase CRM ingestion from `api/lead.js`.
+- Supabase analytics persistence from `api/event.js`.
+- Supabase environment variables from `.env.example`.
+- `signup_click` tracking event from `analytics.js`.
+- Portal workspace preview links from `scripts/dev-site.mjs` and the local `/__preview` page.
 
-The engineering is in good order. Access control is enforced in the database rather than in the pages, which means a person cannot reach another person's data by calling the interface directly — the strongest form of this guarantee available. Forty-seven test cases were run against the live system under simulated identities. Forty-four passed on the first attempt.
+The `workspaces/` monorepo source remains in the repository but is not included in the static build or the root Vercel deployment.
 
-Three failures were found, and all three were fixed and re-tested during the audit. The most significant was in the new audit log. It recorded who viewed compensation and client details correctly, but it accepted any action name from any signed-in person, so a client could have written an invented entry such as "founder approved everything" into the record, or flooded it to bury real entries. They could never have attributed an entry to somebody else, and could never have deleted one, so the log's core guarantee held. It is now restricted to a declared vocabulary and a rate cap.
+## C. Modified files
 
-On instruction, a second pass then closed the whole punch list: the unused enquiry endpoint is gone, the 23 access-control policies are optimised, the 21 missing indexes are added, and the stale crawl line is removed.
+- `api/lead.js` — rewritten as email-only Resend sender.
+- `api/event.js` — rewritten as no-op analytics receiver.
+- `.env.example` — updated to Resend-only variables.
+- `analytics.js` — removed `signup_click` event.
+- `scripts/build-site.mjs` — clears `public-site/` before copying.
+- `scripts/dev-site.mjs` — removed portal preview links.
+- `vercel.json` — added `/learning-portal` to `/learning` 301 redirect.
+- `sitemap.xml` — removed `/learning-portal` entry.
+- `learning.html`, `contact.html`, `work.html`, `terms.html`, `privacy.html`, `refund.html` — removed portal references.
+- All root `*.html` — replaced `Sign in` portal links with `Start a Project` CTA.
+- `test-lead.mjs`, `test-event.mjs` — updated to match the new email/no-op behaviour.
+- `style.css` — unchanged in this loop; existing styles already support the new `btn btn-primary` CTA classes.
 
-That second pass found something worth more than all of it. Closing the item about administrator screens never being opened meant replaying the queries those screens issue. One came back as an error rather than a row: the intern certificate page asked for the holder's name in a way the database refuses as ambiguous, and the page discarded the error instead of reading it. Every certificate would have printed with "Not recorded" where the intern's name belongs — a certificate certifying nobody. It is fixed, and it is the clearest argument in this report for spending ten minutes opening each screen for real.
+## D. New files
 
-Two findings remain open, and neither can be closed by engineering.
+None. All changes were edits to the existing static site or API files.
 
-The first is serious and needs action today. An account password for this system was written into a working transcript during the engagement and has not been confirmed changed. That account is the only administrator, and it can read every client's contact details, every invoice and every person's compensation. The new audit log would record what an intruder did, which helps afterwards but prevents nothing. Changing that password is the single most valuable thing to do this week.
+## E. Deleted files
 
-The second was a cost decision, and is now largely answered without spending anything. Supabase can refuse passwords found in public breach lists, but only on a paid plan — so the portal now performs that check itself, on sign-up and on password recovery. The password never leaves the browser: it is hashed there, only five characters of the hash are sent, and the comparison happens locally among thousands of candidates, so nobody on the wire can tell which one was being asked about.
+- `learning-portal.html`
 
-It works on real data, and the useful test was not "does it refuse a bad password" — the existing rules already refuse the obvious ones. The question is whether anything slips past those rules and is still known to attackers. Seven of eight candidates did: `Liverpool1!`, `Chocolate1!`, `Manchester1!`, `Tinkerbell1!`, `Rainbow123!`, `Blessed@2020` and `Butterfly9!` each satisfy every requirement the portal already enforced, and each appears in the breach corpus — `Liverpool1!` nearly twenty-three thousand times. All are now refused. Submitted through the real form, the check also stops before any account is created rather than after.
+## F. Environment variables
 
-What remains is a password set through a platform path the portal does not render, and point-in-time recovery, which is still the backup story this system does not have. Both need the paid plan.
+Required production variables:
 
-The website side is strong and needs little. All 25 pages carry correct titles, descriptions, canonical links and structured data, with no duplicates. The robots file names fifteen answer-engine crawlers explicitly rather than relying on a wildcard, which is ahead of common practice. One accessibility defect was found and fixed.
+- `RESEND_API_KEY` — Resend API key.
+- `LEAD_TO_EMAIL` — recipient for enquiries (default `founder@mucolabs.com`).
+- `LEAD_FROM_EMAIL` — verified sender address on a Resend domain.
 
-Certification fails on the open S1 and S2. That is the gate doing its job, not a judgement on build quality. Change the password and decide on the plan, and this passes with a short list of minor items.
+No Supabase, database or authentication variables are required for the public website.
 
-## 2. Objective and intake
+## G. Route map
 
-The standing instruction for this session was to continue the work in progress. The engagement to date has been the ten-phase four-workspace specification, completed and shipped through commit `0cd1188`. This loop applies the factory's Test and QA stations to that work.
+Final public routes served from `public-site/`:
 
-## 3. Scope, environments, tools, limits
+`/`
+`/about`
+`/services`
+`/services-websites`
+`/services-software`
+`/services-mobile`
+`/services-product-design`
+`/services-business-systems`
+`/services-ai-automation`
+`/services-marketing`
+`/services-support`
+`/pricing`
+`/contact`
+`/faq`
+`/work`
+`/careers`
+`/learning`
+`/maintenance`
+`/website-audit`
+`/website-development-erode`
+`/website-cost-erode`
+`/business-website-growth`
+`/textile-software`
+`/privacy`
+`/terms`
+`/refund`
+`/404`
 
-**In scope.** The public website as generated by `build.py`; the portal application; the production Supabase database, including its access policies, functions and triggers.
+Redirect: `/learning-portal` → `/learning` (301, permanent).
 
-**Environments.** Supabase production project `iruolxedptsuhjlyagon`; local production build of the portal; static site built from source.
+## H. SEO map
 
-**Tools.** Direct SQL under simulated identities; the Supabase security and performance advisors; TypeScript, lint and production builds; a static analysis pass across all built pages; a Chromium browser.
-
-**Limits, declared and not worked around.**
-
-- No administrator session was available. This operator does not enter account passwords, so administrator screens were never rendered signed in.
-- Only a Chromium browser was available. Firefox and WebKit were not tested.
-- No physical devices or screen readers were available.
-- No client performance measurement and no load testing were run this loop.
-
-## 4. Method — stations run and skipped
-
-| Station | Status |
-|---|---|
-| 0 Intake | Run |
-| 1 R&D | Covered by the four-workspace specification, which served as the brief. Not re-run; nothing in this loop required re-analysis of the problem. |
-| 2 Design | Covered by the same specification and by prior loops. |
-| 3 Frontend | Shipped in prior loops; this loop added the audit screen and the intern permission panel. |
-| 4 Backend | Shipped in prior loops; this loop added the audit log, the tier packs and two corrective migrations. |
-| 5 Tester | Run. See `05-TEST-REPORT.md`. |
-| 6 QA audit | Run. See `06-QA-AUDIT.md`. |
-
-Stations 1 through 4 are recorded as covered by existing artefacts rather than re-run. They are not claimed as fresh output of this session.
-
-## 5. Synopses
-
-**Domain rules.** Four workspaces, one per person, with no crossing: `/admin`, `/portal`, `/intern`, `/staff`. A person's role decides their workspace, and a request for another workspace is redirected before any page runs. Interns are bounded by real dates. Nobody sees another person's compensation. Clients never see source archives.
-
-**Frontend.** Twenty-nine routes. This loop added `/admin/audit` with five filters, and a panel on the intern home page showing what that intern's tier opens — including what it refuses, shown dimmed rather than hidden, because seeing the edge of your access is more useful than wondering whether a module exists.
-
-**Backend.** Access control is expressed as database policy, not as query filters, so the interface cannot be bypassed. The audit log is append-only: it carries no update, delete or insert policy for anyone, including the founder, and entries arrive only through a controlled function. Sensitive values never enter the log — it records that an amount changed, never the amount.
-
-**Data integrity.** Intern permissions are stored as data rather than as branches in code. The list of modules a tier may name is a database constraint, so customer records, invoices and production cannot be granted to an intern by configuration error — they cannot be named at all.
-
-## 6. Test synopsis
-
-Forty-seven cases planned and run across seven families: audit integrity, tier packs, audit surface abuse, routing, website crawl hygiene, website accessibility, and build safety. Forty-four passed. Three failed and were fixed within the station. Five areas were not run and are declared above.
-
-Each refusal was re-run as the database owner to confirm the same statement would otherwise have succeeded. This control exists because a refusal that matched no rows proves nothing — a lesson from a false positive in the previous loop.
-
-## 7. Findings
-
-Full detail with fields A through J is in `06-QA-AUDIT.md`.
-
-| ID | Title | Severity | Owner | Status | Effort |
+| URL | Primary intent | Title | H1 | Canonical | Schema |
 |---|---|---|---|---|---|
-| F-04 | Sole administrator credential is known-exposed | S1 | Founder | Open | Minutes |
-| F-01 | Audit log accepted invented action names and unbounded volume | S2 | Backend | Fixed | Done |
-| F-05 | Leaked-password protection disabled | S3 | Founder | Mitigated in the app | Plan decision for the remainder |
-| F-02 | Trigger function exposed on the public API surface | S3 | Backend | Fixed | Done |
-| F-03 | Link text "Read more" gives no destination | S3 | Frontend | Fixed | Done |
-| F-11 | Intern certificate rendered without the holder's name | S2 | Frontend | Fixed | Done |
-| F-12 | Onboarding could create a second customer record | S3 | Backend | Fixed | Done |
-| F-13 | Query errors discarded in eight places | S3 | Frontend | Fixed | Done |
-| F-06 | Enquiry endpoint deployed with no caller | S3 | Backend | Fixed | Done |
-| F-07 | Authorisation checks re-evaluated per row in 23 policies | S3 | Backend | Fixed | Done |
-| F-08 | 21 foreign keys without a covering index | S3 | Backend | Fixed | Done |
-| F-09 | Administrator interface never rendered signed in | S3 | Founder | Partly closed | Ten minutes |
-| F-10 | Crawl file excludes a page that is not built | S4 | Frontend | Fixed | Done |
+| / | Home | Website Development & Custom Software in Erode \| MUCO LABS | Website development in Erode that helps customers find you. | https://mucolabs.com/ | Organization, WebSite, WebPage |
+| /about | About the company | About \| Founder-led software studio in Erode \| MUCO LABS | A founder-led software studio in Erode. | https://mucolabs.com/about | Organization, AboutPage |
+| /services | Service overview | Services \| Web, Mobile, Software, AI & Marketing \| MUCO LABS | What we build, and what you get | https://mucolabs.com/services | Organization, ItemList |
+| /services-websites | Website service | Website Design & Development Services \| MUCO LABS, Erode | Website design & development | https://mucolabs.com/services-websites | Organization, Service |
+| /services-software | Software service | Custom Software & SaaS Development in Erode \| MUCO LABS | Custom software & SaaS | https://mucolabs.com/services-software | Organization, Service |
+| /services-mobile | Mobile app service | Mobile App Development in Erode \| MUCO LABS | Mobile app development | https://mucolabs.com/services-mobile | Organization, Service |
+| /services-product-design | Design service | UI/UX & Product Design in Erode \| MUCO LABS | UI/UX and product design | https://mucolabs.com/services-product-design | Organization, Service |
+| /services-business-systems | Business systems service | CRM, ERP & Billing Software in Erode \| MUCO LABS | CRM, ERP, HRMS, LMS & billing | https://mucolabs.com/services-business-systems | Organization, Service |
+| /services-ai-automation | AI automation service | AI & Business Automation in Erode \| MUCO LABS | AI & business automation | https://mucolabs.com/services-ai-automation | Organization, Service |
+| /services-marketing | Marketing service | SEO & Digital Marketing Services in Erode \| MUCO LABS | Digital marketing & SEO | https://mucolabs.com/services-marketing | Organization, Service |
+| /services-support | Support service | Branding, IT & Cloud Support in Erode \| MUCO LABS | Branding, IT & cloud support | https://mucolabs.com/services-support | Organization, Service |
+| /pricing | Pricing guidance | Pricing \| How We Quote \| MUCO LABS | We quote from a scope, not from a price list | https://mucolabs.com/pricing | Organization |
+| /contact | Enquiry conversion | Contact MUCO LABS \| Free Project Consultation in Erode | Tell us what your business needs. | https://mucolabs.com/contact | Organization, ContactPage, BreadcrumbList |
+| /faq | Common questions | FAQ \| Pricing, Process & Ownership \| MUCO LABS | The questions we actually get asked | https://mucolabs.com/faq | Organization, FAQPage |
+| /work | Proof and portfolio | Work & Projects \| MUCO LABS | Six things we are actually building | https://mucolabs.com/work | Organization |
+| /learning | Learning content | Learning & Courses \| Way2Me & MUCO LABS | Build your skills. Choose your next step. | https://mucolabs.com/learning | Organization |
+| /website-audit | Audit lead gen | Free Website Review & Audit \| MUCO LABS | Find out what your website is actually doing. | https://mucolabs.com/website-audit | Organization |
+| /website-development-erode | Local service page | Website Development in Erode \| MUCO LABS | Website development in Erode | https://mucolabs.com/website-development-erode | Organization |
+| /website-cost-erode | Local pricing guide | What Does a Business Website Cost in Erode? \| MUCO LABS | What does a business website cost in Erode? | https://mucolabs.com/website-cost-erode | Organization |
+| /business-website-growth | Growth guide | Business Website & Local Search Setup \| MUCO LABS, Erode | A business website built around customer enquiries. | https://mucolabs.com/business-website-growth | Organization |
+| /textile-software | Industry solution | Textile Order & Job Work Software in Erode \| MUCO LABS | Keep textile orders, job work and stock connected. | https://mucolabs.com/textile-software | Organization |
+| /careers | Hiring | Careers & Freelancer Collaboration \| MUCO LABS | We are small, and we hire that way | https://mucolabs.com/careers | Organization |
+| /maintenance | Support plans | Maintenance & Support Plans \| MUCO LABS | Someone who answers when something breaks | https://mucolabs.com/maintenance | Organization |
+| /privacy | Legal | Privacy Policy \| MUCO LABS | Privacy policy | https://mucolabs.com/privacy | Organization |
+| /terms | Legal | Terms \| MUCO LABS | Terms and conditions | https://mucolabs.com/terms | Organization |
+| /refund | Legal | Refund & Cancellation \| MUCO LABS | Refund and cancellation policy | https://mucolabs.com/refund | Organization |
+| /404 | Error | Page not found \| MUCO LABS | That page does not exist. | https://mucolabs.com/404 | Organization |
 
-## 8. Growth and organic-lead assessment
+## I. SEO/AEO/GEO work completed
 
-The growth gate passes. Crawl hygiene is clean across all 25 pages with no duplicate titles or descriptions. The sitemap covers all 24 indexable pages. Structured data is present and valid on every page except the error page, which is correctly excluded from crawling. Answer-engine access is declared explicitly for fifteen named crawlers, with a plain-language summary in `llms.txt`.
+- Unique `<title>` and `<meta name="description">` on every public page.
+- Canonical URLs and `alternate hreflang` `en-IN` / `x-default` links.
+- Open Graph and Twitter/X metadata on every page.
+- `robots.txt` allows public crawlers and names major answer-engine bots explicitly.
+- `sitemap.xml` lists all public routes except the removed `/learning-portal`.
+- Organization schema, WebSite schema, ContactPage, FAQPage and BreadcrumbList schema remain on relevant pages.
+- No fake testimonials, ratings, awards, offices or invented business facts were introduced.
+- `llms.txt` retained for answer-engine grounding.
 
-One thing to watch rather than fix: twelve pages carry frequently-asked-question markup. That is an asset only while every answer remains true, so it should be reviewed whenever pricing or service scope changes.
+## J. Testing
 
-## 9. Certification result
+| Check | Command | Result |
+|---|---|---|
+| Static build | `node scripts/build-site.mjs` | Passed — 38 files packaged into `public-site/`. |
+| Lead API contract | `node test-lead.mjs` | 20 passed, 0 failed. |
+| Event API contract | `node test-event.mjs` | 3 passed, 0 failed. |
+| Node test runner | `node --test test-lead.mjs test-event.mjs` | 2 suites passed. |
+| Portal link removal | `grep` over `public-site/*.html` for `client.mucolabs.com`, `Sign in`, `/login`, `/signup`, `/learning-portal` | No remaining portal links found. |
+| Lint / typecheck | Not run. | This static site has no TypeScript/lint pipeline at the root. |
+| Responsive / accessibility / Lighthouse | Not run in this session. | Existing semantic HTML, responsive CSS and a11y patterns were preserved; manual device testing is recommended before final certification. |
+| Cross-browser | Not run. | Only the built files and Node contract tests were exercised. |
 
-**Not certified.** Evidence exists for functional smoke, critical-path access control, security sanity, accessibility structure, growth hygiene, and build and type safety. Evidence does not exist for cross-browser rendering, real devices and screen readers, client performance budget, load behaviour, or the administrator interface rendered with real data.
+## K. Performance
 
-The gate fails on F-04 (S1) alone. Closing it — a password change, minutes of work — moves this to a pass with two S3 items: the live render of the administrator screens, and the platform-level remainder of F-05.
+- Lighthouse/Core Web Vitals were not measured in this session.
+- The production build is now a pure static HTML/CSS/JS site with no Next.js portal bundle, which removes the previous workspace JavaScript overhead entirely.
+- Images, fonts and SVGs continue to be served with long-lived cache headers configured in `vercel.json`.
 
-Every other finding in this loop is fixed and re-tested, including F-11, which was found while closing F-09.
+## L. Remaining limitations
 
-## 10. Quick wins this week
+- The `workspaces/` monorepo source still exists in the repository but is excluded from the static build and root Vercel deployment. It is not required for the public website.
+- Responsive, accessibility and Lighthouse checks were not run in this session; they should be completed before final certification.
+- Email delivery depends on a valid Resend API key and a verified sender domain.
+- The public enquiry endpoint has per-instance rate limiting; a shared store would be required for stronger abuse protection if traffic grows.
+- The existing `learning-portal-callout` CSS class name remains in `learning.html` and `style.css` but is no longer a portal link.
 
-Three remain, and every one of them needs you rather than the code.
+## M. Deployment
 
-1. **Change the administrator password.** Closes the only S1, and is the single most valuable thing on this list. Minutes.
-2. **Open each administrator screen once while signed in** and report anything wrong. Closes F-09. The certificate defect found this loop is why this is worth ten real minutes rather than being a formality.
-3. **Decide on the Supabase plan.** The password half of F-05 is now handled in the application at no cost. What the plan still buys is the platform-level remainder and point-in-time recovery — the backup story this system does not have.
+1. Commit the changes and push to the `main` branch.
+2. In Vercel, confirm the project uses `node scripts/build-site.mjs` as the build command and `public-site/` as the output directory.
+3. Set `RESEND_API_KEY`, `LEAD_TO_EMAIL` and `LEAD_FROM_EMAIL` in Vercel environment variables.
+4. Remove any unused Supabase/auth environment variables from the Vercel project to avoid confusion.
+5. Verify that `https://mucolabs.com/learning-portal` returns a 301 redirect to `/learning`.
 
-F-06, F-07, F-08, F-10, F-11, F-12 and F-13 were on this list and are done.
+## Factory station notes
 
-## 11. Structural work this month
-
-1. **Close the verification gaps** — a cross-browser pass, a screen-reader pass on the portal, and a client performance measurement. These are the areas this loop could not reach, and each hides the same class of fault F-11 turned out to be: valid code, wrong result, invisible to type checks and builds.
-2. **Watch the write cost of the new indexes.** Twenty-one were added this loop and the database already carried 16 unused ones. If insert volume grows enough to notice, drop the indexes whose parent rows are never deleted and never joined backwards.
-
-## 12. Open questions and assumption log
-
-**Open questions for the founder.**
-
-1. Has the administrator password been changed? This report assumes it has not, because that has not been confirmed. If it has, F-04 closes immediately.
-2. Is the Supabase paid plan worth it now that the password half of F-05 is handled in the application? The case for it is point-in-time recovery, not the password check.
-3. `api/lead.js` is now removed. If an anonymous contact form is returning at some point, say so — it should come back with its own review rather than by reviving code that sat unused.
-
-**Assumptions.**
-
-- The four-workspace specification is the current brief and has not changed.
-- The single organisation in the database is the intended model today. Two policies were corrected this loop because they would have behaved unpredictably once a second organisation existed.
-- Current data volumes are small. Both performance findings are sized against that and would need re-rating at scale.
-
-**Stated plainly.** Nothing in this report is claimed as tested unless it was executed and its output recorded. The administrator interface was never opened signed in, and this report does not imply otherwise.
+- **R&D:** Scope changed to public website only; decision to retain the existing static HTML/CSS/JS build and remove public-facing portal dependencies rather than migrate frameworks.
+- **Design:** Navigation simplified to a single primary CTA, Start a Project, linked to `/contact`. The footer no longer links to `/learning-portal`.
+- **Frontend:** All public pages updated to remove `Sign in` links and replace them with the Start a Project button. The `/learning` page was updated to remove the Way2Me portal CTA.
+- **Backend:** `api/lead.js` now validates and emails enquiries through Resend. `api/event.js` accepts events but does not persist them to a database.
+- **Tester:** Contract tests for both endpoints were updated and pass.
+- **QA:** This report. No S0–S2 defects found in the public-website scope; unmeasured areas are declared in Section J and Section K.

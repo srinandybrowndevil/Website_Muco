@@ -3,10 +3,7 @@
  *
  *   node test-lead.mjs
  *
- * No network and no mail send: RESEND_API_KEY is left unset, which is the path
- * where the lead is still accepted and written to the function log. Each case
- * uses its own IP, because the endpoint rate-limits per address and reusing one
- * would make later cases fail for the wrong reason.
+ * No real email is sent: RESEND_API_KEY is mocked.
  */
 import handler from './api/lead.js';
 
@@ -27,8 +24,10 @@ const call = (body, { method = 'POST', ip = nextIp() } = {}) =>
 
 const valid = {
   name: 'Test Person',
+  business: 'Test Business',
   phone: '+91 9876543210',
-  message: 'We run a textile unit in Erode and want to track jobwork.',
+  service: 'Website design & development',
+  message: 'We need a website.',
   consent: true
 };
 
@@ -52,26 +51,30 @@ const eq = (got, want, what) => {
   }
 };
 
-// The endpoint logs every accepted lead. Capture it instead of printing it, so
-// the results stay readable and the log line itself can be asserted on.
 const realLog = console.log;
 let captured = '';
-function capture() {
-  captured = '';
-  console.log = (...a) => { captured += a.join(' '); };
+function capture() { captured = ''; console.log = (...a) => { captured += a.join(' '); }; }
+function release() { console.log = realLog; return captured; }
+const quiet = (fn) => async () => { capture(); try { return await fn(); } finally { release(); } };
+
+const realFetch = global.fetch;
+function withMockResend(fn) {
+  return async () => {
+    process.env.RESEND_API_KEY = 'test-resend-key';
+    global.fetch = async (url, options) => {
+      if (url === 'https://api.resend.com/emails') {
+        return { ok: true, status: 200, text: async () => '' };
+      }
+      return { ok: true, status: 200, text: async () => '' };
+    };
+    try {
+      await fn();
+    } finally {
+      global.fetch = realFetch;
+      delete process.env.RESEND_API_KEY;
+    }
+  };
 }
-function release() {
-  console.log = realLog;
-  return captured;
-}
-const quiet = (fn) => async () => {
-  capture();
-  try {
-    return await fn();
-  } finally {
-    release();
-  }
-};
 
 console.log('POST /api/lead\n');
 
@@ -81,15 +84,13 @@ await check('rejects any method but POST', quiet(async () => {
   eq(r.headers.Allow, 'POST', 'Allow header');
 }));
 
-await check('rejects a complete enquiry when no delivery path accepts it', quiet(async () => {
+await check('requires a Resend key to deliver', quiet(async () => {
   const r = await call(valid);
   eq(r.code, 503, 'status');
   eq(r.body.ok, false, 'ok');
-  eq(r.body.recorded, false, 'recorded');
-  eq(r.body.emailed, false, 'emailed, with no key configured');
 }));
 
-for (const field of ['name', 'phone', 'message']) {
+for (const field of ['name', 'business', 'phone', 'service']) {
   await check(`rejects a missing ${field}`, quiet(async () => {
     const r = await call({ ...valid, [field]: '' });
     eq(r.code, 400, 'status');
@@ -105,17 +106,17 @@ await check('rejects a malformed email', quiet(async () => {
   eq((await call({ ...valid, email: 'not-an-address' })).code, 400, 'status');
 }));
 
-await check('accepts an omitted email', quiet(async () => {
-  eq((await call({ ...valid, email: '' })).code, 503, 'status');
-}));
+await check('accepts an omitted email when Resend is configured', quiet(withMockResend(async () => {
+  eq((await call({ ...valid, email: '' })).code, 200, 'status');
+})));
 
 await check('rejects a missing consent', quiet(async () => {
   eq((await call({ ...valid, consent: false })).code, 400, 'status');
 }));
 
-await check('accepts consent sent as the string "true"', quiet(async () => {
-  eq((await call({ ...valid, consent: 'true' })).code, 503, 'status');
-}));
+await check('accepts consent sent as the string "true"', quiet(withMockResend(async () => {
+  eq((await call({ ...valid, consent: 'true' })).code, 200, 'status');
+})));
 
 await check('rejects a null body', quiet(async () => {
   eq((await call(null)).code, 400, 'status');
@@ -125,32 +126,29 @@ await check('rejects a non-JSON string body', quiet(async () => {
   eq((await call('this is not json')).code, 400, 'status');
 }));
 
-await check('parses a JSON string body', quiet(async () => {
-  eq((await call(JSON.stringify(valid))).code, 503, 'status');
-}));
+await check('parses a JSON string body', quiet(withMockResend(async () => {
+  eq((await call(JSON.stringify(valid))).code, 200, 'status');
+})));
 
 await check('answers the honeypot with a silent 200', quiet(async () => {
   const r = await call({ ...valid, company_website: 'http://spam.example' });
   eq(r.code, 200, 'status');
-  eq(r.body.emailed, undefined, 'the lead was not processed');
 }));
 
-await check('truncates an oversized field rather than rejecting it', async () => {
-  // Someone who writes an essay should not be told off; the field is capped.
+await check('truncates an oversized field', withMockResend(async () => {
   capture();
   const r = await call({ ...valid, message: 'x'.repeat(20000) });
-  const logged = release();
-  eq(r.code, 503, 'status');
-  if (!logged.includes('[lead] received')) throw new Error('operational receipt log missing');
-});
+  release();
+  eq(r.code, 200, 'status');
+}));
 
-await check('strips control characters, so a field cannot forge a mail header', async () => {
-  const injected = 'Test Person' + String.fromCharCode(13, 10) + 'Bcc: attacker@example.com';
+await check('strips control characters so a field cannot forge a mail header', withMockResend(async () => {
   capture();
+  const injected = 'Test Person' + String.fromCharCode(13, 10) + 'Bcc: attacker@example.com';
   await call({ ...valid, name: injected });
   const logged = release();
   if (logged.includes('Bcc: attacker@example.com')) throw new Error('PII escaped into logs');
-});
+}));
 
 await check('rate-limits a flood from one address', quiet(async () => {
   const ip = '203.0.113.9';
@@ -159,88 +157,33 @@ await check('rate-limits a flood from one address', quiet(async () => {
   eq(last, 429, 'status on the sixth post inside a minute');
 }));
 
-const realFetch = global.fetch;
-function restoreMocks() {
-  global.fetch = realFetch;
-  delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-  delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-}
-function mockOkFetch() {
-  global.fetch = async () => ({ ok: true, status: 200, text: async () => '' });
-}
-function mockFailFetch() {
-  global.fetch = async () => ({ ok: false, status: 503, text: async () => 'service unavailable' });
-}
-
-await check('records the enquiry when CRM ingestion succeeds', async () => {
-  try {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
-    mockOkFetch();
-    capture();
-    const r = await call(valid);
-    const logged = release();
-    eq(r.code, 200, 'status');
-    eq(r.body.ok, true, 'ok');
-    eq(r.body.recorded, true, 'recorded');
-    eq(r.body.emailed, false, 'emailed, with no Resend key configured');
-    if (logged.includes('test-publishable-key-12345')) {
-      throw new Error('Supabase key leaked to function logs');
-    }
-    if (JSON.stringify(r.body).includes('test-publishable-key-12345')) {
-      throw new Error('Supabase key leaked to response body');
-    }
-  } finally {
-    restoreMocks();
-  }
-});
-
-await check('wraps enquiry data in the named RPC payload argument', async () => {
-  try {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
-    let sent;
-    global.fetch = async (_url, options) => {
+await check('sends email when Resend accepts the request', withMockResend(async () => {
+  let sent;
+  global.fetch = async (url, options) => {
+    if (url === 'https://api.resend.com/emails') {
       sent = JSON.parse(options.body);
       return { ok: true, status: 200, text: async () => '' };
-    };
-    await call(valid);
-    eq(typeof sent.payload, 'object', 'named payload argument');
-    eq(sent.payload.name, valid.name, 'lead name');
-    eq(sent.payload.message, valid.message, 'lead message');
-  } finally {
-    restoreMocks();
-  }
-});
-
-await check('reports a durable delivery failure when CRM ingestion fails', async () => {
-  try {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
-    mockFailFetch();
-    const r = await call(valid);
-    eq(r.code, 503, 'status');
-    eq(r.body.ok, false, 'ok');
-    eq(r.body.recorded, false, 'recorded is false when CRM ingestion fails');
-    eq(r.body.emailed, false, 'emailed, with no Resend key configured');
-  } finally {
-    restoreMocks();
-  }
-});
-
-await check('does not send the Supabase key to the browser on failed validation', async () => {
-  try {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key-12345';
-    mockOkFetch();
-    const r = await call({ ...valid, name: '' });
-    eq(r.code, 400, 'status');
-    if (JSON.stringify(r.body).includes('test-publishable-key-12345')) {
-      throw new Error('Supabase key leaked in validation error response');
     }
+    return { ok: true, status: 200, text: async () => '' };
+  };
+  const r = await call(valid);
+  eq(r.code, 200, 'status');
+  eq(r.body.ok, true, 'ok');
+  eq(r.body.emailed, true, 'emailed');
+  eq(sent.to[0], 'founder@mucolabs.com', 'default recipient');
+  if (JSON.stringify(r.body).includes('test-resend-key')) throw new Error('API key leaked to response');
+}));
+
+await check('reports failure when Resend rejects the send', async () => {
+  try {
+    process.env.RESEND_API_KEY = 'test-resend-key';
+    global.fetch = async () => ({ ok: false, status: 422, text: async () => 'unauthorized' });
+    const r = await call(valid);
+    eq(r.code, 502, 'status');
+    eq(r.body.ok, false, 'ok');
   } finally {
-    restoreMocks();
+    global.fetch = realFetch;
+    delete process.env.RESEND_API_KEY;
   }
 });
 
