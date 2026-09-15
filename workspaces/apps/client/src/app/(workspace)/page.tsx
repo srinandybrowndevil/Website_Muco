@@ -55,6 +55,7 @@ export default async function ClientHome() {
         <EmptyState icon="briefcase" title="No project yet">
           When the studio opens a project for {customer.company || customer.name}, its status,
           milestones and files appear here.
+          <p><Link className="btn primary" href="/start-project">Start a project</Link></p>
         </EmptyState>
       </div>
     );
@@ -65,6 +66,7 @@ export default async function ClientHome() {
       <section className="panel">
         <div className="statement">
           <span className="eyebrow">{customer.company || customer.name}</span>
+          <Link className="btn sm" href="/start-project">Start another project</Link>
           <h1>{statusSentence(project.status, project.name)}</h1>
           <p>{statusDetail(project.status)}</p>
         </div>

@@ -42,8 +42,8 @@ export function Convert({
       return;
     }
     const argument = rpc === "convert_request" ? { p_request_id: id } : { p_enquiry_id: id };
-    const { error: failure } = await supabase.rpc(rpc, argument);
-    setBusy(false);
+    try {
+    const { data, error: failure } = await supabase.rpc(rpc, argument);
     if (failure) {
       setError(
         failure.message.includes("admin required")
@@ -52,15 +52,19 @@ export function Convert({
       );
       return;
     }
+    if (!data?.lead_id) { setError("The conversion was not confirmed. Refresh to check its status before retrying."); return; }
     router.refresh();
+    } catch { setError("The connection was interrupted. Refresh to check whether it converted, then retry if needed."); }
+    finally { setBusy(false); }
   }
 
-  if (error) return <span className="errortext">{error}</span>;
-
   return (
+    <div className="stack-sm">
     <button className="btn sm primary" type="button" onClick={convert} disabled={busy}>
       <Icon name="bolt" size={14} />
       <span>{busy ? "Converting" : label}</span>
     </button>
+    {error ? <span className="errortext" role="alert">{error}</span> : null}
+    </div>
   );
 }

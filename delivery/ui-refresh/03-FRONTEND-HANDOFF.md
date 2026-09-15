@@ -1,0 +1,5 @@
+# UI refresh — Frontend handoff
+
+The customer shell uses grouped navigation at desktop width and an inline disclosure menu below 1080px. The `/organisation` route is titled “Profile & organisation”, with an editable personal panel and a business record containing a Support link. Text, mobile control sizing, personal/social field grouping, a keyboard-operable photo button and save/discard feedback use existing CSS tokens and primitives. The shared form improvements also apply to employee and intern profile forms. The earlier mentoring card now describes an already-sent recommendation accurately.
+
+API contract is unchanged: `profiles.update` writes `full_name`, `phone`, optional `linkedin_url`, `instagram_url`, and `avatar_url`, filtered by the signed-in user ID. Photo upload/removal uses the existing `avatars` bucket. Local preview uses the existing isolated sample endpoint. Empty organisation state has a heading and Support action. Failed operations retain the draft and present a retry message; success is only shown after the profile update resolves. No new network service or JavaScript dependency was added.

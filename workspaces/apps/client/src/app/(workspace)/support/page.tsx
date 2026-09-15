@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireAccount } from "@muco/core/server";
 import { formatDateTime, humanise } from "@muco/core";
 import { EmptyState, Fact, Facts, Icon, StatusPill } from "@muco/ui";
@@ -33,6 +34,7 @@ export default async function SupportPage() {
           Anything about your project — a question, something that looks wrong, or a new piece of
           work. Writing it here keeps it attached to your project instead of buried in an inbox.
         </p>
+        <Link className="btn" href="/start-project">Want to build something new? Start a project</Link>
       </div>
 
       <section className="grid-main">
@@ -65,7 +67,7 @@ export default async function SupportPage() {
           <h2>What you have sent</h2>
           <span className="hint">{(requests.data ?? []).length}</span>
         </div>
-        {(requests.data ?? []).length === 0 ? (
+        {requests.error ? <p className="panel-body errortext" role="alert">Your requests could not be loaded. Refresh to try again.</p> : (requests.data ?? []).length === 0 ? (
           <EmptyState icon="message" title="Nothing sent yet">
             Everything you send from this page stays here with its status, so you can see what has
             been picked up without asking.

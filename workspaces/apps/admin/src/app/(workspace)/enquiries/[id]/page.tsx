@@ -13,13 +13,14 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const { supabase, organizationId, role } = await requireAccount("admin");
 
-  const { data: enquiry } = await supabase
+  const { data: enquiry, error } = await supabase
     .from("website_enquiries")
     .select("id,name,business,email,phone,location,service,website,budget,timeline,message,page,referrer,utm_source,utm_medium,utm_campaign,channel,status,created_at,converted_at,converted_lead_id")
     .eq("organization_id", organizationId)
     .eq("id", id)
     .maybeSingle();
 
+  if (error) return <div className="page"><h1>Enquiry unavailable</h1><p className="errortext" role="alert">The enquiry could not be loaded. Refresh to try again.</p><Link href="/enquiries">All enquiries</Link></div>;
   if (!enquiry) notFound();
 
   return (
@@ -98,6 +99,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
               <div>
                 <b>Already converted to a lead.</b>
                 <p>Converted {formatDateTime(enquiry.converted_at)}. Converting again does nothing.</p>
+                <Link href={`/pipeline/${enquiry.converted_lead_id}`}>Open the lead</Link>
               </div>
             </div>
           ) : (

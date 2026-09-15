@@ -40,7 +40,7 @@ export default async function RequestsPage({
 
   if (status) query = query.eq("status", status);
 
-  const { data: requests } = await query;
+  const { data: requests, error } = await query;
 
   return (
     <div className="page">
@@ -48,8 +48,8 @@ export default async function RequestsPage({
         <span className="eyebrow">From customers</span>
         <h1>Requests</h1>
         <p className="lede">
-          What customers asked for from their own workspace. Accepting one turns it into a lead and
-          a project in a single transaction, so a converted request never leaves a half-made record.
+          Project briefs and support requests from customers. Review a request, mark it accepted,
+          then use Create the lead and project to open the work in one step.
         </p>
       </div>
 
@@ -68,10 +68,10 @@ export default async function RequestsPage({
 
       <section className="panel">
         <div className="panel-head"><h2>{(requests ?? []).length} shown</h2></div>
-        {(requests ?? []).length === 0 ? (
+        {error ? <p role="alert" className="panel-body errortext">Requests could not be loaded. Refresh to retry; your saved requests have not been removed.</p> : (requests ?? []).length === 0 ? (
           <EmptyState icon="fileText" title="Nothing here">
             {status === "new"
-              ? "No unopened requests. Customers write these from the support page in their workspace."
+              ? "No unopened requests. Customers send project briefs from Start a project and questions from Support."
               : "Nothing with that status."}
           </EmptyState>
         ) : (

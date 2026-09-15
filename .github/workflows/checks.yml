@@ -70,6 +70,9 @@ jobs:
       - name: Check every query against the schema
         run: python scripts/schema-check.py
 
+      - name: Check the release includes imported source files
+        run: node scripts/check-release-source.mjs --tracked
+
       - name: Install
         working-directory: workspaces
         run: npm ci

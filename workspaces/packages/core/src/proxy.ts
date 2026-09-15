@@ -135,6 +135,9 @@ export function createWorkspaceProxy(workspace: WorkspaceKey, options: ProxyOpti
 
     if (!membership) {
       if (isPublic(path)) return serve();
+      if (workspace === "client" && !accessSwitchedOff(rows)) {
+        return redirect(`/onboarding?next=${encodeURIComponent(`${path}${request.nextUrl.search}`)}`);
+      }
       return redirect(accessSwitchedOff(rows) ? "/login?access=closed" : "/login?access=none");
     }
 

@@ -17,13 +17,14 @@ export default async function RequestPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const { supabase, organizationId, role } = await requireAccount("admin");
 
-  const { data: request } = await supabase
+  const { data: request, error } = await supabase
     .from("project_requests")
-    .select("id,title,service,status,problem,requirements,budget_range,timeline,website,reference,contact_preference,created_at,converted_at,converted_project_id,customer_id,customers(id,company,name,email,phone)")
+    .select("id,title,service,status,problem,requirements,budget_range,timeline,website,reference,contact_preference,created_at,converted_at,converted_project_id,converted_lead_id,customer_id,customers(id,company,name,email,phone)")
     .eq("organization_id", organizationId)
     .eq("id", id)
     .maybeSingle();
 
+  if (error) return <div className="page"><h1>Request unavailable</h1><p role="alert" className="errortext">The request could not be loaded. Refresh to try again.</p><Link href="/requests">All requests</Link></div>;
   if (!request) notFound();
 
   const customer = one<{ id: string; company: string; name: string; email: string; phone: string }>(
@@ -82,6 +83,7 @@ export default async function RequestPage({ params }: { params: Promise<{ id: st
             <Callout tone="ok" icon="checkCircle" title="Already converted">
               A lead and a project were created {formatDateTime(request.converted_at)}.{" "}
               <Link href={"/projects/" + request.converted_project_id}>Open the project</Link>.
+              {request.converted_lead_id ? <> <Link href={`/pipeline/${request.converted_lead_id}`}>Open the lead</Link>.</> : null}
             </Callout>
           ) : (
             <>

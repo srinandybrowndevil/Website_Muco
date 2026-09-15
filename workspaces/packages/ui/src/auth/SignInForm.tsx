@@ -128,7 +128,7 @@ function ConnectedSignIn({ workspace, allowSignup }: { workspace: WorkspaceKey; 
           <Icon name="info" size={18} />
           <div>
             <b>This account is not part of a workspace yet.</b>
-            <p>Accounts here are created by invitation. Ask the studio to send you one.</p>
+            {allowSignup ? <p><Link href={`/onboarding?next=${encodeURIComponent(next)}`}>Finish your customer setup</Link> to start a project.</p> : <p>Accounts here are created by invitation. Ask the studio to send you one.</p>}
           </div>
         </div>
       ) : null}

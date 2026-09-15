@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Icon } from "@muco/ui";
 import { SignOutButton } from "@muco/ui/auth";
 
-// Nine destinations in the order a customer thinks about their project: how is
+// Destinations in the order a customer thinks about their project: how is
 // it going, what did we agree, when does it land, what can I see, what do I
 // owe, who do I ask. Nothing here is named after a table.
 const NAV: { label: string; items: [string, string, string][] }[] = [
@@ -20,6 +20,7 @@ const NAV: { label: string; items: [string, string, string][] }[] = [
     ["Billing", "/billing", "card"],
   ] },
   { label: "Working together", items: [
+    ["Start a project", "/start-project", "briefcase"],
     ["Support", "/support", "message"],
     ["People", "/people", "users"],
   ] },

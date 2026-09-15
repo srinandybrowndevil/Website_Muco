@@ -111,6 +111,7 @@ export const requireAccount = cache(async (workspace: WorkspaceKey): Promise<Acc
     // Switched off and never joined look identical to primaryMembership and
     // deserve opposite answers. Sending somebody whose access was just revoked
     // to an onboarding form would invite them to sign themselves back in.
+    if (workspace === "client" && !accessSwitchedOff(rows)) redirect(`/onboarding?next=${encodeURIComponent(await currentPath())}`);
     redirect(accessSwitchedOff(rows) ? "/login?access=closed" : "/login?access=none");
   }
 
