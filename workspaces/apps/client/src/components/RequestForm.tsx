@@ -47,6 +47,12 @@ export function RequestForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  // The reference is copied into state on success rather than read from the
+  // ref during render. requestId stays a ref because it must survive a retry
+  // without re-rendering -- that is what stops a lost response creating a
+  // second brief -- but reading a ref while rendering is not guaranteed to be
+  // stable under concurrent rendering, and react-hooks/refs rejects it.
+  const [sentReference, setSentReference] = useState<string | null>(null);
   const [requirements, setRequirements] = useState("");
   const [budget, setBudget] = useState("");
   const [website, setWebsite] = useState("");
@@ -92,6 +98,7 @@ export function RequestForm({
     setProblem("");
     setTimeline("");
     setRequirements(""); setBudget(""); setWebsite(""); setReference("");
+    setSentReference(requestId.current);
     setSent(true);
     router.refresh();
     } catch {
@@ -109,8 +116,8 @@ export function RequestForm({
             {isLocalPreview
               ? "Open Admin → Requests to review it. This sample request has not been sent to anyone. "
               : "It appears in the list below straight away and someone reads it within working hours — Monday to Saturday, 9am to 7pm. "}
-            <small>Request reference: {requestId.current}</small>
-            <button className="btn sm quiet" type="button" onClick={() => { requestId.current = null; setSent(false); }}>
+            <small>Request reference: {sentReference}</small>
+            <button className="btn sm quiet" type="button" onClick={() => { requestId.current = null; setSentReference(null); setSent(false); }}>
               Write another
             </button>
           </p>
