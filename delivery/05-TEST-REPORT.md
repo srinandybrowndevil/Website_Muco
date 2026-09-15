@@ -10,19 +10,26 @@ Verify that the public website builds, the enquiry endpoint works without a data
 
 ## Declared skips
 
-- Responsive, accessibility, Lighthouse and cross-browser checks were not run in this session.
+- Lighthouse, Core Web Vitals and cross-browser rendering were not measured in this session.
 - Real Resend email delivery was not tested; the Resend API call is mocked in tests.
 
 ## Results
 
-| Check | Command | Result |
+| Check | Command / method | Result |
 |---|---|---|
 | Static build | `node scripts/build-site.mjs` | Passed — 38 files packaged. |
 | Lead API contract | `node test-lead.mjs` | 20 passed, 0 failed. |
 | Event API contract | `node test-event.mjs` | 3 passed, 0 failed. |
 | Node test runner | `node --test test-lead.mjs test-event.mjs` | 2 suites passed. |
 | Portal link removal | `grep` over `public-site/*.html` for portal patterns | No remaining links. |
+| Internal link integrity | Static parser over `public-site/*.html` | 0 broken internal links out of 1,698 checked. |
+| Alt text | Static parser over `public-site/*.html` | 0 images missing `alt`. |
+| Form labels | Static parser over `public-site/*.html` | 0 unlabelled inputs. |
+| Heading hierarchy | Static parser over `public-site/*.html` | No duplicate `h1`; no skipped heading levels. |
+| Viewport / title / description / canonical | Static parser over `public-site/*.html` | All 27 pages present. |
+| Reduced-motion CSS | `style.css` search | `prefers-reduced-motion` media query present. |
+| Touch-target CSS | `style.css` search | `min-width` / `min-height` ≥ 44 px rules present. |
 
 ## Defects
 
-No S0–S2 defects found in the public-website scope. Unmeasured areas are carried to QA.
+No S0–S2 defects found in the public-website scope. Lighthouse and real-device testing remain as declared skips.

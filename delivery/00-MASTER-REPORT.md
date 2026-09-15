@@ -151,21 +151,28 @@ Redirect: `/learning-portal` → `/learning` (301, permanent).
 | Lead API contract | `node test-lead.mjs` | 20 passed, 0 failed. |
 | Event API contract | `node test-event.mjs` | 3 passed, 0 failed. |
 | Node test runner | `node --test test-lead.mjs test-event.mjs` | 2 suites passed. |
-| Portal link removal | `grep` over `public-site/*.html` for `client.mucolabs.com`, `Sign in`, `/login`, `/signup`, `/learning-portal` | No remaining portal links found. |
+| Portal link removal | `grep` over `public-site/*.html` for portal patterns | No remaining portal links. |
+| Internal link integrity | Static parser over `public-site/*.html` | 0 broken internal links out of 1,698 checked. |
+| Alt text | Static parser over `public-site/*.html` | 0 images missing `alt` out of 13 images. |
+| Form labels | Static parser over `public-site/*.html` | 0 unlabelled inputs/selects/textareas. |
+| Heading hierarchy | Static parser over `public-site/*.html` | No duplicate `h1`; no skipped heading levels. |
+| Viewport / title / description / canonical | Static parser over `public-site/*.html` | Present on all 27 public pages. |
+| Reduced-motion CSS | `style.css` search | `prefers-reduced-motion` media query present. |
+| Touch-target CSS | `style.css` search | `min-width` / `min-height` ≥ 44 px rules present. |
 | Lint / typecheck | Not run. | This static site has no TypeScript/lint pipeline at the root. |
-| Responsive / accessibility / Lighthouse | Not run in this session. | Existing semantic HTML, responsive CSS and a11y patterns were preserved; manual device testing is recommended before final certification. |
-| Cross-browser | Not run. | Only the built files and Node contract tests were exercised. |
+| Lighthouse / Core Web Vitals | Not run in this session. | A field measurement should be run after Vercel deployment. |
+| Real-device responsive / cross-browser | Not run in this session. | Existing responsive CSS and semantic HTML were preserved; manual device testing is recommended before final certification. |
 
 ## K. Performance
 
 - Lighthouse/Core Web Vitals were not measured in this session.
 - The production build is now a pure static HTML/CSS/JS site with no Next.js portal bundle, which removes the previous workspace JavaScript overhead entirely.
-- Images, fonts and SVGs continue to be served with long-lived cache headers configured in `vercel.json`.
+- Packaged HTML is ~820 KB across 27 pages, with most assets cached via `vercel.json`.
 
 ## L. Remaining limitations
 
 - The `workspaces/` monorepo source still exists in the repository but is excluded from the static build and root Vercel deployment. It is not required for the public website.
-- Responsive, accessibility and Lighthouse checks were not run in this session; they should be completed before final certification.
+- Lighthouse, Core Web Vitals and real-device/cross-browser checks were not run in this session; they should be completed after deployment.
 - Email delivery depends on a valid Resend API key and a verified sender domain.
 - The public enquiry endpoint has per-instance rate limiting; a shared store would be required for stronger abuse protection if traffic grows.
 - The existing `learning-portal-callout` CSS class name remains in `learning.html` and `style.css` but is no longer a portal link.
@@ -184,5 +191,5 @@ Redirect: `/learning-portal` → `/learning` (301, permanent).
 - **Design:** Navigation simplified to a single primary CTA, Start a Project, linked to `/contact`. The footer no longer links to `/learning-portal`.
 - **Frontend:** All public pages updated to remove `Sign in` links and replace them with the Start a Project button. The `/learning` page was updated to remove the Way2Me portal CTA.
 - **Backend:** `api/lead.js` now validates and emails enquiries through Resend. `api/event.js` accepts events but does not persist them to a database.
-- **Tester:** Contract tests for both endpoints were updated and pass.
+- **Tester:** Contract tests for both endpoints were updated and pass; static QA scan found no broken links, missing alt text or unlabelled inputs.
 - **QA:** This report. No S0–S2 defects found in the public-website scope; unmeasured areas are declared in Section J and Section K.
