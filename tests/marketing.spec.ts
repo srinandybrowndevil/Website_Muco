@@ -131,12 +131,24 @@ test.describe("marketing site", () => {
     expect(broken, "internal links that 404").toEqual([]);
   });
 
-  test("sales contact actions require a client sign-in", async ({ request }) => {
+  // This used to assert the opposite: that WhatsApp, phone and email were all
+  // routed through a client sign-in. That gate was removed deliberately -- the
+  // public site asks nobody to create an account to make an enquiry -- so the
+  // test now guards the replacement rule instead of the rule it replaced.
+  test("contact actions are direct and need no account", async ({ request }) => {
     const html = await (await request.get(`${BASE}/contact.html`)).text();
-    const directSalesLinks = html.match(/href="(?:https:\/\/wa\.me|mailto:|tel:)[^"]*"/gi) ?? [];
-    expect(directSalesLinks, "contact page must not expose direct sales channels").toEqual([]);
-    expect(html).toContain('href="https://client.mucolabs.com/login?next=%2Fsupport"');
-    expect(html).toContain('href="https://client.mucolabs.com/signup?next=%2Fsupport"');
+    expect(html, "WhatsApp must be a real wa.me link").toContain('href="https://wa.me/916381809844');
+    expect(html, "phone must be a real tel: link").toContain('href="tel:+916381809844"');
+    expect(html, "no sign-in may appear in the public journey").not.toContain("client.mucolabs.com/login");
+    expect(html, "no sign-up may appear in the public journey").not.toContain("client.mucolabs.com/signup");
+  });
+
+  test("one primary conversion, named the same everywhere", async ({ request }) => {
+    for (const name of ["index.html", "services.html", "pricing.html", "work.html", "contact.html"]) {
+      const html = await (await request.get(`${BASE}/${name}`)).text();
+      expect(html, `${name} must not revive the second CTA`).not.toContain("Free Consultation");
+      expect(html, `${name} must offer Start a Project`).toContain("Start a Project");
+    }
   });
 
   test("learning page carries the tutor, Way2Me leadership and feedback", async ({ request }) => {
@@ -193,7 +205,7 @@ test.describe("marketing site", () => {
       let sent: Record<string, unknown> | null = null;
       await page.route("**/api/lead", async route => {
         sent = JSON.parse(route.request().postData() || "{}");
-        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, recorded: true }) });
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, recorded: false, emailed: true }) });
       });
 
       // Query before the fragment. Written the other way round it is not a
@@ -202,6 +214,8 @@ test.describe("marketing site", () => {
       await page.goto(`${BASE}/contact.html?utm_source=probe&utm_medium=test&utm_campaign=suite#enquiry`);
       await page.locator("#lead-name").fill("Probe Person");
       await page.locator("#lead-phone").fill("+91 90000 00000");
+      await page.locator("#lead-business").fill("Probe Trading Co");
+      await page.locator("#lead-service").selectOption({ index: 1 });
       await page.locator("#lead-message").fill("Orders arrive by phone and we lose them.");
       await page.locator("#lead-consent").check();
       await page.locator("#lead-submit").click();
@@ -242,12 +256,14 @@ test.describe("marketing site", () => {
       await page.goto(OPEN);
       await page.locator("#lead-name").fill("Probe Person");
       await page.locator("#lead-phone").fill("+91 90000 00000");
+      await page.locator("#lead-business").fill("Probe Trading Co");
+      await page.locator("#lead-service").selectOption({ index: 1 });
       await page.locator("#lead-message").fill("Something short.");
       await page.locator("#lead-consent").check();
       await page.locator("#lead-submit").click();
 
       await expect(page.locator("#lead-status")).toHaveClass(/form-status-err/);
-      await expect(page.locator("#lead-status")).toContainText(/portal/i);
+      await expect(page.locator("#lead-status")).toContainText(/whatsapp/i);
       // And the button comes back, so the visitor can retry.
       await expect(page.locator("#lead-submit")).toBeEnabled();
     });

@@ -169,6 +169,10 @@ export default async function handler(req, res) {
   if (!lead.phone || !looksLikePhone(lead.phone))
     errors.phone = 'Please enter a number we can reach you on.';
   if (!lead.service) errors.service = 'Please choose a service.';
+  // Required on the project form only: the website review form collects a
+  // URL instead of a brief and never renders this field.
+  if (clean(body.form_type, 20) !== 'audit' && !lead.message)
+    errors.message = 'Please tell us a little about the project.';
   if (!looksLikeEmail(lead.email)) errors.email = 'That email address does not look right.';
   // A form-encoded checkbox arrives as "on", not "true".
   if (body.consent !== true && body.consent !== 'true' && body.consent !== 'on')

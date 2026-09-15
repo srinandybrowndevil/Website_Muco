@@ -453,13 +453,13 @@
         var data = MEYRA_SCENARIOS[btn.getAttribute('data-meyra-scenario')];
         if (!data) return;
 
+        // Selection is expressed by aria-pressed alone, and the stylesheet keys
+        // off it. Swapping in btn-primary made the selected chip wear the site's
+        // primary-CTA styling, so a toggle inside a mockup competed with Start a
+        // Project -- and it was the only btn-primary left on the whole site.
         Array.prototype.forEach.call(buttons, function (b) {
-          b.classList.remove('btn-primary');
-          b.classList.add('btn-secondary');
           b.setAttribute('aria-pressed', 'false');
         });
-        btn.classList.remove('btn-secondary');
-        btn.classList.add('btn-primary');
         btn.setAttribute('aria-pressed', 'true');
 
         userEl.textContent = data.user;
@@ -805,6 +805,9 @@
       var digits = payload.phone.replace(/[^0-9]/g, '');
       if (!/^[+0-9().\s-]+$/.test(payload.phone) || digits.length < 7 || digits.length > 15) errors.phone = 'Enter a valid phone number with 7 to 15 digits.';
       if (!payload.service) errors.service = 'Please choose a requirement.';
+      // The brief is required on the project form. The review form has no
+      // message field at all -- it asks for a website instead.
+      if (kind !== 'audit' && !payload.message) errors.message = 'Please tell us a little about the project.';
       if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) errors.email = 'Please check your email address.';
       if (kind === 'audit' && !payload.website) errors.website = 'Please enter the website to review.';
       if (payload.website) {
@@ -840,9 +843,14 @@
         if (!response.ok || !result.ok || !result.emailed) throw Error(result.error || 'We could not confirm your enquiry reached us. Please retry, or use WhatsApp, call or email below.');
         completed = true;
         status.className = 'form-status form-status-ok';
-        status.textContent = result.recorded
-          ? (kind === 'audit' ? 'Your website review request has been saved. We will contact you to agree a review time.' : 'Your enquiry has been saved. We will review your requirement and contact you about the next step.')
-          : 'Your enquiry was delivered by email. You can also contact us directly using the options below.';
+        // Confirm the outcome the sender cares about -- that it arrived -- rather
+        // than describing our plumbing. The old copy branched on result.recorded
+        // and said the enquiry "has been saved", which stopped being true when
+        // the database went away; the other branch talked about email delivery,
+        // which is our problem and not theirs.
+        status.textContent = kind === 'audit'
+          ? 'Thank you — your review request reached us. We will confirm a time, then send you the findings.'
+          : 'Thank you — your enquiry reached us. We will read your requirement and reply with the next step.';
         // lead_submit maps to the GA generate_lead conversion in analytics.js, so
         // it fires whenever the enquiry actually reached us. It used to be gated
         // on result.recorded, which meant it silently stopped counting once the

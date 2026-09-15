@@ -51,12 +51,18 @@ def public_lead_form(audit=False):
       <select id="lead-service" name="service" class="form-control" required aria-describedby="err-service">
         <option value="">Choose a requirement</option>%s</select><p class="form-error" id="err-service"></p></div>''' % "".join(
         '<option value="%s">%s</option>' % (escape(s, quote=True), escape(s)) for s in SERVICE_OPTIONS)
-    optional = email if audit else '''<details class="lead-optional"><summary>Add optional project details</summary>
-      <div class="form-row">%s%s</div><div class="form-row">%s%s</div>
-      <div class="form-group"><label for="lead-message">Anything else? (optional)</label>
-      <textarea class="form-control" id="lead-message" name="message" maxlength="4000" rows="4"
-        placeholder="What is happening today, and what would you like to improve?" aria-describedby="err-message"></textarea>
-      <p class="form-error" id="err-message"></p></div></details>''' % (
+    # The project requirement is the one answer that makes an enquiry worth
+    # anything, so it is visible and required. It used to sit inside the
+    # collapsed "optional details" disclosure, which meant most people never
+    # saw it and the studio received enquiries with no brief attached.
+    requirement = '''<div class="form-group"><label for="lead-message">What do you want built or fixed? <span class="form-req">*</span></label>
+      <textarea class="form-control" id="lead-message" name="message" maxlength="4000" rows="4" required
+        placeholder="What is happening today, and what would you like to improve?"
+        aria-describedby="hint-message err-message"></textarea>
+      <p class="form-hint" id="hint-message">A sentence or two is enough. It is the fastest way to a useful reply.</p>
+      <p class="form-error" id="err-message"></p></div>'''
+    optional = email if audit else '''<details class="lead-optional"><summary>Add budget, timeline and links (optional)</summary>
+      <div class="form-row">%s%s</div><div class="form-row">%s%s</div></details>''' % (
         email, website, field("budget", "Budget (optional)", limit=60, placeholder="A range or not decided"),
         field("timeline", "Timeline (optional)", limit=60, placeholder="When would you like to start?"))
     # method and action are declared so a browser with no working JavaScript posts
@@ -74,9 +80,9 @@ def public_lead_form(audit=False):
       <h2>{heading}</h2><p class="form-intro">{intro} Fields marked * are required.</p>
       <fieldset class="lead-fields"><legend class="visually-hidden">Your enquiry</legend>
       {website}<div class="form-row">{name}{phone}</div><div class="form-row">{business}{service}</div>
-      {optional}
-      <div class="lead-honeypot" aria-hidden="true"><label for="company-website">Leave this field empty</label>
-        <input id="company-website" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
+      {requirement}{optional}
+      <div class="lead-honeypot" aria-hidden="true"><label for="lead-company-website">Leave this field empty</label>
+        <input id="lead-company-website" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
       <div class="form-group"><label class="consent-label" for="lead-consent">
         <input id="lead-consent" name="consent" type="checkbox" required aria-describedby="err-consent">
         <span>I agree that MUCO LABS may contact me about this enquiry. <a href="privacy.html">Privacy policy</a>.</span></label>
@@ -90,6 +96,7 @@ def public_lead_form(audit=False):
       <div class="btn-group lead-fallback"><a class="btn btn-whatsapp" href="{wa}" data-whatsapp>WhatsApp MUCO LABS</a>
         <a class="btn btn-secondary" href="tel:+916381809844">Call</a><a class="text-link" href="mailto:{email_address}">Email us</a></div>
     </form>'''.format(kind="audit" if audit else "project", name=name, phone=phone, business=business,
+        requirement="" if audit else requirement,
         website=website if audit else "", service='<input type="hidden" name="service" value="Website review / audit">' if audit else service,
         optional=optional, heading="Request a Website Review" if audit else "Start a Project",
         intro="Send the website you would like us to review. No account needed." if audit else "Tell us the essentials. No account needed.",

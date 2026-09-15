@@ -1242,7 +1242,7 @@ def build_home():
     home_faqs = [(q, lookup[q]) for q in HOME_FAQ_KEYS if q in lookup]
     home_faq_html = "".join(
         """        <details class="faq-item">
-          <summary><h2>%s</h2></summary>
+          <summary><h3>%s</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
 """ % (q, a) for q, a in home_faqs
@@ -1299,7 +1299,7 @@ def build_home():
                 <div class="mt-1">
                   <span class="text-mono note fs-xs block mb-2">TRY A COMMAND</span>
                   <div class="mockup-badge-row">
-                    <button type="button" class="btn btn-primary btn-sm" data-meyra-scenario="briefing" aria-pressed="true">Morning briefing</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="briefing" aria-pressed="true">Morning briefing</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="followup" aria-pressed="false">Client follow-ups</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="operations" aria-pressed="false">Sort enquiries</button>
                   </div>
@@ -1563,7 +1563,7 @@ def build_service_page(sv):
     )
     faqs = "".join(
         '''        <details class="faq-item">
-          <summary><h2>%s</h2></summary>
+          <summary><h3>%s</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
 ''' % (qq, aa) for qq, aa in d["faqs"]
@@ -1939,7 +1939,7 @@ def build_local_erode():
 
     faqs = "".join(
         '''        <details class="faq-item">
-          <summary><h2>%s</h2></summary>
+          <summary><h3>%s</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
 ''' % (q, a) for q, a in LOCAL_FAQS
@@ -2301,13 +2301,53 @@ def build_contact():
     return build_public_contact()
 
 
+# Eleven questions in one undifferentiated list is a wall to read, and it left
+# the page jumping straight from h1 to the questions with nothing in between.
+# Grouping gives the page a spine: a reader scans three headings instead of
+# eleven, and each question is properly subordinate to the group it belongs to.
+FAQ_GROUPS = [
+    ("Cost, payment and ownership", [
+        "What does a website actually cost?",
+        "How do payments work?",
+        "Do I own the code and the design?",
+    ]),
+    ("How we work", [
+        "How long does a project take?",
+        "How quickly will you reply?",
+        "Who actually builds my project?",
+        "Do you use AI to write client code?",
+    ]),
+    ("Scope, reach and life after launch", [
+        "Do you work with businesses outside Erode?",
+        "Can you fix or improve my existing website?",
+        "What happens after launch?",
+        "Do you guarantee first page on Google?",
+    ]),
+]
+
+
 def build_faq():
+    answers = dict(FAQS)
+    grouped = [q for _, questions in FAQ_GROUPS for q in questions]
+    # A question added to FAQS but not to a group would silently vanish from the
+    # page while still appearing in the FAQPage schema, which is the kind of
+    # mismatch Google flags. Fail the build instead.
+    missing = [q for q in answers if q not in grouped]
+    unknown = [q for q in grouped if q not in answers]
+    assert not missing, "FAQ questions missing from FAQ_GROUPS: %s" % missing
+    assert not unknown, "FAQ_GROUPS references unknown questions: %s" % unknown
+
     items = "".join(
-        """        <details class="faq-item">
-          <summary><h2>%s</h2></summary>
+        """      <section class="faq-group" aria-labelledby="faq-%d">
+        <h2 id="faq-%d" class="faq-group-title">%s</h2>
+%s      </section>
+""" % (index, index, title, "".join(
+            """        <details class="faq-item">
+          <summary><h3>%s</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
         </details>
-""" % (q, a) for q, a in FAQS
+""" % (q, answers[q]) for q in questions))
+        for index, (title, questions) in enumerate(FAQ_GROUPS, start=1)
     )
 
     body = page_header(
@@ -3401,7 +3441,7 @@ def build_website_audit():
     ]
     faq_html = "".join(
         """        <details class="faq-item">
-          <summary><h2>%s</h2></summary>
+          <summary><h3>%s</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>%s</p></div></div></div>
         </details>
 """ % (q, a) for q, a in audit_faqs)

@@ -32,7 +32,7 @@
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css?v=68950aa8de" />
+<link rel="stylesheet" href="style.css?v=e011d80839" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -225,7 +225,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="form-hint" id="hint-business">Still planning? Enter your planned business name.</p><p class="form-error" id="err-business"></p></div><div class="form-group"><label for="lead-service">What do you need? <span class="form-req">*</span></label>
       <select id="lead-service" name="service" class="form-control" required aria-describedby="err-service">
         <option value="">Choose a requirement</option><option value="Website design &amp; development">Website design &amp; development</option><option value="Mobile app development">Mobile app development</option><option value="UI/UX &amp; product design">UI/UX &amp; product design</option><option value="Custom software &amp; SaaS">Custom software &amp; SaaS</option><option value="CRM / ERP / HRMS / LMS / billing">CRM / ERP / HRMS / LMS / billing</option><option value="Digital marketing &amp; SEO">Digital marketing &amp; SEO</option><option value="AI &amp; business automation">AI &amp; business automation</option><option value="Branding, IT &amp; cloud support">Branding, IT &amp; cloud support</option><option value="Website review / audit">Website review / audit</option><option value="Maintenance &amp; support">Maintenance &amp; support</option><option value="Something else">Something else</option></select><p class="form-error" id="err-service"></p></div></div>
-      <details class="lead-optional"><summary>Add optional project details</summary>
+      <div class="form-group"><label for="lead-message">What do you want built or fixed? <span class="form-req">*</span></label>
+      <textarea class="form-control" id="lead-message" name="message" maxlength="4000" rows="4" required
+        placeholder="What is happening today, and what would you like to improve?"
+        aria-describedby="hint-message err-message"></textarea>
+      <p class="form-hint" id="hint-message">A sentence or two is enough. It is the fastest way to a useful reply.</p>
+      <p class="form-error" id="err-message"></p></div><details class="lead-optional"><summary>Add budget, timeline and links (optional)</summary>
       <div class="form-row"><div class="form-group"><label for="lead-email">Email (optional)</label>
       <input class="form-control" id="lead-email" name="email" type="email" maxlength="160"
          autocomplete="email" placeholder="you@example.com" aria-describedby="hint-email err-email">
@@ -238,13 +243,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="form-hint" id="hint-budget"></p><p class="form-error" id="err-budget"></p></div><div class="form-group"><label for="lead-timeline">Timeline (optional)</label>
       <input class="form-control" id="lead-timeline" name="timeline" type="text" maxlength="60"
           placeholder="When would you like to start?" aria-describedby="hint-timeline err-timeline">
-      <p class="form-hint" id="hint-timeline"></p><p class="form-error" id="err-timeline"></p></div></div>
-      <div class="form-group"><label for="lead-message">Anything else? (optional)</label>
-      <textarea class="form-control" id="lead-message" name="message" maxlength="4000" rows="4"
-        placeholder="What is happening today, and what would you like to improve?" aria-describedby="err-message"></textarea>
-      <p class="form-error" id="err-message"></p></div></details>
-      <div class="lead-honeypot" aria-hidden="true"><label for="company-website">Leave this field empty</label>
-        <input id="company-website" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
+      <p class="form-hint" id="hint-timeline"></p><p class="form-error" id="err-timeline"></p></div></div></details>
+      <div class="lead-honeypot" aria-hidden="true"><label for="lead-company-website">Leave this field empty</label>
+        <input id="lead-company-website" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
       <div class="form-group"><label class="consent-label" for="lead-consent">
         <input id="lead-consent" name="consent" type="checkbox" required aria-describedby="err-consent">
         <span>I agree that MUCO LABS may contact me about this enquiry. <a href="/privacy">Privacy policy</a>.</span></label>
@@ -355,6 +356,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </div>
-  <script src="main.js?v=774894faa5" defer></script>
+  <script src="main.js?v=865ddf0624" defer></script>
 </body>
 </html>

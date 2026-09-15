@@ -1900,7 +1900,7 @@ tbody tr:last-child td {
   display: none;
 }
 
-.faq-item summary h2 {
+.faq-item summary h3 {
   display: inline;
   font-size: 16.5px;
   font-weight: 550;
@@ -3831,9 +3831,14 @@ main {
    trigger in the header, so they never compete with Start a Project and never
    become two floating buttons in opposite corners. */
 .contact-dock { position: relative; }
-.contact-dock-trigger { display: inline-flex; align-items: center; gap: 7px; min-height: 40px;
-  padding: 0 14px; border: 1px solid var(--line-strong); border-radius: var(--radius);
-  color: var(--text-2); font-size: 14px; cursor: pointer; list-style: none; white-space: nowrap; }
+/* Same font size, padding and border as the .btn-sm beside it, so the two
+   compute to an identical height instead of being 1px apart. Setting a
+   min-height here instead produced 40px next to the button's content-driven
+   40.8px -- close enough to look like a rendering artefact and wrong enough to
+   see once you know. */
+.contact-dock-trigger { display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius);
+  color: var(--text-2); font-size: 13px; cursor: pointer; list-style: none; white-space: nowrap; }
 .contact-dock-trigger::-webkit-details-marker { display: none; }
 .contact-dock-trigger:hover, .contact-dock[open] .contact-dock-trigger { color: var(--text); border-color: var(--accent); }
 .contact-dock-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 120;
@@ -3967,4 +3972,35 @@ main {
   body:has(#menu-toggle[aria-expanded="true"]) .mobile-contact-bar { display: none; }
   .public-lead-form .form-row { display: grid; grid-template-columns: minmax(0, 1fr); }
   .public-lead-form .btn { white-space: normal; }
+}
+
+/* FAQ groups. The questions are subordinate to their group heading, so the
+   group title carries section weight while the questions stay at reading size. */
+.faq-group { margin-bottom: 56px; }
+.faq-group:last-child { margin-bottom: 0; }
+.faq-group-title { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.25; margin: 0 0 20px;
+  padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+
+/* Scenario toggle inside the hero mockup. The selected chip is styled from its
+   own aria-pressed state rather than by swapping in btn-primary: a toggle in a
+   product mockup should not borrow the styling of the site's primary call to
+   action, and that was the last btn-primary anywhere on the site. */
+.mockup-badge-row .btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* At 320px the three dock labels no longer fit at the default size, and
+   "Start a Project" wrapped to two lines beside two single-line siblings.
+   Shrink the type rather than truncate the label: the primary action should
+   still say what it does. */
+@media (max-width: 380px) {
+  .mobile-contact-bar { gap: .4rem; padding-inline: .5rem; }
+  .mobile-contact-bar a { font-size: .8rem; padding-inline: .25rem; white-space: nowrap; }
+  /* The consent notice must stay complete -- it is a legal notice -- so tighten
+     the frame around it instead of cutting any of the words. */
+  .consent-bar { padding: 12px; }
+  .consent-text { font-size: 13px; line-height: 1.45; }
+  .consent-inner { gap: 12px; }
 }
