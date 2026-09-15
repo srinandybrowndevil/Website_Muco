@@ -12,6 +12,7 @@ import { createWorkspaceProxy } from "@muco/core/proxy";
 // product means two sets of cookies and a canonical nobody chose.
 export const proxy = createWorkspaceProxy("client", {
   redirectHosts: { portal: "client" },
+  publicPaths: ["/start-project"],
 });
 
 // Static on purpose, and repeated in each of the four applications rather than
