@@ -18,7 +18,11 @@ problems, notes = [], []
 def add(page, msg): problems.append(f"{page}: {msg}")
 def note(page, msg): notes.append(f"{page}: {msg}")
 
-pages = sorted(p for p in glob.glob("*.html"))
+# Locale subdirectories hold real pages, so they get the same checks as the
+# root. Without the recursive glob the Tamil pages shipped unaudited --
+# no title, description, canonical, heading-order or alt-text check ran
+# on any of them.
+pages = sorted((p.replace("\\", "/") for p in set(glob.glob("*.html")) | set(glob.glob("ta/*.html"))))
 titles, descriptions = defaultdict(list), defaultdict(list)
 
 for page in pages:
@@ -92,7 +96,13 @@ if os.path.exists("sitemap.xml"):
     listed = set()
     for loc in re.findall(r"<loc>(.*?)</loc>", open("sitemap.xml", encoding="utf-8").read()):
         path = re.sub(r"^https?://[^/]+/?", "", loc.strip()) or "index.html"
-        listed.add(path if path.endswith(".html") else path + ".html")
+        if not path.endswith(".html"):
+            # A clean URL is either a page or a directory index. /ta is served
+            # from ta/index.html, and resolving it to ta.html reported a live
+            # page as missing.
+            path = (path + "/index.html"
+                    if os.path.isfile(path + "/index.html") else path + ".html")
+        listed.add(path)
     for path in sorted(listed):
         if not os.path.exists(path):
             add("sitemap.xml", f"lists {path}, which does not exist")

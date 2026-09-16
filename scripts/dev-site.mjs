@@ -58,10 +58,22 @@ http.createServer(async (req, res) => {
 
     let name = decodeURIComponent(url.pathname).replace(/^\/+/, "");
     if (!name) name = "index.html";
-    if (!extname(name)) name += ".html";
+    // A clean URL is either a page or a directory index. Vercel serves /ta from
+    // ta/index.html; appending ".html" unconditionally asked for ta.html and
+    // returned 404 locally for a page that is live in production.
+    if (!extname(name)) {
+      name = existsSync(resolve(root, name, "index.html"))
+        ? name + "/index.html"
+        : name + ".html";
+    }
     const path = resolve(root, name);
     const allowed = path.startsWith(root.endsWith(sep) ? root : root + sep) && !name.split(/[\\/]/).some(part => part.startsWith("."))
-      && (name.startsWith("assets/") || (!/[\\/]/.test(name) && (name.endsWith(".html") || ["style.css", "main.js", "attribution.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg"].includes(name))));
+      && (name.startsWith("assets/")
+           // The guard refused every HTML path containing a separator, which
+           // predates locale directories. Admit exactly the locale prefixes;
+           // dot segments and anything outside root are still rejected above.
+           || /^ta[\\/][a-z0-9-]+\.html$/.test(name)
+           || (!/[\\/]/.test(name) && (name.endsWith(".html") || ["style.css", "main.js", "attribution.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg"].includes(name))));
     const found = allowed && existsSync(path) && statSync(path).isFile();
     res.statusCode = found ? 200 : 404;
     const selected = found ? path : resolve(root, "404.html");

@@ -3076,6 +3076,12 @@ SITEMAP_PAGES = [
 def build_sitemap():
     urls = ""
     pages = list(SITEMAP_PAGES) + [(slug + ".html", "0.7", "monthly") for slug in GROWTH_PAGES]
+    # The Tamil pages are discoverable here; their hreflang pairs live in each
+    # page head, where both sides name both URLs. canonical_path is what turns
+    # ta/index.html into /ta rather than the /ta/index that stripping ".html"
+    # alone would produce.
+    pages += [(canonical_path(ta), "0.8", "monthly")
+              for ta in TAMIL_TWINS.values()]
     idx = [i for i, p in enumerate(pages) if p[0] == "services.html"][0] + 1
     for sv in reversed(SERVICES):
         pages.insert(idx, ("services-%s.html" % sv["slug"], "0.8", "monthly"))
@@ -3653,6 +3659,11 @@ def build_all():
     jobs += [("services-%s.html" % sv["slug"], (lambda v: lambda: build_service_page(v))(sv))
              for sv in SERVICES]
     jobs += [(slug + ".html", (lambda key: lambda: build_growth_page(key))(slug)) for slug in GROWTH_PAGES]
+    # The Tamil pages are imported here rather than at module scope so that
+    # tamil_content can import from build without a cycle back through
+    # content.
+    import tamil_content
+    jobs += tamil_content.TAMIL_PAGES
     total = 0
     for name, fn in jobs:
         size = fn()

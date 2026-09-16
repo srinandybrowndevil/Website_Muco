@@ -29,10 +29,27 @@ execFileSync(python, ["build.py"], { cwd: root, stdio: "inherit" });
 const output = resolve(root, "public-site");
 if (existsSync(output)) rmSync(output, { recursive: true });
 mkdirSync(output, { recursive: true });
+// Locale subdirectories that hold built pages. Must match the prefixes used
+// by TAMIL_TWINS in build.py.
+const LOCALE_DIRS = ["ta"];
+
 // Deliberately package only public artifacts, excluding .env, portal source,
 // raw images, SQL, tests and local configuration from the static web root.
 const files = readdirSync(root).filter(name => name.endsWith(".html"));
 files.push("style.css", "main.js", "attribution.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg");
 for (const name of files) if (existsSync(join(root, name))) copyFileSync(join(root, name), join(output, name));
 cpSync(join(root, "assets"), join(output, "assets"), { recursive: true });
-console.log(`Packaged ${files.length} public files and assets into public-site/`);
+
+// Locale subdirectories. readdirSync above is not recursive, so without this
+// every Tamil page built locally, passed every check, and was then left out of
+// the deployed bundle -- the pages would 404 in production while looking
+// perfectly fine in the repository.
+let localeFiles = 0;
+for (const locale of LOCALE_DIRS) {
+  const from = join(root, locale);
+  if (!existsSync(from)) continue;
+  cpSync(from, join(output, locale), { recursive: true });
+  localeFiles += readdirSync(from).filter(name => name.endsWith(".html")).length;
+}
+
+console.log(`Packaged ${files.length + localeFiles} public files and assets into public-site/`);

@@ -780,6 +780,77 @@ section section {
 }
 .hero-fact dd { margin: 0; color: var(--text); max-width: 30ch; }
 
+/* ------------------------------------------------------------------ Tamil
+   The three webfonts carry Latin and Latin-ext only, so every Tamil glyph
+   would otherwise fall back to whatever the browser picks -- and Instrument
+   Serif has no Tamil at all, which left headings rendering in a default serif
+   that matched nothing else on the page.
+
+   These are system fonts on purpose. Noto Sans Tamil ships with Android, Tamil
+   Sangam MN with iOS and macOS, Nirmala UI with Windows: the readers this page
+   is for already have a good Tamil face installed. Serving one ourselves would
+   add 100KB+ to a 218KB site, and pulling it from Google Fonts would add a
+   third-party request that the privacy policy would then have to disclose. */
+:root {
+  --font-tamil: 'Noto Sans Tamil', 'Nirmala UI', 'Tamil Sangam MN', Latha,
+    'Arial Unicode MS', var(--font-sans);
+}
+
+[lang^="ta"] body,
+body[lang^="ta"],
+html[lang^="ta"] body {
+  font-family: var(--font-tamil);
+}
+
+/* Tamil has no italic and no true small caps, and the display serif has no
+   Tamil coverage, so headings and the accent word take the same stack. */
+html[lang^="ta"] h1,
+html[lang^="ta"] h2,
+html[lang^="ta"] h3,
+html[lang^="ta"] .lede,
+html[lang^="ta"] .accent-serif {
+  font-family: var(--font-tamil);
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+/* Tamil needs both more leading and a smaller size than the Latin display face.
+   The vowel signs sit above and below the line, so 1.05 clipped them; and a
+   Tamil glyph is far wider than a Latin one, so the same 88px headline filled
+   most of the viewport and pushed everything else below the fold. These are the
+   sizes at which a Tamil headline occupies the space the English one does. */
+html[lang^="ta"] h1 {
+  font-size: clamp(32px, 4.4vw, 58px);
+  line-height: 1.28;
+}
+html[lang^="ta"] h2 {
+  font-size: clamp(25px, 2.9vw, 38px);
+  line-height: 1.32;
+}
+html[lang^="ta"] h3 { line-height: 1.4; }
+html[lang^="ta"] .lead { line-height: 1.75; }
+
+/* The eyebrow is uppercased mono in English. Tamil has no case, so uppercase
+   does nothing and the wide tracking only pushes the glyphs apart. */
+html[lang^="ta"] .eyebrow,
+html[lang^="ta"] .rule-label {
+  font-family: var(--font-tamil);
+  text-transform: none;
+  letter-spacing: .02em;
+}
+html[lang^="ta"] .rule-label b { font-family: var(--font-mono); }
+
+.lang-switch {
+  display: inline-flex; align-items: center; min-height: 40px;
+  padding: 0 var(--sp-3);
+  font-family: var(--font-sans); font-size: var(--fs-400);
+  color: var(--text-2); text-decoration: none;
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.lang-switch:hover, .lang-switch:focus-visible {
+  color: var(--text); border-color: var(--accent-line);
+}
+
 .stack {
   display: flex;
   flex-direction: column;

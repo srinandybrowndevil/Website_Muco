@@ -5,9 +5,18 @@ import { readdirSync } from "node:fs";
 // page is covered the day it is written instead of the day someone remembers
 // to add it here. Playwright runs from the directory holding its config, which
 // is the repository root, and this package is an ES module -- so no __dirname.
-const PAGES = readdirSync(process.cwd())
-  .filter(name => name.endsWith(".html"))
-  .sort();
+// Locale subdirectories are part of that discovery. The Tamil pages shipped
+// with every asset path resolved against /ta/, so they loaded with no
+// stylesheet and no JavaScript -- a fault the per-page failed-request check
+// below catches immediately, but only for pages it is actually given.
+const LOCALES = ["ta"];
+const PAGES = [
+  ...readdirSync(process.cwd()).filter(name => name.endsWith(".html")),
+  ...LOCALES.flatMap(locale =>
+    readdirSync(`${process.cwd()}/${locale}`)
+      .filter(name => name.endsWith(".html"))
+      .map(name => `${locale}/${name}`)),
+].sort();
 
 const BASE = "http://localhost:8123";
 
@@ -347,6 +356,72 @@ test.describe("contrast on the actions people press", () => {
       const ratio = contrast(item.fg, item.bg);
       const needed = item.large ? 3 : 4.5;
       expect(ratio, `"${item.text}" contrast`).toBeGreaterThanOrEqual(needed);
+    }
+  });
+});
+
+test.describe("Tamil locale", () => {
+  const PAIRS = [
+    ["/", "/ta"],
+    ["/services", "/ta/services"],
+    ["/about", "/ta/about"],
+    ["/contact", "/ta/contact"],
+  ];
+
+  for (const [en, ta] of PAIRS) {
+    test(`${ta} declares Tamil and pairs with ${en}`, async ({ page }) => {
+      await page.goto(`${BASE}${ta}`, { waitUntil: "load" });
+      await expect(page.locator("html")).toHaveAttribute("lang", "ta-IN");
+
+      // Both sides of an hreflang pair must name both URLs, or search engines
+      // discard the annotation entirely. Asserting one direction would pass
+      // while the pair was still broken.
+      for (const [href, lang] of [[en, "en-in"], [ta, "ta-in"]] as const) {
+        const expected = `https://mucolabs.com${href === "/" ? "/" : href}`;
+        await expect(
+          page.locator(`link[rel=alternate][hreflang="${lang}"]`),
+          `${ta} should point ${lang} at ${expected}`,
+        ).toHaveAttribute("href", expected);
+      }
+
+      await page.goto(`${BASE}${en}`, { waitUntil: "load" });
+      await expect(
+        page.locator('link[rel=alternate][hreflang="ta-in"]'),
+        `${en} should point back at ${ta}`,
+      ).toHaveAttribute("href", `https://mucolabs.com${ta}`);
+    });
+  }
+
+  test("the stylesheet actually applies on a locale page", async ({ page }) => {
+    // /ta happened to work while /ta/about did not, because a path with no
+    // trailing slash resolves relative assets against the root. Assert on the
+    // nested page, which is the one that broke, and compare against the English
+    // page rather than a hardcoded colour so a palette change does not read as
+    // a missing stylesheet.
+    await page.goto(`${BASE}/about`, { waitUntil: "load" });
+    const english = await page.locator("body").evaluate(
+      el => getComputedStyle(el).backgroundColor);
+
+    await page.goto(`${BASE}/ta/about`, { waitUntil: "load" });
+    const body = page.locator("body");
+    await expect(body, "a locale page should load the same stylesheet")
+      .toHaveCSS("background-color", english);
+    const family = await body.evaluate(el => getComputedStyle(el).fontFamily);
+    expect(family, "Tamil pages should request a Tamil-capable face")
+      .toContain("Tamil");
+  });
+
+  test("a reader can get to Tamil and back without a dead end", async ({ page }) => {
+    await page.goto(`${BASE}/ta`, { waitUntil: "load" });
+    await page.locator("header a.lang-switch").click();
+    await expect(page).toHaveURL(`${BASE}/`);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en-IN");
+  });
+
+  test("no page offers a Tamil version that does not exist", async ({ page }) => {
+    for (const [, ta] of PAIRS) {
+      const response = await page.goto(`${BASE}${ta}`, { waitUntil: "commit" });
+      expect(response?.status(), `${ta} is advertised by hreflang and must serve 200`).toBe(200);
     }
   });
 });

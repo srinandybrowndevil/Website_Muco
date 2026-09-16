@@ -359,9 +359,15 @@ def asset_v(name):
     try:
         raw = open(path, "rb").read()
     except OSError:
-        return name
+        return "/" + name
     digest = hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()[:10]
-    return "%s?v=%s" % (name, digest)
+    # Root-relative, not relative. A page in a locale subdirectory resolved a
+    # bare "style.css" against its own directory and asked for /ta/style.css,
+    # which does not exist -- so /ta/about rendered with no stylesheet and no
+    # JavaScript at all. /ta itself happened to work, because a path with no
+    # trailing slash resolves against the root, which is what made the fault
+    # look like it affected only some pages.
+    return "/%s?v=%s" % (name, digest)
 
 
 def icon(paths, size=20):
@@ -780,10 +786,56 @@ def faq_jsonld(pairs):
 
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Locales
+# ---------------------------------------------------------------------------
+# English slug -> Tamil slug, for pages that genuinely exist in both. Adding a
+# row here is what publishes a translation: it creates the reciprocal hreflang
+# pair, the sitemap entry and the language switch. A page absent from this map
+# advertises no Tamil version, which is the correct behaviour while the rest of
+# the site is English only -- an hreflang pointing at a page that does not
+# exist, or at a half-translated one, is worse than no hreflang at all.
+TAMIL_TWINS = {
+    "index.html": "ta/index.html",
+    "services.html": "ta/services.html",
+    "about.html": "ta/about.html",
+    "contact.html": "ta/contact.html",
+}
+
+TAMIL_TO_ENGLISH = {ta: en for en, ta in TAMIL_TWINS.items()}
+
+
+def canonical_path(slug):
+    """The clean URL for a slug, with index.html collapsing to its directory."""
+    if slug == "index.html":
+        return ""
+    if slug.endswith("/index.html"):
+        return slug[:-len("/index.html")]
+    return slug[:-5] if slug.endswith(".html") else slug
+
+
+def hreflang_block(slug):
+    """Reciprocal alternates, or a self-referential pair when there is no twin.
+
+    Both sides of a pair must name both URLs or search engines ignore the
+    annotation, so this is generated from one map rather than written per page.
+    """
+    english = TAMIL_TO_ENGLISH.get(slug, slug)
+    tamil = TAMIL_TWINS.get(english)
+    en_url = "%s/%s" % (DOMAIN, canonical_path(english))
+    if not tamil:
+        return ('<link rel="alternate" hreflang="en-in" href="%s" />' + NEWLINE +
+                '<link rel="alternate" hreflang="x-default" href="%s" />') % (en_url, en_url)
+    ta_url = "%s/%s" % (DOMAIN, canonical_path(tamil))
+    return ('<link rel="alternate" hreflang="en-in" href="%s" />' + NEWLINE +
+            '<link rel="alternate" hreflang="ta-in" href="%s" />' + NEWLINE +
+            '<link rel="alternate" hreflang="x-default" href="%s" />') % (en_url, ta_url, en_url)
+
+
 # Page shell
 # ---------------------------------------------------------------------------
 SHELL = """<!DOCTYPE html>
-<html lang="en-IN" class="no-js">
+<html lang="{lang}" class="no-js">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -791,8 +843,7 @@ SHELL = """<!DOCTYPE html>
 <meta name="description" content="{description}" />
 <meta name="theme-color" content="#05070b" />
 {robots}{canonical_tag}
-<link rel="alternate" hreflang="en-in" href="{domain}/{canonical}" />
-<link rel="alternate" hreflang="x-default" href="{domain}/{canonical}" />
+{alternates}
 
 <meta property="og:type" content="{og_type}" />
 <meta property="og:site_name" content="{brand}" />
@@ -854,9 +905,10 @@ def gate_contact_links(html, mode=GATE_ALL):
 
 
 def render(slug, title, description, body, current=None, og_type="website",
-           schema_blocks=None, noindex=False, contact_gate=None):
+           schema_blocks=None, noindex=False, contact_gate=None,
+           lang="en-IN", header=None, footer=None):
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
-    canonical = "" if slug == "index.html" else slug[:-5] if slug.endswith(".html") else slug
+    canonical = canonical_path(slug)
     # Consent Mode first, then the Google tag, then Tag Manager further down the
     # head. Order is the whole point: a consent default pushed after a tag has
     # already fired has not gated anything.
@@ -892,14 +944,18 @@ def render(slug, title, description, body, current=None, og_type="website",
         analytics=analytics,
         gtm_head=google_tag_manager_head(),
         gtm_body=google_tag_manager_noscript(),
-        header=header_html(current or slug, key),
+        lang=lang,
+        alternates=hreflang_block(slug),
+        header=header if header is not None else header_html(current or slug, key),
         body=body,
-        footer=footer_html(),
+        footer=footer if footer is not None else footer_html(),
     )
 
     html = clean_urls(html)
 
-    with open(os.path.join(ROOT, slug), "w", encoding="utf-8") as f:
+    target = os.path.join(ROOT, slug)
+    os.makedirs(os.path.dirname(target), exist_ok=True) if os.path.dirname(target) else None
+    with open(target, "w", encoding="utf-8") as f:
         f.write(html)
     return len(html)
 

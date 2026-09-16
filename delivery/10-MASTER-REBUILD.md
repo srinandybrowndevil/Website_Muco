@@ -183,29 +183,54 @@ Names only: `RESEND_API_KEY`, `LEAD_TO_EMAIL`, `LEAD_FROM_EMAIL`,
    determined from this repository. The privacy policy no longer asserts either
    way.
 
-### Not implemented — Phase 7, English/Tamil
+### Phase 7, English/Tamil — conversion core shipped
 
-This is the largest item in the brief and none of it is built. Honestly scoped,
-it needs:
+Built and live: a locale-aware route layer, reciprocal `hreflang` with
+`x-default`, per-locale canonicals, `html lang`, locale entries in the sitemap,
+a language switch in both directions, and a Tamil font strategy.
 
-- a locale-aware route layer in `build.py` emitting `/ta/...` for every page;
-- reciprocal `hreflang` plus `x-default`, per-locale canonicals and `html lang`;
-- a locale-partitioned sitemap;
-- a language switcher and first-visit browser-language preference with
-  persistence, layered on top of indexable URLs rather than replacing them;
-- a Tamil-capable font strategy with subsetting, tested for overflow;
-- a terminology glossary;
-- **genuine Tamil copy for 28 pages** — navigation, headings, body, CTAs, form
-  labels, validation messages, success states, FAQs, metadata and alt text.
+Four pages are in Tamil: `/ta`, `/ta/services`, `/ta/about`, `/ta/contact` —
+the conversion core, in the order §O originally recommended. They are written
+in Tamil rather than translated clause by clause, and they carry their own
+header and footer so a Tamil reader never meets four Tamil labels beside nine
+English ones.
 
-The last item is the real weight, and it is a translation project rather than an
-engineering one. Machine-translating it would produce exactly the "literal
-machine translation" §21 rules out.
+Publishing a page is deliberately two steps: write it in `tamil_content.py`,
+then add its slug to `TAMIL_TWINS` in `build.py`. Only the second step creates
+the `hreflang` pair, the sitemap entry and the switch, so a half-finished
+translation cannot be advertised to a search engine as a complete one. Pages
+with no Tamil version carry no `hreflang` pair at all, which is correct while
+the rest of the site is English only.
 
-Recommended approach: enable Tamil route by route, starting with the conversion
-core (`/`, `/services`, `/contact`, `/about`), and ship a `/ta` route only once
-its page is fully translated. No page then falls back to partial English, and
-pages without a Tamil version simply carry no `hreflang` pair.
+**The Tamil copy has not been read by a native speaker.** It is the one part of
+this work that automated checks cannot judge: the tests prove the pages serve,
+pair, style and switch correctly, and prove nothing about whether the register
+is right for a business owner in Erode. That review is the remaining step.
+
+Fonts are the system Tamil faces — Noto Sans Tamil on Android, Tamil Sangam MN
+on Apple, Nirmala UI on Windows. Self-hosting one would add more than 100KB to
+a 218KB site and serving it from Google Fonts would add a third-party request
+the privacy policy would then have to disclose. Tamil headings are set smaller
+and looser than the Latin display face, because the same 88px filled most of a
+phone viewport and the 1.05 line-height clipped the vowel signs.
+
+Three defects surfaced while building it, each of which would have shipped
+silently:
+
+- `scripts/build-site.mjs` copied root `*.html` only, so every Tamil page would
+  have been absent from the deployed bundle while looking correct in the repo.
+- `asset_v()` emitted relative asset paths. A page one directory down resolved
+  `style.css` to `/ta/style.css` and rendered with no stylesheet and no
+  JavaScript. `/ta` itself worked, because a path with no trailing slash
+  resolves against the root — which is what made the fault look partial.
+- `scripts/dev-site.mjs` refused any HTML path containing a separator and
+  appended `.html` to every extensionless URL, so local preview 404'd pages
+  that production would serve.
+
+Not yet in Tamil: `/work`, `/pricing`, `/faq`, the eight service detail pages,
+the legal pages and the learning pages. The Tamil pages link to the English
+ones for those and say so in Tamil rather than dropping the reader into another
+language without warning.
 
 ### Not implemented — other
 
