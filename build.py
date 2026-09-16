@@ -33,13 +33,13 @@ PHONE = "+91 6381809844"
 EMAIL = "founder@mucolabs.com"
 INSTAGRAM = "https://www.instagram.com/muco_labs/"
 
-# BLOCKER — needs an owner-approved URL before LinkedIn appears anywhere.
-# Guessing a LinkedIn profile risks linking the public site to somebody else's
-# page, so the site renders no LinkedIn link at all while this is empty. Set it
-# to the verified company or founder URL and it appears in the footer, the
-# contact page and the Organization sameAs at once, because every surface reads
-# SOCIAL_PROFILES below.
-LINKEDIN = ""
+# Supplied by the owner. This is the founder's personal profile rather than a
+# company page, which is why it is attached to the founder Person in the schema
+# below and not to the Organization's sameAs: sameAs is meant to list other
+# profiles of the same entity, and a person is not the company. It still shows
+# in the footer and on the contact page, because that is genuinely a way to
+# reach the person who answers.
+LINKEDIN = "https://www.linkedin.com/in/srinivash-mahalingam/"
 
 # One list, so the footer, the contact page and the schema cannot drift apart.
 SOCIAL_PROFILES = [
@@ -697,7 +697,7 @@ ORG_JSONLD = """{
   "logo": "%(domain)s/logo-full.svg",
   "telephone": "%(phone)s",
   "email": "%(email)s",
-  "founder": { "@type": "Person", "@id": "%(domain)s/about#founder", "name": "%(founder)s", "url": "%(domain)s/about" },
+  "founder": { "@type": "Person", "@id": "%(domain)s/about#founder", "name": "%(founder)s", "url": "%(domain)s/about", "jobTitle": "Founder", "sameAs": [%(founder_profiles)s] },
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "%(city)s",
@@ -723,6 +723,7 @@ ORG_JSONLD = """{
     "region": REGION,
     "areas": ",".join('{"@type":"City","name":"%s"}' % m for m in MARKETS),
     "ig": INSTAGRAM,
+    "founder_profiles": ",".join(json.dumps(u) for u in [LINKEDIN] if u),
     "description": DESCRIPTION.replace('"', "'"),
     "lat": GEO_LAT,
     "lon": GEO_LON,

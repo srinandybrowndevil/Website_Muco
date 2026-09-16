@@ -500,3 +500,30 @@ test.describe("service pages close with the enquiry form", () => {
     }
   });
 });
+
+test.describe("the header stays put", () => {
+  // It was declared sticky and never stuck: overflow-x:hidden on html and body
+  // computes overflow-y to auto, which makes them scroll containers, and a
+  // sticky element inside one sticks to that box rather than to the viewport.
+  // Nothing reported it, because the CSS was perfectly valid.
+  for (const slug of ["", "services", "work", "contact"]) {
+    test(`/${slug} keeps the nav on screen when you scroll`, async ({ page }) => {
+      await page.goto(`${BASE}/${slug}`, { waitUntil: "load" });
+      await page.evaluate(() => {
+        document.documentElement.style.scrollBehavior = "auto";
+        window.scrollTo(0, 1400);
+      });
+      await expect
+        .poll(() => page.evaluate(
+          () => Math.round(document.querySelector("header")!.getBoundingClientRect().top)))
+        .toBe(0);
+
+      // Pinning the header is worth nothing if the page now scrolls sideways.
+      const overflows = await page.evaluate(() => {
+        const d = document.documentElement;
+        return d.scrollWidth > d.clientWidth + 1;
+      });
+      expect(overflows, `/${slug} scrolls horizontally`).toBe(false);
+    });
+  }
+});

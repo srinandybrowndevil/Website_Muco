@@ -122,11 +122,20 @@
 :root {
   color-scheme: dark;
 
-  /* Obsidian to graphite. Each step is a real surface level, not a tint. */
-  --bg: #0a0a0c;
-  --surface: #141416;
-  --surface-2: #1a1a1d;
-  --surface-3: #212125;
+  /* Obsidian to graphite. Each step is a real surface level, not a tint.
+     Pulled a shade deeper and given a warm undertone, so that a copper accent
+     sits in the same light as the ground it is on rather than on top of it. */
+  --bg: #08080a;
+  --surface: #121215;
+  --surface-2: #17171b;
+  --surface-3: #1f1f24;
+
+  /* Surfaces are lit, not filled. A panel gets a hairline of light along its
+     top edge, where a real one would catch the light, and rests on a shadow.
+     This single pair is most of the difference between a flat dark box and a
+     milled one. */
+  --lift: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --lift-strong: inset 0 1px 0 rgba(255, 255, 255, 0.085);
 
   /* Warm ivory rather than pure white, which glares on obsidian. */
   --text: #f2ede6;
@@ -147,6 +156,10 @@
      glow, selected tabs, progress, small labels, hover underline, focus ring. */
   --accent: #cf9061;
   --accent-bright: #e0a578;
+  /* Copper behaves like metal when it is graded across a face rather than
+     painted flat: a highlight where the light lands, a deeper tone where it
+     falls away. Used on the one primary action and nothing else. */
+  --accent-metal: linear-gradient(140deg, #eab68d 0%, #cf9061 46%, #ab7049 100%);
   --accent-ink: #1a0f07;
   --accent-soft: rgba(207, 144, 97, 0.10);
   --accent-line: rgba(207, 144, 97, 0.34);
@@ -177,9 +190,12 @@
   --sp-8: 72px;
   --sp-9: 132px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow: 0 12px 34px -18px rgba(0, 0, 0, 0.9);
-  --shadow-lg: 0 30px 70px -30px rgba(0, 0, 0, 0.95);
+  /* Two-part shadows: a tight contact shadow that anchors the edge, and a wide
+     soft one that gives the object somewhere to sit. One blur alone reads as a
+     smudge behind the panel rather than as depth. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.55);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 14px 38px -20px rgba(0, 0, 0, 0.92);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.5), 0 34px 80px -34px rgba(0, 0, 0, 0.96);
 
   --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --font-sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -230,12 +246,25 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-height) + 24px);
   -webkit-text-size-adjust: 100%;
+  /* clip, not hidden. overflow-x:hidden computes overflow-y to auto, which
+     makes the element a scroll container -- and a sticky header inside a
+     scroll container sticks to that box rather than to the viewport. The
+     header has been declared sticky for as long as this file has existed
+     and has never once stuck. clip stops the sideways scroll without
+     creating the container. Safari below 16 falls back to hidden, where the
+     header behaves exactly as it does today. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  /* Graded rather than flat. A single dark fill across a 6000px page is the
+     thing that makes a dark site feel like a dark rectangle. */
+  background:
+    radial-gradient(120% 60% at 50% -10%, #101017 0%, transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   font-size: var(--fs-700);
   line-height: 1.6;
@@ -244,6 +273,7 @@ body {
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overflow-x: clip;
   font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
@@ -993,9 +1023,10 @@ html[lang^="ta"] .rule-label b { font-family: var(--font-mono); }
   flex-direction: column;
   gap: var(--sp-3);
   padding: clamp(24px, 2.6vw, 40px);
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface) 62%);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
+  box-shadow: var(--lift), var(--shadow);
   color: inherit;
   text-decoration: none;
   overflow: hidden;
@@ -1016,7 +1047,7 @@ html[lang^="ta"] .rule-label b { font-family: var(--font-mono); }
 a.service-tile:hover, a.service-tile:focus-visible {
   transform: translateY(-3px);
   border-color: var(--accent-line);
-  background: var(--surface-2, var(--surface));
+  box-shadow: var(--lift-strong), var(--shadow-lg);
 }
 a.service-tile:hover::after, a.service-tile:focus-visible::after { opacity: 1; }
 
@@ -1097,6 +1128,22 @@ a.service-tile:hover .service-tile-go span { transform: translateX(4px); }
   a.service-tile:hover .service-tile-go span { transform: none; }
 }
 
+/* Film grain. Large flat dark areas band badly on 8-bit panels -- you see the
+   gradient step as a visible ring. A few percent of noise breaks the step up
+   and reads as material rather than as a defect. Inline SVG, so it costs a
+   rule rather than a request, and it never intercepts a click. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Everything the page draws sits above the grain. */
+header, main, footer, .consent-bar, .mobile-dock { position: relative; z-index: 2; }
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -1121,9 +1168,9 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 10, 12, 0.72);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  background: rgba(8, 8, 10, 0.62);
+  backdrop-filter: blur(22px) saturate(1.7);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
   border-bottom: 1px solid transparent;
   transition: background var(--transition), border-color var(--transition);
 }
@@ -1442,8 +1489,15 @@ header nav {
 
 .btn-primary,
 .btn-accent {
-  background: var(--accent);
-  border-color: var(--accent);
+  /* Solid copper underneath, metal on top. Setting only the gradient left
+     background-color transparent, so the dark ink label sat on whatever was
+     behind the button if the image did not paint -- 1.06:1 against the page.
+     The fallback keeps the contrast real rather than merely apparent. */
+  background-color: var(--accent);
+  background-image: var(--accent-metal);
+  border-color: rgba(234, 182, 141, 0.55);
+  box-shadow: var(--lift-strong), 0 1px 2px rgba(0, 0, 0, 0.45),
+              0 10px 24px -12px rgba(207, 144, 97, 0.55);
   color: var(--accent-ink);
   font-weight: 600;
   position: relative;
@@ -1531,9 +1585,10 @@ header nav {
 .card,
 .spotlight-card {
   position: relative;
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface) 62%);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
+  box-shadow: var(--lift), var(--shadow);
   padding: clamp(22px, 2.2vw, 32px);
   display: flex;
   flex-direction: column;
