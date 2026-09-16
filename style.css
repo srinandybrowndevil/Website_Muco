@@ -131,6 +131,11 @@
   /* Warm ivory rather than pure white, which glares on obsidian. */
   --text: #f2ede6;
   --text-2: #b5ada2;
+  /* Third text step. It was referenced in seven places and defined in
+     none, so every rule asking for it fell back to the inherited colour
+     and nothing that was meant to recede actually did. 5.2:1 on --bg,
+     so it still clears AA for body text. */
+  --text-3: #8a8279;
   --text-dim: #968d82;
 
   /* Warm-grey borders, three weights. */
@@ -641,6 +646,13 @@ main {
 section {
   padding: var(--sp-9) 0;
   position: relative;
+}
+
+/* A section inside a section is a grouping within a band, not a band. Without
+   this it took the full band padding, putting a screen of empty space above
+   every group heading. */
+section section {
+  padding: 0;
 }
 
 .section-tight {
@@ -4097,3 +4109,10 @@ main {
   border-color: rgba(242, 237, 230, 0.06);
 }
 .learning-service .eyebrow { color: var(--text-3); }
+
+/* Service groups. Three named sets rather than one run of eight peers, so the
+   page is three decisions instead of a wall to read top to bottom. */
+.service-group + .service-group { margin-top: var(--sp-8); }
+.service-group-head { max-width: 58ch; margin-bottom: var(--sp-5); }
+.service-group-head h2 { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.25; margin: 0 0 var(--sp-2); }
+.service-group-head p { margin: 0; color: var(--text-3); }

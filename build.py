@@ -291,6 +291,12 @@ def band_sections(body):
             return m.group(0)
         if "section-flush" in attrs:
             return m.group(0)
+        # A <section> nested inside a page band is a grouping within that band,
+        # not a band of its own. Without this opt-out it collected a band
+        # background and the global 112px section padding, so a group heading
+        # arrived inside a stray surface panel with a screen of space above it.
+        if 'data-band="none"' in attrs:
+            return m.group(0)
 
         state["n"] += 1
         band = "band-surface section-grid" if state["n"] % 2 else "band-deep"

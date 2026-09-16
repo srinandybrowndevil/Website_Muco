@@ -1175,8 +1175,14 @@ def portfolio_counts():
 
 def service_card(s, span=""):
     points = "".join("<li>%s</li>" % pt for pt in s["points"])
-    links = ['<a href="services-%s.html" class="card-cta">Read more about %s &rarr;</a>'
-             % (s["slug"], s["title"].lower())]
+    # The visible label was "Read more about website design & development",
+    # which repeats the heading directly above it, lowercases names that are not
+    # lowercase ("ui/ux and product design"), and wrapped so the arrow sat alone
+    # on its own line. Short on screen, full for a screen reader tabbing through
+    # eight of these in a row.
+    links = ['<a href="services-%s.html" class="card-cta">Read more'
+             '<span class="visually-hidden"> about %s</span>&nbsp;&rarr;</a>'
+             % (s["slug"], s["title"])]
     if s.get("link"):
         links.append('<a href="%s" class="card-cta card-cta-quiet">%s &rarr;</a>' % s["link"])
     price = '<p class="card-links">%s</p>' % "".join(links)
@@ -1184,7 +1190,6 @@ def service_card(s, span=""):
             <div class="icon-tile">{icon}</div>
             <h3>{title}</h3>
             <p class="card-outcome">{outcome}</p>
-            <p class="card-body">{body}</p>
             <ul class="feature-list">{points}</ul>
             {price}
           </article>
@@ -1465,8 +1470,39 @@ def build_home():
     )
 
 
+# Eight peer cards in one uninterrupted run gave a reader nothing to navigate
+# by: identical blocks, top to bottom, with the only way in being to read all of
+# them. Three groups turn that into three decisions. Slugs rather than indexes,
+# so reordering SERVICES cannot silently put a card in the wrong group.
+SERVICE_GROUPS = [
+    ("Build the thing", "Websites, apps and the design work behind them.",
+     ["websites", "mobile", "product-design"]),
+    ("Run the business on it", "Systems that hold your orders, customers and money.",
+     ["software", "business-systems"]),
+    ("Grow it, and keep it running", "Getting found, cutting repeat work, and staying up.",
+     ["marketing", "ai-automation", "support"]),
+]
+
+
 def build_services():
-    cards = "".join(service_card(s) for s in SERVICES)
+    by_slug = {s["slug"]: s for s in SERVICES}
+    grouped = [slug for _, _, slugs in SERVICE_GROUPS for slug in slugs]
+    missing = [s["slug"] for s in SERVICES if s["slug"] not in grouped]
+    unknown = [slug for slug in grouped if slug not in by_slug]
+    assert not missing, "services missing from SERVICE_GROUPS: %s" % missing
+    assert not unknown, "SERVICE_GROUPS names unknown services: %s" % unknown
+
+    cards = "".join(
+        """        <section class="service-group" data-band="none" aria-labelledby="group-%d">
+          <div class="service-group-head">
+            <h2 id="group-%d">%s</h2>
+            <p>%s</p>
+          </div>
+          <div class="ecosystem-grid">
+%s          </div>
+        </section>
+""" % (n, n, title, blurb, "".join(service_card(by_slug[slug]) for slug in slugs))
+        for n, (title, blurb, slugs) in enumerate(SERVICE_GROUPS, start=1))
     industries = "".join('<span class="chip">%s</span>' % i for i in INDUSTRIES)
 
     body = page_header(
@@ -1476,10 +1512,7 @@ def build_services():
         "technology. Everything is scoped in writing before it starts.",
     ) + """    <section class="section-flush">
       <div class="container">
-        <h2 class="visually-hidden">Service lines</h2>
-        <div class="ecosystem-grid">
-{cards}        </div>
-      </div>
+{cards}      </div>
     </section>
 
     <section class="section-divider">
