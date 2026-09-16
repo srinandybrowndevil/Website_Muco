@@ -1283,39 +1283,16 @@ def build_home():
             {trust}
           </div>
 
-          <div>
-            <div class="mockup-window">
-              <div class="mockup-topbar">
-                <div class="mockup-dots" aria-hidden="true">
-                  <span class="mockup-dot red"></span><span class="mockup-dot yellow"></span><span class="mockup-dot green"></span>
-                </div>
-                <span class="mockup-title">meyra &mdash; internal build</span>
-                <span class="clock" aria-hidden="true">--:--</span>
-              </div>
-
-              <div class="mockup-body">
-                <p class="chat-bubble chat-user" id="mockup-user-text">Meyra, give me my morning briefing.</p>
-                <p class="chat-bubble chat-meyra" id="mockup-meyra-text">
-                  <strong>Meyra</strong>
-                  <span id="mockup-meyra-body">Two priority items today: the InkNexis architecture review at 11:30 and the Ooruva vendor pilot check-in at 15:30. One proposal is waiting on your sign-off.</span>
-                </p>
-
-                <div class="mt-1">
-                  <span class="text-mono note fs-xs block mb-2">TRY A COMMAND</span>
-                  <div class="mockup-badge-row">
-                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="briefing" aria-pressed="true">Morning briefing</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="followup" aria-pressed="false">Client follow-ups</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="operations" aria-pressed="false">Sort enquiries</button>
-                  </div>
-                </div>
-
-                <p class="mockup-input-bar">
-                  <span>Meyra is one of our own builds &mdash; not a product for sale yet.</span>
-                  <a class="card-cta" href="work.html#meyra">Read more about Meyra</a>
-                </p>
-              </div>
-            </div>
-          </div>
+          <dl class="hero-facts">
+            <div class="hero-fact"><dt>How we quote</dt>
+              <dd>A written scope before anything starts. No hourly surprises.</dd></div>
+            <div class="hero-fact"><dt>Who you talk to</dt>
+              <dd>The founder. Not an account manager relaying messages.</dd></div>
+            <div class="hero-fact"><dt>What you own</dt>
+              <dd>Source code, design and every account, on final payment.</dd></div>
+            <div class="hero-fact"><dt>Where we work</dt>
+              <dd>Erode and Tamil Nadu in person, India and abroad remotely.</dd></div>
+          </dl>
         </div>
       </div>
     </section>
@@ -1429,6 +1406,57 @@ def build_home():
       </div>
     </section>
 
+    <section class="section-divider">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">One of our own builds</span>
+          <h2>Meyra, the assistant we run the studio on</h2>
+        </div>
+        <div class="hero-split">
+          <div>
+            <div class="mockup-window">
+              <div class="mockup-topbar">
+                <div class="mockup-dots" aria-hidden="true">
+                  <span class="mockup-dot red"></span><span class="mockup-dot yellow"></span><span class="mockup-dot green"></span>
+                </div>
+                <span class="mockup-title">meyra &mdash; internal build</span>
+                <span class="clock" aria-hidden="true">--:--</span>
+              </div>
+
+              <div class="mockup-body">
+                <p class="chat-bubble chat-user" id="mockup-user-text">Meyra, give me my morning briefing.</p>
+                <p class="chat-bubble chat-meyra" id="mockup-meyra-text">
+                  <strong>Meyra</strong>
+                  <span id="mockup-meyra-body">Two priority items today: the InkNexis architecture review at 11:30 and the Ooruva vendor pilot check-in at 15:30. One proposal is waiting on your sign-off.</span>
+                </p>
+
+                <div class="mt-1">
+                  <span class="text-mono note fs-xs block mb-2">TRY A COMMAND</span>
+                  <div class="mockup-badge-row">
+                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="briefing" aria-pressed="true">Morning briefing</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="followup" aria-pressed="false">Client follow-ups</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-meyra-scenario="operations" aria-pressed="false">Sort enquiries</button>
+                  </div>
+                </div>
+
+                <p class="mockup-input-bar">
+                  <span>Meyra is one of our own builds &mdash; not a product for sale yet.</span>
+                  <a class="card-cta" href="work.html#meyra">Read more about Meyra</a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p>Meyra is an internal build, not a product for sale. It is here because it is the
+              clearest thing we can show you about how we think about software: a narrow job,
+              done properly, with the status of every item stated rather than implied.</p>
+            <p class="note">The panel is a drawn interface, not a screen recording. Try the three
+              commands to see the shape of the thing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
 {cta}""".format(
         cap_strip=cap_strip, growth_sections=home_growth_sections(),
         industry_matrix=industry_matrix(),
@@ -1536,27 +1564,34 @@ def build_services():
           <span class="eyebrow">Straight answers</span>
           <h2>What we will not tell you</h2>
         </div>
-        <div class="grid grid-2">
-          <div class="card">
-            <h3>No guaranteed rankings</h3>
-            <p>Nobody controls Google's results. We commit to the technical and content work that
-              makes ranking possible, and we report what actually happened.</p>
+        <div class="index-list">
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">01</span>
+            <div>
+              <h3>No guaranteed rankings</h3>
+              <p class="index-body">Nobody controls Google&rsquo;s results. We commit to the technical and content work that makes ranking possible, and we report what actually happened.</p>
+            </div>
           </div>
-          <div class="card">
-            <h3>No invented numbers</h3>
-            <p>You will not find fabricated client counts, made-up success percentages or stock
-              testimonials anywhere on this site. When we have verified results to publish, we
-              will publish them with the client's permission.</p>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">02</span>
+            <div>
+              <h3>No invented numbers</h3>
+              <p class="index-body">You will not find fabricated client counts, made-up success percentages or stock testimonials anywhere on this site. When we have verified results to publish, we will publish them with the client&rsquo;s permission.</p>
+            </div>
           </div>
-          <div class="card">
-            <h3>No hidden scope</h3>
-            <p>Third-party subscriptions, paid plugins, payment gateway charges, domain renewal,
-              GST and ongoing marketing are stated separately in every quote.</p>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">03</span>
+            <div>
+              <h3>No hidden scope</h3>
+              <p class="index-body">Third-party subscriptions, paid plugins, payment gateway charges, domain renewal, GST and ongoing marketing are stated separately in every quote.</p>
+            </div>
           </div>
-          <div class="card">
-            <h3>No lock-in</h3>
-            <p>You own the code, the design and the accounts. If you decide to move to another
-              team, everything hands over cleanly.</p>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">04</span>
+            <div>
+              <h3>No lock-in</h3>
+              <p class="index-body">You own the code, the design and the accounts. If you decide to move to another team, everything hands over cleanly.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1773,7 +1808,7 @@ def build_work():
 """.format(legend=legend),
     ) + """    <section class="section-flush">
       <div class="container">
-        <h2 class="visually-hidden">Projects</h2>
+        <div class="section-head"><span class="eyebrow">Selected work</span><h2>Projects, labelled by evidence</h2></div>
         <div class="work-grid">
 {cards}        </div>
 
@@ -1975,8 +2010,8 @@ def build_local_erode():
          "effectively than a phone call ever did."),
     ]
     sectors_html = "".join(
-        '          <article class="card reveal-on-scroll"><h3>%s</h3><p>%s</p></article>\n' % sc
-        for sc in sectors
+        index_row(i, title, text)
+        for i, (title, text) in enumerate(sectors, start=1)
     )
 
     faqs = "".join(
@@ -2043,7 +2078,7 @@ def build_local_erode():
             education. Different businesses, same problem: the customer looks you up online before
             they ever call.</p>
         </div>
-        <div class="grid grid-3">
+        <div class="index-list">
 {sectors}        </div>
       </div>
     </section>
@@ -2127,15 +2162,16 @@ def build_maintenance():
         "cover you actually need, and we only commit to response times we can honour.",
     ) + """    <section class="section-flush">
       <div class="container">
+        <div class="section-head"><span class="eyebrow">What is covered</span><h2>What a plan covers, and what it does not</h2></div>
         <div class="grid grid-2">
           <div class="card card-lg">
             <div class="icon-tile">{ok}</div>
-            <h2 class="fs-xl">What a plan includes</h2>
+            <h3 class="fs-xl">What a plan includes</h3>
             <ul class="feature-list mt-4">{incl}</ul>
           </div>
           <div class="card card-lg">
             <div class="icon-tile icon-tile-alt">{code}</div>
-            <h2 class="fs-xl">What it does not include</h2>
+            <h3 class="fs-xl">What it does not include</h3>
             <ul class="feature-list mt-4">{excl}</ul>
             <p class="note mt-4">Anything on this list can
               still be done &mdash; it is quoted separately rather than absorbed silently.</p>
@@ -2152,7 +2188,7 @@ def build_maintenance():
 
     <section class="section-divider">
       <div class="container container-narrow">
-        <h2>How support works</h2>
+        <div class="section-head"><span class="eyebrow">How support works</span><h2>From report to fix</h2></div>
         <div class="process-list mt-5">
           <div class="process-step"><div><h3>Report</h3><p>You raise an issue on the agreed channel with what happened and when.</p></div></div>
           <div class="process-step"><div><h3>Acknowledge and assess</h3><p>We confirm receipt, reproduce the issue and tell you whether it is covered by your plan.</p></div></div>
@@ -2208,9 +2244,12 @@ def build_about():
          "We work in person across Erode, Pallipalayam, Namakkal, Coimbatore, Tiruppur and "
          "Karur, and remotely beyond. Local businesses get a team they can actually meet."),
     ]
+    # Six commitments are one set, not six objects. As bordered boxes in a
+    # three-column grid they read as unrelated tiles; as numbered rows they
+    # read as the list the heading already says they are.
     vhtml = "".join(
-        '          <article class="card reveal-on-scroll"><h3>%s</h3><p>%s</p></article>\n' % v
-        for v in values
+        index_row(i, title, text)
+        for i, (title, text) in enumerate(values, start=1)
     )
 
     body = """    <section>
@@ -2269,14 +2308,14 @@ def build_about():
           <span class="eyebrow">How we operate</span>
           <h2>Six commitments, and what each one costs us</h2>
         </div>
-        <div class="grid grid-3">
+        <div class="index-list">
 {values}        </div>
       </div>
     </section>
 
     <section class="section-divider">
       <div class="container container-narrow">
-        <h2>The working arrangement</h2>
+        <div class="section-head"><span class="eyebrow">Terms in plain sight</span><h2>The working arrangement</h2></div>
         <div class="table-wrap mt-5">
           <table>
             <caption class="visually-hidden">How MUCO LABS works with clients</caption>
@@ -2347,6 +2386,12 @@ def build_contact():
 # the page jumping straight from h1 to the questions with nothing in between.
 # Grouping gives the page a spine: a reader scans three headings instead of
 # eleven, and each question is properly subordinate to the group it belongs to.
+FAQ_GROUP_LABELS = {
+    "Cost, payment and ownership": "Money",
+    "How we work": "Process",
+    "Scope, reach and life after launch": "After launch",
+}
+
 FAQ_GROUPS = [
     ("Cost, payment and ownership", [
         "What does a website actually cost?",
@@ -2381,9 +2426,9 @@ def build_faq():
 
     items = "".join(
         """      <section class="faq-group" aria-labelledby="faq-%d">
-        <h2 id="faq-%d" class="faq-group-title">%s</h2>
+        <div class="section-head"><span class="eyebrow">%s</span><h2 id="faq-%d" class="faq-group-title">%s</h2></div>
 %s      </section>
-""" % (index, index, title, "".join(
+""" % (index, FAQ_GROUP_LABELS[title], index, title, "".join(
             """        <details class="faq-item">
           <summary><h3>%s</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body">%s</div></div></div>
@@ -2439,15 +2484,13 @@ def build_careers():
          "Technical SEO, local search for Tamil Nadu, and writing that a business owner would "
          "recognise as true. No keyword stuffing, no spun content."),
     ]
+    # Five open lanes are a set to scan and pick one from, so they belong on
+    # rules. The apply action moves into the row itself rather than sitting
+    # as five identical buttons down a grid.
     rhtml = "".join(
-        """          <article class="card reveal-on-scroll">
-            <div class="tag-row"><span class="tag tag-subtle">%s</span></div>
-            <h3>%s</h3>
-            <p>%s</p>
-            <a href="%s" class="btn btn-secondary btn-sm mt-4 self-start">Apply for this role</a>
-          </article>
-""" % (kind, title, desc, "mailto:%s?subject=%s" % (EMAIL, quote("Application: " + title)))
-        for title, kind, desc in roles
+        index_row(i, title, desc, kicker=kind, go="Apply",
+                  href="mailto:%s?subject=%s" % (EMAIL, quote("Application: " + title)))
+        for i, (title, kind, desc) in enumerate(roles, start=1)
     )
 
     body = page_header(
@@ -2465,8 +2508,8 @@ def build_careers():
           project work, and terms agreed per engagement.</p>
         </div>
 
-        <h2 class="mb-5">Where we usually need help</h2>
-        <div class="grid grid-3">
+        <div class="section-head"><span class="eyebrow">Where we need help</span><h2>Where we usually need help</h2></div>
+        <div class="index-list">
 {roles}        </div>
       </div>
     </section>
@@ -2475,8 +2518,8 @@ def build_careers():
       <div class="container">
         <div class="split">
           <div>
-            <span class="eyebrow">Freelancers &amp; studios</span>
-            <h2>Collaboration, not subcontracting in the dark</h2>
+            <div class="section-head"><span class="eyebrow">Freelancers &amp; studios</span>
+            <h2>Collaboration, not subcontracting in the dark</h2></div>
             <p class="mb-4">We work with independent developers, designers and small
               studios on projects that need more hands or a specific specialism. If you bring the
               client, you stay in the relationship &mdash; we do not go around you.</p>

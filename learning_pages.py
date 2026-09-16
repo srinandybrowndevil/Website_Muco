@@ -47,8 +47,8 @@ def build_learning(services):
     body += f'''
     <section class="section-divider" id="courses" aria-labelledby="courses-title">
       <div class="container">
-        <span class="eyebrow">Way2Me · Course catalogue</span>
-        <h2 id="courses-title">Find what you want to learn.</h2>
+        <div class="section-head"><span class="eyebrow">Way2Me · Course catalogue</span>
+        <h2 id="courses-title">Find what you want to learn.</h2></div>
         <p>Browse {len(COURSE_GROUPS)} course listings: 64 from <a href="{SOURCE_URL}">Way2Me’s public catalogue</a> and one from its <a href="https://way2me.in/courses/">online course directory</a>. Ask Way2Me about current batches, fees, duration and enrolment.</p>
         <div class="learning-controls" data-course-controls hidden>
           <label for="course-search">Search courses<input id="course-search" type="search" placeholder="Try Python, design or AI" autocomplete="off" aria-controls="course-grid" /></label>

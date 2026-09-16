@@ -108,7 +108,7 @@
   /* ------------------------------------------------------- spotlight cards */
   function initSpotlight() {
     if (reduceMotion) return;
-    var cards = document.querySelectorAll('.spotlight-card, .work-card, .index-row');
+    var cards = document.querySelectorAll('.spotlight-card, .index-row');
     if (!cards.length) return;
 
     Array.prototype.forEach.call(cards, function (card) {

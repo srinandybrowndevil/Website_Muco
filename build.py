@@ -907,6 +907,29 @@ def render(slug, title, description, body, current=None, og_type="website",
 # ---------------------------------------------------------------------------
 # Shared page fragments
 # ---------------------------------------------------------------------------
+def index_row(num, title, body, href="", go="", kicker=""):
+    """One peer in a scannable set, carried on a rule instead of in a box.
+
+    Six bordered boxes in a grid announce six separate objects. Six numbered
+    rows announce one set of six, which is what a list of commitments,
+    industries or roles actually is -- and the number is real information,
+    because it tells a reader how far through the set they are.
+    """
+    tag = "a" if href else "div"
+    attrs = ' href="%s"' % href if href else ""
+    go_html = (NEWLINE + ('            <span class="index-go">%s&nbsp;&rarr;</span>' % go)) if go else ""
+    kicker_html = (NEWLINE + ('              <span class="index-kicker">%s</span>' % kicker)) if kicker else ""
+    return """          <{tag} class="index-row reveal-on-scroll"{attrs}>
+            <span class="index-num">{num}</span>
+            <div>
+              <h3>{title}</h3>{kicker}
+              <p class="index-body">{body}</p>
+            </div>{go}
+          </{tag}>
+""".format(tag=tag, attrs=attrs, num="%02d" % num, title=title, body=body,
+           go=go_html, kicker=kicker_html)
+
+
 def final_cta(heading, sub, primary_label=START_PROJECT_LABEL, primary=START_PROJECT_URL):
     return """    <section class="section-divider">
       <div class="container">

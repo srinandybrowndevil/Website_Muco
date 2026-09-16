@@ -756,6 +756,30 @@ section section {
   align-items: center;
 }
 
+/* The four questions a buyer actually arrives with, answered in the space the
+   product mockup used to occupy. A drawn mockup of an unreleased internal tool
+   was the largest thing in the hero, which put a simulation where the evidence
+   should be; these are commitments that can be checked. */
+.hero-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--sp-5);
+  margin: 0;
+}
+/* Each fact carries its own rule rather than sharing one strip. A single
+   container border left any cell that wrapped to a second row floating with
+   no line above it, and four facts wrap to 3 + 1 at most hero widths. */
+.hero-fact {
+  border-top: 1px solid var(--line-strong);
+  padding-top: var(--sp-4);
+}
+.hero-fact dt {
+  font-family: var(--font-mono); font-size: var(--fs-200);
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: var(--sp-2);
+}
+.hero-fact dd { margin: 0; color: var(--text); max-width: 30ch; }
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -3094,27 +3118,27 @@ textarea.form-control {
   gap: var(--sp-4);
 }
 
+/* The work grid is the one place where the evidence itself is the argument, so
+   the panel gives the image every pixel it can and keeps almost nothing for
+   itself. A bordered card with 24px of padding spent that space on chrome and
+   shrank the only thing a visitor came to look at. Separation now comes from
+   the gap between panels rather than from a box, which is also why the gap
+   grew: without a border, panels need real air to read as separate. */
 .work-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(430px, 1fr));
-  gap: var(--sp-4);
+  gap: var(--sp-8) var(--sp-6);
 }
 
 .work-card {
   position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-5);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
-  transition: border-color var(--transition), transform var(--transition);
-}
-
-.work-card:hover {
-  border-color: var(--accent-line);
-  transform: translateY(-2px);
 }
 
 .work-card-head {
@@ -3439,8 +3463,7 @@ main {
 }
 
 /* Cursor spotlight (spec §50, desktop only). */
-.spotlight-card::before,
-.work-card::before {
+.spotlight-card::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -3455,13 +3478,11 @@ main {
   );
 }
 
-.spotlight-card:hover::before,
-.work-card:hover::before {
+.spotlight-card:hover::before {
   opacity: 1;
 }
 
-.spotlight-card > *,
-.work-card > * {
+.spotlight-card > * {
   position: relative;
 }
 
@@ -3812,8 +3833,7 @@ main {
   }
 
   .read-progress,
-  .spotlight-card::before,
-  .work-card::before {
+  .spotlight-card::before {
     display: none;
   }
 
@@ -3861,7 +3881,9 @@ main {
   }
 }
 /* Responsive portfolio photography; intrinsic dimensions prevent layout shifts. */
-.project-illustration { position: relative; margin: 0 0 24px; overflow: hidden; border-radius: 10px; background: #161a1d; }
+.project-illustration { position: relative; margin: 0 0 var(--sp-4); overflow: hidden;
+  border-radius: var(--radius-lg); border: 1px solid var(--line);
+  background: #161a1d; }
 .project-illustration picture { display: block; }
 .project-illustration img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; transition: transform .5s ease; }
 .project-illustration figcaption { position: absolute; inset: auto 0 0; display: flex; justify-content: space-between; gap: 12px; padding: 28px 16px 12px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.8)); font-size: var(--fs-200); }
@@ -4155,6 +4177,7 @@ a.index-row:hover, a.index-row:focus-visible {
 .index-row .index-num { font-family: var(--font-mono); font-size: var(--fs-300); color: var(--text-3); padding-top: 5px; }
 .index-row h3 { margin: 0 0 var(--sp-1); font-size: var(--fs-900); line-height: 1.25; }
 .index-row .index-outcome { margin: 0 0 var(--sp-2); color: var(--text); font-weight: 500; max-width: 54ch; }
+.index-row .index-body { margin: 0; color: var(--text-2); max-width: 62ch; }
 .index-row .index-points { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin: 0; padding: 0; list-style: none; }
 .index-row .index-points li { color: var(--text-2); font-size: var(--fs-500); }
 .index-row .index-points li::before { content: "— "; color: var(--accent); }
