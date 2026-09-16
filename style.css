@@ -259,6 +259,10 @@ html {
 
 body {
   font-family: var(--font-sans);
+  text-wrap: pretty;
+  /* Quotes and hyphens hang into the margin where supported, so the left edge
+     of a paragraph reads as straight rather than notched. */
+  hanging-punctuation: first last;
   /* Graded rather than flat. A single dark fill across a 6000px page is the
      thing that makes a dark site feel like a dark rectangle.
 
@@ -326,14 +330,22 @@ ol {
 }
 
 ::selection {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: rgba(207, 144, 97, 0.28);
+  color: var(--text);
+  text-shadow: none;
 }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 3px;
+  /* Inherit the shape being focused rather than asserting one. The literal 3px
+     here predated the radius change and cut across every rounded control. */
+  border-radius: inherit;
+}
+/* Elements with no radius of their own still want a ring that is not a hard
+   rectangle. */
+a:focus-visible, button:focus-visible, summary:focus-visible {
+  border-radius: var(--radius);
 }
 
 /* The scrollbar is part of the chrome, so it sits in the same obsidian
@@ -470,6 +482,17 @@ section:has(> .container > .hero-split)::before {
 .band-surface {
   background: var(--surface);
   border-block: 1px solid var(--line);
+  /* Hairlines that stop dead at both ends look cut; a rule across a page
+     this wide should fade, because the edge of the viewport is not a wall.
+     border-image does it without an extra element. Only the block edges
+     have width, so the inline ones never draw.
+
+     This was first written against .section-divider, which does not exist
+     in the output at all: band_sections replaces that class on every
+     section it touches, so the rule matched nothing and looked correct in
+     the stylesheet while doing nothing on the page. */
+  border-image: linear-gradient(90deg, transparent, var(--line) 10%,
+                                var(--line) 90%, transparent) 1;
 }
 
 .band-deep {
@@ -1148,6 +1171,65 @@ body::before {
 }
 /* Everything the page draws sits above the grain. */
 header, main, footer, .consent-bar, .mobile-dock { position: relative; z-index: 2; }
+
+/* ------------------------------------------------------------------ craft */
+
+/* Numbers that sit in a column must line up with the number above them. The
+   proportional figures in this face put a 1 at half the width of a 7, so a
+   price list or a table of quantities came out visibly ragged. */
+table, .price-card, .hero-facts, .contact-facts, .def-list, .stat, time,
+.service-tile-num, .index-num, .rule-label b {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'kern' 1;
+}
+
+/* List markers in the accent, at the weight of punctuation rather than of
+   content. The browser default bullet is a different grey from everything
+   else on the page. */
+.prose ul li::marker, .feature-list li::marker {
+  color: var(--accent);
+}
+
+/* Display type wants less tracking as it gets larger: letterforms set for a
+   paragraph are too loose at 64px. This is the optical correction a type
+   designer would apply by hand. */
+h1 { letter-spacing: -0.028em; }
+h2 { letter-spacing: -0.022em; }
+h3 { letter-spacing: -0.012em; }
+
+/* A focused field should feel like it has been picked up, not merely outlined.
+   The ring is the accent at a weight that reads on obsidian, with a soft bloom
+   so the eye lands on it from across the form. */
+.form-control:focus-visible,
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), var(--lift);
+}
+
+/* An image with no background flashes the page colour through it while it
+   decodes, which on a dark ground reads as a hole that then fills in. */
+img {
+  background-color: var(--surface);
+}
+
+/* Not everyone wants the glass. Both of these are real user settings, and a
+   site that ignores them is making a decision on somebody else's behalf. */
+@media (prefers-reduced-transparency: reduce) {
+  header, .contact-dock-panel, .mobile-menu {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--bg);
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --line: rgba(242, 237, 230, 0.26);
+    --line-strong: rgba(242, 237, 230, 0.42);
+    --text-2: #cfc7bc;
+    --text-3: #b3aaa0;
+  }
+}
 
 .stack {
   display: flex;
