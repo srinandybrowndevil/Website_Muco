@@ -518,7 +518,7 @@ def header_html(current, key):
         </ul>
 
         <div class="nav-actions">
-{portal_login_link}          <a href="{start_project}" class="btn btn-accent btn-sm">{start_label}</a>
+{portal_login_link}{tamil_switch}          <a href="{start_project}" class="btn btn-accent btn-sm">{start_label}</a>
           <details class="contact-dock" id="contact-dock">
             <summary class="contact-dock-trigger" aria-label="Contact MUCO LABS by WhatsApp or phone">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -545,7 +545,7 @@ def header_html(current, key):
       <div class="mobile-menu-secondary">
         <a href="faq.html">FAQ</a>
         <a href="careers.html">Careers</a>
-      </div>
+{tamil_switch_mobile}      </div>
       <div class="mobile-menu-actions">
         <a href="{start_project}" class="btn btn-accent">{start_label}</a>
         <a href="{whatsapp}" class="btn btn-whatsapp" data-whatsapp>WhatsApp MUCO LABS</a>
@@ -553,6 +553,20 @@ def header_html(current, key):
     </div>
   </header>
 """.format(
+        # A Tamil reader landing on an English page had no way to discover the
+        # Tamil version: the only signal was <link rel="alternate" hreflang> in
+        # the head, which no visitor sees. The Tamil pages have offered a route
+        # back to English since they shipped; this is the missing direction.
+        # Named in its own script, which is how a language switch is read by
+        # someone who cannot read the current one.
+        tamil_switch=(
+            '          <a href="/%s" class="lang-switch" lang="ta-IN" hreflang="ta-in">'
+            'தமிழ்</a>' + NEWLINE) % canonical_path(TAMIL_TWINS[current])
+            if current in TAMIL_TWINS else "",
+        tamil_switch_mobile=(
+            '        <a href="/%s" lang="ta-IN" hreflang="ta-in">'
+            'தமிழ்</a>' + NEWLINE) % canonical_path(TAMIL_TWINS[current])
+            if current in TAMIL_TWINS else "",
         brand=BRAND,
         city=CITY,
         logo=LOGO_SVG.replace("{k}", key),

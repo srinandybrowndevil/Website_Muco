@@ -568,3 +568,43 @@ test.describe("the pricing columns read across", () => {
     }
   });
 });
+
+test.describe("both directions of the language switch", () => {
+  const TWINS = [["/", "/ta"], ["/services", "/ta/services"],
+                 ["/about", "/ta/about"], ["/contact", "/ta/contact"]] as const;
+
+  for (const [en, ta] of TWINS) {
+    test(`${en} offers its Tamil version`, async ({ page }) => {
+      // The Tamil pages have linked back to English since they shipped. Going
+      // the other way, the only signal a Tamil version existed was the
+      // <link rel="alternate"> in the head, which no visitor ever sees.
+      await page.goto(`${BASE}${en}`, { waitUntil: "load" });
+      const link = page.locator(`header a[href="${ta}"]`).first();
+      await expect(link).toHaveAttribute("hreflang", "ta-in");
+      // lang on the anchor tells a screen reader to change pronunciation for
+      // the link text, which is in Tamil script.
+      await expect(link).toHaveAttribute("lang", "ta-IN");
+    });
+  }
+
+  test("a page with no Tamil version offers none", async ({ page }) => {
+    await page.goto(`${BASE}/work`, { waitUntil: "load" });
+    await expect(page.locator('header a[href^="/ta"]')).toHaveCount(0);
+  });
+
+  test("every service radio carries its own error description", async ({ page }) => {
+    // aria-describedby on the <fieldset> is never read out for the radio that
+    // has focus, so the error text was unreachable for the one field that is
+    // a group rather than a single input.
+    await page.goto(`${BASE}/contact`, { waitUntil: "load" });
+    const radios = page.locator('input[name="service"]');
+    const total = await radios.count();
+    expect(total).toBeGreaterThan(1);
+    for (let i = 0; i < total; i++) {
+      await expect(radios.nth(i)).toHaveAttribute("aria-describedby", "err-service");
+    }
+    // One `required` satisfies a radio group; eleven made a screen reader say
+    // "required" on every option as the user arrowed through.
+    expect(await page.locator('input[name="service"][required]').count()).toBe(1);
+  });
+});

@@ -81,27 +81,21 @@
       }
     });
 
-    // While the menu is open, Tab cycles through the toggle and the menu's
-    // links instead of falling through to the page behind it.
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Tab' || !menu.classList.contains('open')) return;
-      var items = [toggle].concat(
-        Array.prototype.slice.call(menu.querySelectorAll('a'))
-      );
-      var idx = items.indexOf(document.activeElement);
-      var next;
-      if (e.shiftKey) {
-        next = idx <= 0 ? items[items.length - 1] : items[idx - 1];
-      } else {
-        next = idx === -1 || idx === items.length - 1 ? items[0] : items[idx + 1];
-      }
-      e.preventDefault();
-      next.focus();
-    });
+    // No Tab trap here, deliberately. This panel is an in-flow dropdown that
+    // does not cover the page behind it, so the content below stays visible --
+    // and a trap meant a keyboard user could see that content and never reach
+    // it, with Escape the only way out and nothing on screen saying so. A trap
+    // belongs to a modal that actually hides the rest of the page; this is not
+    // one. Focus now flows naturally out of the menu and on down the document.
 
     // Close when the viewport grows back to the desktop nav.
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 768 && menu.classList.contains('open')) setOpen(false);
+      if (window.innerWidth <= 768 || !menu.classList.contains('open')) return;
+      // Hand focus back to the toggle first. The panel is about to become
+      // display:none, and hiding an element that still contains the focused
+      // one drops focus to <body> with no way back.
+      if (menu.contains(document.activeElement)) toggle.focus();
+      setOpen(false);
     });
   }
 
@@ -720,10 +714,11 @@
     if (more) more.addEventListener('click', function () {
       shown += PAGE;
       filter();
-      // Move focus to the first newly revealed card so a keyboard user is not
-      // dropped back at the top of the list.
-      var next = cards.filter(function (c) { return !c.hidden; })[shown - PAGE];
-      if (next) { next.setAttribute('tabindex', '-1'); next.focus({preventScroll: true}); }
+      // Focus stays on this button. It used to move to the first new card --
+      // an <article>, which takes no name from its content, so a screen reader
+      // landed somewhere it could not announce, and anyone wanting a second
+      // page had to tab backwards to find the button again. #course-count is
+      // already a polite live region, so the new total is announced anyway.
     });
     search.addEventListener('input', function () { shown = PAGE; filter(); });
     category.addEventListener('change', function () { shown = PAGE; filter(); });
@@ -807,14 +802,27 @@
       return found.nodeType ? found : (found[0] || null);
     }
 
+    // aria-invalid has to go on every radio in a group. controlFor returns the
+    // first one, so marking only that told a screen reader the "Website design"
+    // option was invalid no matter which option the user was on.
+    function markInvalid(name, invalid) {
+      var found = form.elements[name];
+      if (!found) return;
+      var list = found.nodeType ? [found] : Array.prototype.slice.call(found);
+      list.forEach(function (el) {
+        if (invalid) el.setAttribute('aria-invalid', 'true');
+        else el.removeAttribute('aria-invalid');
+      });
+    }
+
     function showErrors(errors) {
       var first;
       Object.keys(errors).forEach(function (name) {
         var input = controlFor(name);
         var slot = document.getElementById('err-' + name);
         if (slot) slot.textContent = errors[name];
+        markInvalid(name, true);
         if (input) {
-          input.setAttribute('aria-invalid', 'true');
           var disclosure = input.closest('details');
           if (disclosure) disclosure.open = true;
           if (!first) first = input;
@@ -828,8 +836,7 @@
       fields.concat(['consent']).forEach(function (name) {
         var slot = document.getElementById('err-' + name);
         if (slot) slot.textContent = '';
-        var control = controlFor(name);
-        if (control) control.removeAttribute('aria-invalid');
+        markInvalid(name, false);
       });
       var payload = Object.assign({}, window.mucoAttribution ? window.mucoAttribution() : {}, {
         page: location.pathname, form_type: kind, submission_id: submissionId,
@@ -984,6 +991,10 @@
     });
 
     bar.hidden = false;
+    // Announce it. A non-modal dialog becoming visible is not announced by
+    // itself, and this one is emitted near the end of <body>, so without this
+    // a screen reader user meets the consent prompt only by reading that far.
+    bar.setAttribute('aria-live', 'polite');
   }
 
   function init() {

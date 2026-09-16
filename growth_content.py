@@ -76,10 +76,11 @@ def public_lead_form(audit=False, preselect=""):
       <legend>What do you need? <span class="form-req">*</span></legend>
       <div class="service-chips">%s</div>
       <p class="form-error" id="err-service"></p></fieldset>''' % "".join(
-        '<label class="service-chip"><input type="radio" name="service" value="%s"%s required>'
-        '<span>%s</span></label>'
-        % (escape(value, quote=True), " checked" if value == preselect else "", escape(label))
-        for value, label in SERVICE_CHOICES)
+        '<label class="service-chip"><input type="radio" name="service" value="%s"%s'
+        ' aria-describedby="err-service"%s><span>%s</span></label>'
+        % (escape(value, quote=True), " checked" if value == preselect else "",
+           " required" if index == 0 else "", escape(label))
+        for index, (value, label) in enumerate(SERVICE_CHOICES))
     # The project requirement is the one answer that makes an enquiry worth
     # anything, so it is visible and required. It used to sit inside the
     # collapsed "optional details" disclosure, which meant most people never
