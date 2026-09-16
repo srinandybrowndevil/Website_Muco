@@ -700,7 +700,7 @@ def footer_html():
 # ---------------------------------------------------------------------------
 ORG_JSONLD = """{
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": ["Organization", "ProfessionalService", "LocalBusiness"],
   "@id": "%(domain)s/#organization",
   "name": "%(brand)s",
   "alternateName": "MUCO Labs",
@@ -711,7 +711,29 @@ ORG_JSONLD = """{
   "logo": "%(domain)s/logo-full.svg",
   "telephone": "%(phone)s",
   "email": "%(email)s",
-  "founder": { "@type": "Person", "@id": "%(domain)s/about#founder", "name": "%(founder)s", "url": "%(domain)s/about", "jobTitle": "Founder", "sameAs": [%(founder_profiles)s] },
+  "priceRange": "$$",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "opens": "09:00",
+      "closes": "19:00"
+    }
+  ],
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "%(lat)s",
+    "longitude": "%(lon)s"
+  },
+  "founder": {
+    "@type": "Person",
+    "@id": "%(domain)s/about#founder",
+    "name": "%(founder)s",
+    "url": "%(domain)s/about",
+    "jobTitle": "Founder & Chairman",
+    "knowsAbout": ["Software Engineering", "AI Systems", "Web Architecture", "Custom Software", "SaaS", "Local SEO"],
+    "sameAs": [%(founder_profiles)s]
+  },
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "%(city)s",
@@ -725,7 +747,17 @@ ORG_JSONLD = """{
     "name": "Services",
     "itemListElement": [%(catalog)s]
   },
-  "knowsAbout": ["Website development","Mobile app development","Custom software","SaaS","AI automation","Digital marketing","SEO"]
+  "knowsAbout": [
+    "Website Development",
+    "Mobile App Development",
+    "Custom Software",
+    "SaaS Architecture",
+    "CRM, ERP, HRMS, LMS & Billing Systems",
+    "AI & Business Automation",
+    "Digital Marketing & SEO",
+    "Answer Engine Optimization (AEO)",
+    "Generative Engine Optimization (GEO)"
+  ]
 }""" % {
     "domain": DOMAIN,
     "brand": BRAND,
@@ -774,6 +806,7 @@ def breadcrumbs(items):
 def service_jsonld(name, description, slug):
     """One Service entity per service line. Answer engines use these to say what
     a business actually does, so the wording has to match the page."""
+    page_slug = "services-" + slug if slug in ["websites", "mobile", "product-design", "software", "business-systems", "marketing", "ai-automation", "support"] else slug
     return """{
   "@context": "https://schema.org",
   "@type": "Service",
@@ -783,6 +816,28 @@ def service_jsonld(name, description, slug):
   "provider": { "@id": "%s/#organization" },
   "areaServed": [%s],
   "url": "%s/%s",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "%s Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "%s Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "%s Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "%s/contact.html",
@@ -790,7 +845,7 @@ def service_jsonld(name, description, slug):
   }
 }""" % (name, description.replace('"', "'"), name, DOMAIN,
         ",".join('{"@type":"City","name":"%s"}' % m for m in MARKETS),
-        DOMAIN, "services-" + slug if slug in ["websites", "mobile", "product-design", "software", "business-systems", "marketing", "ai-automation", "support"] else slug, DOMAIN, PHONE)
+        DOMAIN, page_slug, name, name, name, DOMAIN, PHONE)
 
 
 def speakable_jsonld(url, selectors):
