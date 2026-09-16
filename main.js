@@ -108,7 +108,7 @@
   /* ------------------------------------------------------- spotlight cards */
   function initSpotlight() {
     if (reduceMotion) return;
-    var cards = document.querySelectorAll('.spotlight-card, .work-card');
+    var cards = document.querySelectorAll('.spotlight-card, .work-card, .index-row');
     if (!cards.length) return;
 
     Array.prototype.forEach.call(cards, function (card) {
@@ -209,6 +209,19 @@
       },
       { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
     );
+
+    // Rules animate on the same signal as the content they head.
+    Array.prototype.forEach.call(document.querySelectorAll('.rule-label'), function (rule) {
+      if (reduceMotion || !('IntersectionObserver' in window)) { rule.classList.add('is-revealed'); return; }
+      var ro = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-revealed');
+          ro.unobserve(entry.target);
+        });
+      }, { threshold: 0.4 });
+      ro.observe(rule);
+    });
 
     Array.prototype.forEach.call(els, function (el) {
       // Anything already on screen at load appears immediately — the effect is

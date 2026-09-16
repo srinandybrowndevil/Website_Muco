@@ -4164,3 +4164,61 @@ a.index-row:hover, a.index-row:focus-visible {
   .index-row { grid-template-columns: 34px 1fr; gap: var(--sp-3); }
   .index-row .index-go { grid-column: 2; padding-top: 0; }
 }
+
+/* --------------------------------------------------------------- motion
+   Three effects, chosen rather than collected. Each marks a moment that
+   matters: the one action we want taken, the row under the cursor, and the
+   first second of the page. Everything else stays still, which is what makes
+   these read as deliberate. All of it is CSS on transform and opacity, and
+   all of it stops under prefers-reduced-motion.
+   ---------------------------------------------------------------------- */
+
+/* 1. A sheen that crosses the primary action on hover. One flourish, on the
+      single most important element on the page. */
+.btn-accent { position: relative; overflow: hidden; isolation: isolate; }
+.btn-accent::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(105deg, transparent 38%,
+    rgba(255, 252, 248, 0.42) 50%, transparent 62%);
+  transform: translateX(-120%);
+  transition: transform 0.62s var(--ease);
+}
+.btn-accent:hover::after, .btn-accent:focus-visible::after { transform: translateX(120%); }
+
+/* 2. The index highlight follows the cursor along the row. --mouse-x is set by
+      the pointer tracking that already served the cards. */
+a.index-row {
+  background-image: radial-gradient(
+    46rem circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    var(--accent-soft), transparent 42%);
+  background-repeat: no-repeat;
+  opacity: 1;
+}
+a.index-row:hover, a.index-row:focus-visible {
+  background-color: transparent;
+  background-image: radial-gradient(
+    46rem circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    var(--accent-soft), transparent 42%);
+}
+.index-row .index-go { transition: transform var(--transition); }
+a.index-row:hover .index-go, a.index-row:focus-visible .index-go { transform: translateX(4px); }
+
+/* 3. The rule above a section draws itself in when it arrives. A rule that
+      grows is the one piece of motion that belongs to this direction, because
+      the rule is the direction. */
+.rule-label { position: relative; }
+.rule-label::before {
+  content: ""; position: absolute; inset-inline: 0; top: -1px; height: 1px;
+  background: var(--accent); transform: scaleX(0); transform-origin: left;
+  transition: transform 0.7s var(--ease);
+}
+.reveal-on-scroll.is-revealed .rule-label::before,
+.rule-label.is-revealed::before { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-accent::after { display: none; }
+  a.index-row, a.index-row:hover { background-image: none; }
+  a.index-row:hover { background-color: var(--accent-soft); }
+  .index-row .index-go, a.index-row:hover .index-go { transition: none; transform: none; }
+  .rule-label::before { transition: none; transform: scaleX(1); }
+}
