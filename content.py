@@ -1271,9 +1271,15 @@ def build_home():
               final payment.
             </p>
 
+            <!-- One primary action, one quieter path to proof. The second
+                 button used to be WhatsApp, which rendered 239px wide against
+                 Start a Project's 148px -- the secondary out-shouting the
+                 primary on the most important screen on the site. WhatsApp did
+                 not need to be here twice either: it is in the header dock and
+                 the mobile dock already. -->
             <div class="btn-group">
               <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a Project</a>
-              <a href="{portal_contact}" class="btn btn-whatsapp btn-lg">{wa_svg} WhatsApp MUCO LABS</a>
+              <a href="work.html" class="btn btn-secondary btn-lg">See our work</a>
             </div>
 
             {trust}
