@@ -914,14 +914,19 @@ def crumb_nav(items):
 
 
 def page_header(eyebrow, h1, lead, extra=""):
-    return """    <section>
+    # A header that ends at its lead paragraph carries the same 112px bottom
+    # padding as one with a CTA group under it, which left 144px of void below
+    # the text on pages like /contact -- enough to read as an unfinished page
+    # rather than breathing room. The modifier lets the stylesheet close it up.
+    return """    <section class="page-header{bare}">
       <div class="container">
         <span class="eyebrow">{eyebrow}</span>
         <h1>{h1}</h1>
         <p class="lead">{lead}</p>
 {extra}      </div>
     </section>
-""".format(eyebrow=eyebrow, h1=h1, lead=lead, extra=extra)
+""".format(eyebrow=eyebrow, h1=h1, lead=lead, extra=extra,
+               bare="" if extra.strip() else " page-header-bare")
 
 
 if __name__ == "__main__":
