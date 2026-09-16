@@ -771,10 +771,19 @@
         status.textContent = '';
       }
     });
+    // form.elements['service'] is a RadioNodeList now, not an element: it has no
+    // setAttribute, closest or focus. Resolve to something focusable before any
+    // of those are called on it.
+    function controlFor(name) {
+      var found = form.elements[name];
+      if (!found) return null;
+      return found.nodeType ? found : (found[0] || null);
+    }
+
     function showErrors(errors) {
       var first;
       Object.keys(errors).forEach(function (name) {
-        var input = form.elements[name];
+        var input = controlFor(name);
         var slot = document.getElementById('err-' + name);
         if (slot) slot.textContent = errors[name];
         if (input) {
@@ -792,16 +801,22 @@
       fields.concat(['consent']).forEach(function (name) {
         var slot = document.getElementById('err-' + name);
         if (slot) slot.textContent = '';
-        if (form.elements[name]) form.elements[name].removeAttribute('aria-invalid');
+        var control = controlFor(name);
+        if (control) control.removeAttribute('aria-invalid');
       });
       var payload = Object.assign({}, window.mucoAttribution ? window.mucoAttribution() : {}, {
         page: location.pathname, form_type: kind, submission_id: submissionId,
         consent: form.elements.consent.checked, company_website: form.elements.company_website.value
       });
-      fields.forEach(function (name) { payload[name] = form.elements[name] ? form.elements[name].value.trim() : ''; });
+      fields.forEach(function (name) {
+        var el = form.elements[name];
+        if (!el) { payload[name] = ''; return; }
+        // A radio group comes back as a RadioNodeList, whose .value is the
+        // checked member -- or '' when nothing is chosen yet.
+        payload[name] = (el.value || '').trim();
+      });
       var errors = {};
       if (!payload.name) errors.name = 'Please enter your name.';
-      if (!payload.business) errors.business = 'Please enter your business or planned business name.';
       var digits = payload.phone.replace(/[^0-9]/g, '');
       if (!/^[+0-9().\s-]+$/.test(payload.phone) || digits.length < 7 || digits.length > 15) errors.phone = 'Enter a valid phone number with 7 to 15 digits.';
       if (!payload.service) errors.service = 'Please choose a requirement.';

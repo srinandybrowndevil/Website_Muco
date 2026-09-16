@@ -90,13 +90,22 @@ await check('requires a Resend key to deliver', quiet(async () => {
   eq(r.body.ok, false, 'ok');
 }));
 
-for (const field of ['name', 'business', 'phone', 'service']) {
+// The brief joined the required set and the business name left it: a name we
+// can simply ask for in the reply is not worth a required field on the way in.
+for (const field of ['name', 'phone', 'service', 'message']) {
   await check(`rejects a missing ${field}`, quiet(async () => {
     const r = await call({ ...valid, [field]: '' });
     eq(r.code, 400, 'status');
     eq(typeof r.body.errors[field], 'string', `${field} error message`);
   }));
 }
+
+await check('accepts an enquiry with no business name', withMockResend(async () => {
+  global.fetch = async () => ({ ok: true, status: 200, text: async () => '' });
+  const r = await call({ ...valid, business: '' });
+  eq(r.code, 200, 'status');
+  eq(r.body.ok, true, 'ok');
+}));
 
 await check('rejects a phone with too few digits', quiet(async () => {
   eq((await call({ ...valid, phone: '12345' })).code, 400, 'status');

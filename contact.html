@@ -32,7 +32,7 @@
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="style.css?v=e011d80839" />
+<link rel="stylesheet" href="style.css?v=b7d7d65836" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -202,45 +202,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="lead">A website that brings enquiries, an app for your customers, or software that saves your team time. Start with a free conversation with Srinivash Mahalingam, based in Erode, Tamil Nadu, with remote delivery available.</p>
       </div>
     </section>
-<section class="band-surface section-grid"><div class="container">
-      <div class="section-head"><h2>Choose how to reach us</h2><p class="section-sub">No sign-in is needed for any of these options.</p></div>
-      <div class="grid grid-3">
-        <a class="card card-interactive" href="https://wa.me/916381809844?text=Hello%20MUCO%20LABS%2C%20I%20would%20like%20to%20start%20a%20project." data-whatsapp><h3>WhatsApp</h3><p>+91 6381809844</p><span class="card-cta">Open a conversation &rarr;</span></a>
-        <a class="card card-interactive" href="tel:+916381809844"><h3>Call</h3><p>+91 6381809844</p><span class="card-cta">Monday to Saturday, 9 AM to 7 PM</span></a>
-        <a class="card card-interactive" href="mailto:founder@mucolabs.com"><h3>Email</h3><p>founder@mucolabs.com</p><span class="card-cta">For briefs and documents &rarr;</span></a>
-      </div></div></section><section class="band-deep"><div class="container container-narrow"><form class="form-card public-lead-form" id="lead-form" data-form-type="project" data-clarity-mask="true"
+<section class="band-surface section-grid"><div class="container container-narrow">
+      <nav class="reach-strip" aria-label="Contact MUCO LABS directly">
+        <span>Rather talk?</span>
+        <a href="https://wa.me/916381809844?text=Hello%20MUCO%20LABS%2C%20I%20would%20like%20to%20start%20a%20project." data-whatsapp>WhatsApp</a>
+        <a href="tel:+916381809844">Call</a>
+        <a href="mailto:founder@mucolabs.com">Email</a>
+      </nav>
+      <form class="form-card public-lead-form" id="lead-form" data-form-type="project" data-clarity-mask="true"
       method="post" action="/api/lead" novalidate>
       <span id="start-project" class="anchor-target" aria-hidden="true"></span>
       <h2>Start a Project</h2><p class="form-intro">Tell us the essentials. No account needed. Fields marked * are required.</p>
       <fieldset class="lead-fields"><legend class="visually-hidden">Your enquiry</legend>
-      <div class="form-row"><div class="form-group"><label for="lead-name">Your name <span class="form-req">*</span></label>
+      <fieldset class="form-group service-picker" aria-describedby="err-service">
+      <legend>What do you need? <span class="form-req">*</span></legend>
+      <div class="service-chips"><label class="service-chip"><input type="radio" name="service" value="Website design &amp; development" required><span>Website</span></label><label class="service-chip"><input type="radio" name="service" value="Mobile app development" required><span>Mobile app</span></label><label class="service-chip"><input type="radio" name="service" value="UI/UX &amp; product design" required><span>UI/UX</span></label><label class="service-chip"><input type="radio" name="service" value="Custom software &amp; SaaS" required><span>Software</span></label><label class="service-chip"><input type="radio" name="service" value="CRM / ERP / HRMS / LMS / billing" required><span>CRM &amp; ERP</span></label><label class="service-chip"><input type="radio" name="service" value="Digital marketing &amp; SEO" required><span>SEO</span></label><label class="service-chip"><input type="radio" name="service" value="AI &amp; business automation" required><span>Automation</span></label><label class="service-chip"><input type="radio" name="service" value="Branding, IT &amp; cloud support" required><span>Branding &amp; IT</span></label><label class="service-chip"><input type="radio" name="service" value="Website review / audit" required><span>Site review</span></label><label class="service-chip"><input type="radio" name="service" value="Maintenance &amp; support" required><span>Maintenance</span></label><label class="service-chip"><input type="radio" name="service" value="Something else" required><span>Other</span></label></div>
+      <p class="form-error" id="err-service"></p></fieldset><div class="form-row"><div class="form-group"><label for="lead-name">Your name <span class="form-req">*</span></label>
       <input class="form-control" id="lead-name" name="name" type="text" maxlength="100"
         required autocomplete="name" placeholder="Your full name" aria-describedby="hint-name err-name">
       <p class="form-hint" id="hint-name"></p><p class="form-error" id="err-name"></p></div><div class="form-group"><label for="lead-phone">Phone / WhatsApp <span class="form-req">*</span></label>
       <input class="form-control" id="lead-phone" name="phone" type="tel" maxlength="32"
         required autocomplete="tel" placeholder="+91 …" aria-describedby="hint-phone err-phone">
-      <p class="form-hint" id="hint-phone">Include your country code if outside India.</p><p class="form-error" id="err-phone"></p></div></div><div class="form-row"><div class="form-group"><label for="lead-business">Business name <span class="form-req">*</span></label>
-      <input class="form-control" id="lead-business" name="business" type="text" maxlength="120"
-        required autocomplete="organization" placeholder="" aria-describedby="hint-business err-business">
-      <p class="form-hint" id="hint-business">Still planning? Enter your planned business name.</p><p class="form-error" id="err-business"></p></div><div class="form-group"><label for="lead-service">What do you need? <span class="form-req">*</span></label>
-      <select id="lead-service" name="service" class="form-control" required aria-describedby="err-service">
-        <option value="">Choose a requirement</option><option value="Website design &amp; development">Website design &amp; development</option><option value="Mobile app development">Mobile app development</option><option value="UI/UX &amp; product design">UI/UX &amp; product design</option><option value="Custom software &amp; SaaS">Custom software &amp; SaaS</option><option value="CRM / ERP / HRMS / LMS / billing">CRM / ERP / HRMS / LMS / billing</option><option value="Digital marketing &amp; SEO">Digital marketing &amp; SEO</option><option value="AI &amp; business automation">AI &amp; business automation</option><option value="Branding, IT &amp; cloud support">Branding, IT &amp; cloud support</option><option value="Website review / audit">Website review / audit</option><option value="Maintenance &amp; support">Maintenance &amp; support</option><option value="Something else">Something else</option></select><p class="form-error" id="err-service"></p></div></div>
+      <p class="form-hint" id="hint-phone">Include your country code if outside India.</p><p class="form-error" id="err-phone"></p></div></div>
       <div class="form-group"><label for="lead-message">What do you want built or fixed? <span class="form-req">*</span></label>
       <textarea class="form-control" id="lead-message" name="message" maxlength="4000" rows="4" required
         placeholder="What is happening today, and what would you like to improve?"
         aria-describedby="hint-message err-message"></textarea>
       <p class="form-hint" id="hint-message">A sentence or two is enough. It is the fastest way to a useful reply.</p>
-      <p class="form-error" id="err-message"></p></div><details class="lead-optional"><summary>Add budget, timeline and links (optional)</summary>
-      <div class="form-row"><div class="form-group"><label for="lead-email">Email (optional)</label>
+      <p class="form-error" id="err-message"></p></div><details class="lead-optional"><summary>Add business name, budget, timeline and links (optional)</summary>
+      <div class="form-row"><div class="form-group"><label for="lead-business">Business name (optional)</label>
+      <input class="form-control" id="lead-business" name="business" type="text" maxlength="120"
+         autocomplete="organization" placeholder="" aria-describedby="hint-business err-business">
+      <p class="form-hint" id="hint-business">Leave it blank if you are still deciding.</p><p class="form-error" id="err-business"></p></div><div class="form-group"><label for="lead-email">Email (optional)</label>
       <input class="form-control" id="lead-email" name="email" type="email" maxlength="160"
          autocomplete="email" placeholder="you@example.com" aria-describedby="hint-email err-email">
-      <p class="form-hint" id="hint-email"></p><p class="form-error" id="err-email"></p></div><div class="form-group"><label for="lead-website">Existing website (optional)</label>
+      <p class="form-hint" id="hint-email"></p><p class="form-error" id="err-email"></p></div></div><div class="form-row"><div class="form-group"><label for="lead-website">Existing website (optional)</label>
       <input class="form-control" id="lead-website" name="website" type="url" maxlength="300"
           placeholder="https://example.com" aria-describedby="hint-website err-website">
-      <p class="form-hint" id="hint-website">Use the full address, starting with https://.</p><p class="form-error" id="err-website"></p></div></div><div class="form-row"><div class="form-group"><label for="lead-budget">Budget (optional)</label>
+      <p class="form-hint" id="hint-website">Use the full address, starting with https://.</p><p class="form-error" id="err-website"></p></div><div class="form-group"><label for="lead-budget">Budget (optional)</label>
       <input class="form-control" id="lead-budget" name="budget" type="text" maxlength="60"
           placeholder="A range or not decided" aria-describedby="hint-budget err-budget">
-      <p class="form-hint" id="hint-budget"></p><p class="form-error" id="err-budget"></p></div><div class="form-group"><label for="lead-timeline">Timeline (optional)</label>
+      <p class="form-hint" id="hint-budget"></p><p class="form-error" id="err-budget"></p></div></div><div class="form-row"><div class="form-group"><label for="lead-timeline">Timeline (optional)</label>
       <input class="form-control" id="lead-timeline" name="timeline" type="text" maxlength="60"
           placeholder="When would you like to start?" aria-describedby="hint-timeline err-timeline">
       <p class="form-hint" id="hint-timeline"></p><p class="form-error" id="err-timeline"></p></div></div></details>
@@ -259,11 +261,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="btn-group lead-fallback"><a class="btn btn-whatsapp" href="https://wa.me/916381809844?text=Hello%20MUCO%20LABS%2C%20I%20would%20like%20to%20start%20a%20project." data-whatsapp>WhatsApp MUCO LABS</a>
         <a class="btn btn-secondary" href="tel:+916381809844">Call</a><a class="text-link" href="mailto:founder@mucolabs.com">Email us</a></div>
     </form></div></section>
-      <section class="band-surface section-grid"><div class="container container-narrow"><h2>What happens after your enquiry?</h2>
+      <section class="band-deep"><div class="container container-narrow"><h2>What happens after your enquiry?</h2>
       <ol class="feature-list"><li>We read your requirement and clarify the business problem.</li>
       <li>We agree a discovery conversation if it is useful, then prepare a written scope and quote.</li>
       <li>You decide whether to proceed. Customer workspace access is arranged during onboarding after agreement and payment confirmation.</li></ol>
-      <p class="mt-5">Already working with us? <a href="/contact#start-project">Sign in to your customer workspace</a> for project updates.</p>
       <p>Want an existing website checked first? <a href="/website-audit">Request a free website review</a>.</p></div></section>
   </main>
 
@@ -356,6 +357,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </div>
-  <script src="main.js?v=865ddf0624" defer></script>
+  <script src="main.js?v=5810f51b1a" defer></script>
 </body>
 </html>

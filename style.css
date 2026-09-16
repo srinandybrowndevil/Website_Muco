@@ -4004,3 +4004,35 @@ main {
   .consent-text { font-size: 13px; line-height: 1.45; }
   .consent-inner { gap: 12px; }
 }
+
+/* Service picker. Real radio inputs, so it works with scripting off and is
+   operable with arrow keys; the input itself is visually hidden and the label
+   carries the chip. One tap instead of open-picker, scroll, select, dismiss. */
+.service-picker { border: 0; padding: 0; margin: 0 0 1.25rem; min-width: 0; }
+.service-picker legend { padding: 0; margin-bottom: 10px; font-size: 15px; color: var(--text); }
+.service-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.service-chip { position: relative; display: inline-flex; }
+.service-chip input {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  margin: 0; opacity: 0; cursor: pointer;
+}
+.service-chip span {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 10px 16px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface); color: var(--text-2); font-size: 14px; line-height: 1.2;
+}
+.service-chip input:hover + span { border-color: var(--accent); color: var(--text); }
+.service-chip input:checked + span {
+  border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600;
+}
+/* Focus lands on the hidden input, so the ring has to be drawn on the chip. */
+.service-chip input:focus-visible + span { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+
+/* Compact direct-contact strip above the form. The three routes stay offered
+   without a whole section of cards pushing the form below the fold. */
+.reach-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px;
+  margin-bottom: 24px; font-size: 14px; color: var(--text-3); }
+.reach-strip span { color: var(--text-3); }
+.reach-strip a { display: inline-flex; align-items: center; min-height: 44px;
+  color: var(--text-2); border-bottom: 1px solid var(--line-strong); }
+.reach-strip a:hover, .reach-strip a:focus-visible { color: var(--accent-bright); border-bottom-color: var(--accent); }

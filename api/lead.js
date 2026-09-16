@@ -165,7 +165,6 @@ export default async function handler(req, res) {
 
   const errors = {};
   if (!lead.name) errors.name = 'Please enter your name.';
-  if (!lead.business) errors.business = 'Please enter your business name.';
   if (!lead.phone || !looksLikePhone(lead.phone))
     errors.phone = 'Please enter a number we can reach you on.';
   if (!lead.service) errors.service = 'Please choose a service.';
@@ -211,7 +210,7 @@ export default async function handler(req, res) {
 
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
-    console.error('[lead] RESEND_API_KEY is not configured. The enquiry above was captured in this log and nowhere else.');
+    console.error('[lead] RESEND_API_KEY is not configured.');
     const undelivered = 'We have your enquiry, but our email system is not responding. Please also send it on WhatsApp or call us so we can reply today.';
     return asHtml
       ? htmlReply(res, 503, 'We have your enquiry', undelivered)
@@ -260,7 +259,7 @@ export default async function handler(req, res) {
     });
     if (!r.ok) {
       const text = await r.text();
-      console.error('[lead] resend failed — the enquiry above is captured in this log only', r.status, text);
+      console.error('[lead] resend failed — the sender was handed a prefilled WhatsApp link', r.status, text);
       return undelivered(res, asHtml, lead);
     }
     // recorded stays false on purpose: this site has no store, so the enquiry
@@ -273,7 +272,7 @@ export default async function handler(req, res) {
           'We will review your requirement and contact you about the next step.')
       : res.status(200).json({ ok: true, recorded: false, emailed: true });
   } catch (err) {
-    console.error('[lead] resend threw — the enquiry above is captured in this log only', err && err.message);
+    console.error('[lead] resend threw — the sender was handed a prefilled WhatsApp link', err && err.message);
     return undelivered(res, asHtml, lead);
   }
 }

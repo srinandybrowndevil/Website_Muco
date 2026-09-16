@@ -214,8 +214,9 @@ test.describe("marketing site", () => {
       await page.goto(`${BASE}/contact.html?utm_source=probe&utm_medium=test&utm_campaign=suite#enquiry`);
       await page.locator("#lead-name").fill("Probe Person");
       await page.locator("#lead-phone").fill("+91 90000 00000");
-      await page.locator("#lead-business").fill("Probe Trading Co");
-      await page.locator("#lead-service").selectOption({ index: 1 });
+      // Service is a radio chip group now, not a select, and the business name
+      // is optional and tucked into the optional-details disclosure.
+      await page.locator(".service-chip input").first().check();
       await page.locator("#lead-message").fill("Orders arrive by phone and we lose them.");
       await page.locator("#lead-consent").check();
       await page.locator("#lead-submit").click();
@@ -256,8 +257,9 @@ test.describe("marketing site", () => {
       await page.goto(OPEN);
       await page.locator("#lead-name").fill("Probe Person");
       await page.locator("#lead-phone").fill("+91 90000 00000");
-      await page.locator("#lead-business").fill("Probe Trading Co");
-      await page.locator("#lead-service").selectOption({ index: 1 });
+      // Service is a radio chip group now, not a select, and the business name
+      // is optional and tucked into the optional-details disclosure.
+      await page.locator(".service-chip input").first().check();
       await page.locator("#lead-message").fill("Something short.");
       await page.locator("#lead-consent").check();
       await page.locator("#lead-submit").click();
