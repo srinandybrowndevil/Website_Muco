@@ -158,8 +158,13 @@
   --info: #7fa8d4;
   --whatsapp: #45c265;
 
-  --radius: 2px;
-  --radius-lg: 3px;
+  /* Earlier this session these were 2px and 3px, which suited a design carried
+     by hairline rules: a rule is sharp, so the boxes were too. The direction
+     moved to objects you pick between, and an object with a 3px corner reads
+     as a cropped rectangle rather than a thing. One token for controls, one
+     for panels, and everything card-shaped already shares the second. */
+  --radius: 10px;
+  --radius-lg: 18px;
   --radius-pill: 999px;
 
   --sp-1: 4px;
@@ -170,7 +175,7 @@
   --sp-6: 32px;
   --sp-7: 48px;
   --sp-8: 72px;
-  --sp-9: 112px;
+  --sp-9: 132px;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow: 0 12px 34px -18px rgba(0, 0, 0, 0.9);
@@ -452,7 +457,7 @@ h1 {
 
 h2 {
   font-family: var(--font-display);
-  font-size: clamp(34px, 4vw, 54px);
+  font-size: clamp(34px, 4.4vw, 64px);
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.08;
@@ -563,7 +568,7 @@ strong {
 }
 
 .section-head {
-  margin-bottom: var(--sp-7);
+  margin-bottom: var(--sp-8);
   max-width: 70ch;
 }
 
@@ -965,6 +970,131 @@ html[lang^="ta"] .rule-label b { font-family: var(--font-mono); }
      away in the fixed bottom dock. */
   .contact-panel { order: -1; }
   .contact-hero { padding-block: var(--sp-6) var(--sp-7); }
+}
+
+/* ------------------------------------------------------------------- tiles
+   A service is an object you choose between, so it gets an object: its own
+   surface, a generous corner, room to breathe, and depth when you point at it.
+   These were index rows, which is right for a list you scan in sequence and
+   wrong for eight things you are picking one of.
+
+   Three across at desktop, which is what the groups are already shaped for:
+   they hold three, three and two, so each group fills its row instead of
+   leaving one tile stranded. It falls to two and then one on the way down. */
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: var(--sp-5);
+}
+
+.service-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: clamp(24px, 2.6vw, 40px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform var(--transition), border-color var(--transition),
+              background var(--transition);
+}
+.service-tile::after {
+  /* A light source at the top edge, so the tile reads as lifted off the page
+     rather than cut out of it. Sits under the content, never over it. */
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+a.service-tile:hover, a.service-tile:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--accent-line);
+  background: var(--surface-2, var(--surface));
+}
+a.service-tile:hover::after, a.service-tile:focus-visible::after { opacity: 1; }
+
+.service-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+.service-tile-num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-300);
+  letter-spacing: .14em;
+  color: var(--text-3);
+}
+.service-tile-icon {
+  display: grid; place-items: center;
+  width: 44px; height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.service-tile h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 2.1vw, 31px);
+  line-height: 1.12;
+  letter-spacing: -.015em;
+}
+.service-tile-outcome {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-700);
+  line-height: 1.55;
+  max-width: 42ch;
+}
+.service-tile-points {
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.service-tile-points li {
+  font-size: var(--fs-500);
+  color: var(--text-3);
+  padding-left: 16px;
+  position: relative;
+}
+.service-tile-points li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: .62em;
+  width: 6px; height: 1px;
+  background: var(--accent);
+}
+.service-tile-go {
+  margin-top: auto;
+  padding-top: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-300);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.service-tile-go span { transition: transform var(--transition); }
+a.service-tile:hover .service-tile-go span { transform: translateX(4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .service-tile, .service-tile::after, .service-tile-go span { transition: none; }
+  a.service-tile:hover { transform: none; }
+  a.service-tile:hover .service-tile-go span { transform: none; }
 }
 
 .stack {
@@ -1404,7 +1534,7 @@ header nav {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: var(--sp-5);
+  padding: clamp(22px, 2.2vw, 32px);
   display: flex;
   flex-direction: column;
   transition: border-color var(--transition), background var(--transition),
@@ -1491,10 +1621,11 @@ header nav {
 }
 
 .card-interactive:hover,
+.card-interactive:focus-visible,
 .spotlight-card:hover {
   border-color: var(--accent-line);
   background: var(--surface-2);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 /* Spec §4.2 / §13: a thin accent border glow on the one featured surface. */
@@ -3900,7 +4031,7 @@ main {
 }
 
 @media (max-width: 768px) {
-  :root { --gutter: 22px; --nav-h: 62px; --sp-9: 72px; --sp-8: 56px; }
+  :root { --gutter: 22px; --nav-h: 62px; --sp-9: 84px; --sp-8: 60px; }
 
   .grid-2,
   .grid-3,

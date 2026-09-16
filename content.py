@@ -1519,29 +1519,35 @@ for _slug, _detail in SERVICE_SCOPE.items():
 
 
 def service_card(s, span="", num=None):
+    """A tile, not a row.
+
+    Rows are right for a list you read in sequence and wrong for eight things
+    you are choosing one of -- there, each option wants to be an object you can
+    weigh against the others, with its own surface and its own edge. The number
+    stays because position in a set of eight is still real information; it just
+    sits quietly in the corner now instead of leading the line.
+    """
     points = "".join("<li>%s</li>" % pt for pt in s["points"])
-    # An index row, not a card. Eight bordered boxes in a grid is what made the
-    # page one texture; a peer set that someone scans and picks from belongs on
-    # rules. The number is the position in the list, which is real information
-    # here -- it tells you how far through eight you are.
-    return """          <a class="index-row reveal-on-scroll {span}" href="services-{slug}.html" id="{slug}">
-            <span class="index-num">{num}</span>
-            <div>
-              <h3>{title}</h3>
-              <p class="index-outcome">{outcome}</p>
-              <ul class="index-points">{points}</ul>
-            </div>
-            <span class="index-go">Read more<span class="visually-hidden"> about {title}</span>&nbsp;&rarr;</span>
+    return """          <a class="service-tile reveal-on-scroll {span}" href="services-{slug}.html" id="{slug}">
+            <span class="service-tile-top">
+              <span class="service-tile-icon" aria-hidden="true">{icon}</span>
+              <span class="service-tile-num">{num}</span>
+            </span>
+            <h3>{title}</h3>
+            <p class="service-tile-outcome">{outcome}</p>
+            <ul class="service-tile-points">{points}</ul>
+            <span class="service-tile-go">Read more<span class="visually-hidden"> about {title}</span>
+              <span aria-hidden="true">&rarr;</span></span>
           </a>
 """.format(
         span=span,
         slug=s["slug"],
         num="%02d" % num if num else "",
+        icon=icon(ICONS[s["icon"]], 20),
         title=s["title"],
         outcome=s["outcome"],
         points=points,
     )
-
 
 def trust_row():
     items = [
@@ -1874,7 +1880,7 @@ def build_services():
             <h2 id="group-%d">%s</h2>
             <p>%s</p>
           </div>
-          <div class="index-list">
+          <div class="tile-grid">
 %s          </div>
         </section>
 """ % (gi, gi, len(slugs), len(SERVICES), gi, title, blurb, rows))
