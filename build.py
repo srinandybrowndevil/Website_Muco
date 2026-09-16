@@ -273,6 +273,30 @@ def clean_urls(text):
 _SECTION_TAG = re.compile(r'<section\b([^>]*)>')
 
 
+def rule_labels(body):
+    """Turn each section head's eyebrow into the signature rule.
+
+    The eyebrow already named the section; the rule adds its position and draws
+    a hairline across the container. Done here rather than at twenty-seven call
+    sites so the numbering is per page and stays correct when a section is added
+    or moved -- hand-written numbers would be wrong the first time anyone
+    reorders a page.
+    """
+    state = {"n": 0}
+
+    def swap(m):
+        state["n"] += 1
+        return (
+            '<div class="rule-label"><b>%02d</b> %s<span class="rule-fill"></span></div>'
+            '%s          <div class="%s">'
+            % (state["n"], m.group(2), NEWLINE, m.group(1))
+        )
+
+    return re.sub(
+        r'<div class="(section-head[^"]*)">\s*<span class="eyebrow">([^<]*)</span>',
+        swap, body)
+
+
 def band_sections(body):
     """Alternate section backgrounds so no two consecutive bands look alike.
 
@@ -840,6 +864,7 @@ def render(slug, title, description, body, current=None, og_type="website",
         consent_mode_tag(), asset_v("attribution.js"), asset_v("analytics.js"),
         google_analytics_tag())
 
+    body = rule_labels(body)
     body = band_sections(body)
 
     schema = ""
