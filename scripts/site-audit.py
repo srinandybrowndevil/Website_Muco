@@ -13,6 +13,11 @@ from collections import defaultdict
 # reads like a status page and is not one -- it sells maintenance and support
 # plans, so it belongs in the sitemap like any other service page.
 PUBLIC_SKIP = {"404.html"}
+
+# Legal and utility pages are not competing for a query, so a short title on
+# them is correct rather than a missed opportunity.
+TITLE_SHORT_OK = {"404.html", "privacy.html", "terms.html", "refund.html",
+                  "learning-portal.html"}
 problems, notes = [], []
 
 def add(page, msg): problems.append(f"{page}: {msg}")
@@ -39,6 +44,24 @@ for page in pages:
     for found, count in sorted(seen.items()):
         if count > 1:
             add(page, "id %r is used %d times" % (found, count))
+
+    # Title width. Entities are decoded first: "&amp;" is five characters in
+    # the source and one on the results page, so measuring the raw string
+    # reported titles as over-long that were nothing of the sort.
+    title_match = re.search(r"<title>(.*?)</title>", flat, re.S)
+    if title_match:
+        rendered = html.unescape(re.sub(r"\s+", " ", title_match.group(1))).strip()
+        if len(rendered) > 60:
+            add(page, "title is %d characters, over the 60 a result listing shows"
+                % len(rendered))
+        # The lower bound is a Latin character count and does not transfer: a
+        # Tamil glyph is far wider, so 26 Tamil characters take up more result
+        # width than 26 Latin ones. Flagging /ta would be measuring the wrong
+        # thing, the same way counting "&amp;" as five characters was.
+        elif (len(rendered) < 50 and page not in TITLE_SHORT_OK
+              and not page.startswith("ta/")):
+            note(page, "title is %d characters, leaving result width unused"
+                 % len(rendered))
 
     if not re.search(r"<html[^>]*\blang=", flat):
         add(page, "no lang attribute on <html>")

@@ -21,15 +21,23 @@ SERVICE_CHOICES = [
 ]
 SERVICE_OPTIONS = [value for value, _ in SERVICE_CHOICES]
 
+# "websites" deliberately carries no city. It was titled "... | MUCO LABS,
+# Erode" and shared 30% of its title, description and h1 vocabulary with
+# /website-development-erode -- two pages arguing for the same query, which
+# splits the signal rather than doubling it. The service page now owns the
+# service intent and the Erode page owns the local one.
+#
+# The rest gained a real modifier rather than a keyword: several sat at 43-49
+# rendered characters, which leaves usable width unused in a result listing.
 SERVICE_SEARCH_TITLES = {
-    "websites": "Website Design & Development Services | MUCO LABS, Erode",
-    "mobile": "Mobile App Development in Erode | MUCO LABS",
-    "product-design": "UI/UX & Product Design in Erode | MUCO LABS",
+    "websites": "Website Design & Development Services | MUCO LABS",
+    "mobile": "Mobile App Development in Erode | Android & iOS | MUCO LABS",
+    "product-design": "UI/UX & Product Design in Erode | Web & Mobile | MUCO LABS",
     "software": "Custom Software & SaaS Development in Erode | MUCO LABS",
-    "business-systems": "CRM, ERP & Billing Software in Erode | MUCO LABS",
+    "business-systems": "CRM, ERP, HRMS & Billing Software in Erode | MUCO LABS",
     "marketing": "SEO & Digital Marketing Services in Erode | MUCO LABS",
-    "ai-automation": "AI & Business Automation in Erode | MUCO LABS",
-    "support": "Branding, IT & Cloud Support in Erode | MUCO LABS",
+    "ai-automation": "AI & Business Automation Services in Erode | MUCO LABS",
+    "support": "Branding, IT & Cloud Support Services in Erode | MUCO LABS",
 }
 
 

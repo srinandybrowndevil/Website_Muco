@@ -455,7 +455,7 @@ SERVICES = [
 # Per-service page content. Each service gets its own indexable page (spec §6).
 SERVICE_DETAIL = {
     "websites": {
-        "meta": 'Custom website design and development for businesses in Erode and Tamil Nadu. Responsive, SEO-ready, with the code and accounts in your name.',
+        "meta": 'Custom website design and development: responsive, fast, and built to turn visitors into enquiries. Written scope first, and you own the code and accounts.',
         "who": ['A business with no website, or one built years ago that nobody can edit', 'A shop or service that customers look up on Google before calling', 'A brand whose whole presence is currently a social media account'],
         "deliverables": ['Custom design, built for your business rather than a bought template', 'Responsive from a 320px phone up to a wide desktop', 'Enquiry form and a WhatsApp button with context prefilled', 'Technical SEO baseline: titles, metadata, schema, sitemap, robots', 'Analytics and Search Console connected before launch', 'Deployment, a handover document and training on editing it'],
         "faqs": [('How many pages will I need?', '<p>Most business sites need fewer than people expect. A clear home page, a services or products section, an about page and a contact page will out-perform a twenty-page site nobody finishes reading. We recommend a structure in the scope and you decide.</p>'), ('Can I edit the content myself afterwards?', '<p>Yes, and we show you how before handover. If the site needs frequent content changes we build it with that in mind from the start rather than making you come back to us for every word.</p>'), ('What about hosting and the domain?', '<p>We set up hosting and deployment as part of the project. Domain registration and annual renewal are charged separately and stay in your name &mdash; not ours.</p>')],
@@ -634,7 +634,9 @@ FAQS = [
     ("Do you work with businesses outside Erode?",
      "<p>Yes. We are based in Erode and work in person across Erode, Pallipalayam, Namakkal, "
      "Coimbatore, Tiruppur, Karur and the rest of Tamil Nadu, and remotely beyond that. Most "
-     "project work happens over calls and shared documents regardless of where you are.</p>"),
+     "project work happens over calls and shared documents regardless of where you are. "
+     "If you are local, the page on <a href=\"website-development-erode.html\">website "
+     "development in Erode</a> covers what that looks like by industry.</p>"),
     ("Do you guarantee first page on Google?",
      "<p>No, and you should be careful with anyone who does. Rankings depend on competition, "
      "domain history and Google's own changes — none of which any agency controls. What we do "
@@ -2242,7 +2244,7 @@ def build_work():
     names = ", ".join(p["name"] for p in shown[:3])
     return render(
         "work.html",
-        "Work &amp; Projects | %s" % BRAND,
+        "Work &amp; Projects | What We Have Actually Built | %s" % BRAND,
         "Projects built by %s: %s and more — each labelled as client work or active build, with "
         "the real problem, scope and current status." % (BRAND, names),
         body,
@@ -2330,7 +2332,7 @@ def build_pricing():
         <div class="callout mt-6">
           <p><strong>Payment terms.</strong> 50% advance and 50% on completion, or milestone
           payments on larger projects. Domain registration and renewal are charged separately.
-          Refund and cancellation terms are on the <a class="accent" href="refund.html">refund policy</a> page.</p>
+          Refund and cancellation terms are on the <a class="accent" href="refund.html">refund policy</a> page. Full conditions are in the <a href="terms.html">terms of service</a>.</p>
           <p class="mt-2"><strong>Timing.</strong> We plan around the customer’s real need. If a
           clear first milestone is needed in five working days, allow another one or two working
           days for review and adjustments; the written scope confirms the actual date.</p>
@@ -2390,7 +2392,7 @@ def build_pricing():
 
     return render(
         "pricing.html",
-        "Pricing | How We Quote | %s" % BRAND,
+        "Pricing | How We Quote Website &amp; Software Work | %s" % BRAND,
         "Every project quoted from a written scope. 50% advance and 50% on completion, with an "
         "honest list of what changes the number and what is excluded.",
         body,
@@ -2539,7 +2541,7 @@ def build_local_erode():
 
     return render(
         "website-development-erode.html",
-        "Website Development in Erode | %s" % BRAND,
+        "Website Development in Erode, Tamil Nadu | %s" % BRAND,
         "Website development in Erode: custom sites for textile, trading, healthcare, education "
         "and retail businesses. Tamil and English, built for real phones.",
         body,
@@ -2626,7 +2628,7 @@ def build_maintenance():
 
     return render(
         "maintenance.html",
-        "Maintenance &amp; Support Plans | %s" % BRAND,
+        "Website &amp; Software Maintenance Plans in Erode | %s" % BRAND,
         "Website maintenance from %s: uptime monitoring, security updates, backups, content "
         "changes, bug fixes and monthly reporting. Clear inclusions." % BRAND,
         body,
@@ -4023,7 +4025,7 @@ def build_website_audit():
 
     return render(
         "website-audit.html",
-        "Free Website Review & Audit | %s" % BRAND,
+        "Free Website Review &amp; Audit for Businesses | %s" % BRAND,
         "Free website review from %s in %s. Speed, mobile UX, technical SEO, local "
         "search and broken links, checked by a person and written in plain English." % (BRAND, CITY),
         body,
