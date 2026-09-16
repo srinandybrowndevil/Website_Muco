@@ -527,3 +527,44 @@ test.describe("the header stays put", () => {
     });
   }
 });
+
+test.describe("the pricing columns read across", () => {
+  test("every row of the three cards sits on one line", async ({ page }) => {
+    // The cards matched on the outside -- same height, titles and buttons on the
+    // same baseline -- while the feature lists started 24px apart, because one
+    // description is a single line where the others wrap to two. Reading across
+    // the row, the lists were the thing that looked broken.
+    await page.goto(`${BASE}/pricing`, { waitUntil: "load" });
+
+    const rows = await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll(".price-card"));
+      const topsOf = (sel: string) =>
+        cards.map(c => {
+          const el = c.querySelector(sel);
+          return el ? Math.round(el.getBoundingClientRect().top) : null;
+        });
+      return {
+        count: cards.length,
+        title: topsOf("h3"),
+        tagline: topsOf(".price-tagline"),
+        list: topsOf("ul"),
+        button: topsOf(".btn"),
+        sideBySide: new Set(cards.map(c => Math.round(c.getBoundingClientRect().top))).size === 1,
+      };
+    });
+
+    expect(rows.count).toBe(3);
+
+    // Only meaningful while the cards are side by side. Stacked into one column
+    // on a phone they are supposed to sit at different heights, and asserting
+    // otherwise would be asserting a bug.
+    if (!rows.sideBySide) {
+      test.skip(true, "cards are stacked at this width, so rows cannot align");
+    }
+    for (const [name, tops] of Object.entries(rows)) {
+      if (name === "count" || name === "sideBySide") continue;
+      const unique = new Set(tops as number[]);
+      expect(unique.size, `${name} sits at ${JSON.stringify(tops)} instead of one line`).toBe(1);
+    }
+  });
+});
