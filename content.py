@@ -2537,11 +2537,18 @@ LEGAL_NOTICE = """      <div class="callout callout-warn mb-7">
 
 
 def legal_page(slug, nav_title, h1, eyebrow, description, sections):
+    # A rule already separates every clause: .prose h2 carries border-top plus
+    # its own margin and padding. Wrapping each clause in a <section> to add one
+    # was solving a problem that did not exist, and it broke two things -- the
+    # global `section { padding: 112px 0 }` applied inside every clause, and
+    # `.prose > * + *` stopped matching once the paragraphs became grandchildren,
+    # so they lost their spacing entirely.
+    nl = chr(10)
     blocks = ""
     for heading, paras in sections:
-        blocks += "        <h2>%s</h2>\n" % heading
+        blocks += "        <h2>%s</h2>%s" % (heading, nl)
         for p in paras:
-            blocks += "        <p>%s</p>\n" % p if not p.startswith("<") else "        %s\n" % p
+            blocks += ("        <p>%s</p>%s" % (p, nl)) if not p.startswith("<") else ("        %s%s" % (p, nl))
 
     body = """    <section>
       <div class="container container-narrow">
@@ -2552,14 +2559,14 @@ def legal_page(slug, nav_title, h1, eyebrow, description, sections):
       <div class="prose">
 {blocks}
         <h2>Questions about this page</h2>
-        <p>Email <a href="mailto:{email}">{email}</a> &mdash; no account needed for a question
-        about this policy. For WhatsApp or a call, <a href="{portal_contact}">sign in to your
-        account</a>.</p>
+          <p>Email <a href="mailto:{email}">{email}</a> &mdash; no account is needed to ask
+          about this policy. You can also <a href="{portal_contact}" data-whatsapp>message us
+          on WhatsApp</a> or call <a href="{call}">{phone}</a>.</p>
       </div>
       </div>
     </section>
 """.format(eyebrow=eyebrow, h1=h1, updated=LEGAL_REVISED, notice=LEGAL_NOTICE, blocks=blocks,
-           email=EMAIL, portal_contact=WHATSAPP_URL)
+           email=EMAIL, portal_contact=WHATSAPP_URL, call=CALL_URL, phone=PHONE)
 
     return render(
         slug,

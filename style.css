@@ -1243,8 +1243,28 @@ header nav {
   padding: var(--sp-6);
 }
 
+/* Three weights, and they now differ in the direction their names promise.
+   card-quiet set --surface-2, which is #1a1a1d against the default card's
+   #141416 -- lighter, so the "quiet" card read as the most prominent thing in
+   any row it appeared in. It recedes now: sunk to the page background, hairline
+   border, and it does not lift on hover. */
 .card-quiet {
-  background: var(--surface-2);
+  background: var(--bg);
+  border-color: rgba(242, 237, 230, 0.06);
+}
+
+.card-quiet:hover {
+  transform: none;
+}
+
+/* The one card in a group that should be looked at first. Same treatment the
+   pricing table already used for its recommended tier, promoted to the shared
+   system so the two cannot drift apart. */
+.card-featured {
+  border-color: var(--accent-line);
+  background:
+    radial-gradient(ellipse 90% 130% at 50% 0%, rgba(207, 144, 97, 0.09), transparent 62%),
+    var(--surface);
 }
 
 .card-interactive:hover,
@@ -1839,6 +1859,8 @@ header nav {
     radial-gradient(ellipse 90% 130% at 50% 0%, rgba(207, 144, 97, 0.09), transparent 62%),
     var(--surface);
 }
+/* Kept as its own selector because the pricing grid also uses it for layout,
+   but the visual treatment is deliberately identical to .card-featured. */
 
 .price-tagline {
   font-family: var(--font-mono);
@@ -4063,3 +4085,15 @@ main {
 /* Page headers. One that ends at its lead needs less room beneath it than one
    carrying a CTA group; the shared 112px left a visible void on /contact. */
 .page-header-bare { padding-bottom: var(--sp-8); }
+
+
+
+/* MUCO service cards on the Learning page. The brief is explicit that they are
+   secondary to the course catalogue, but they carried no styling of their own,
+   so eight cross-sell cards rendered at exactly the weight of the sixty-five
+   courses the page exists to show. Same recession as .card-quiet. */
+.learning-service {
+  background: var(--bg);
+  border-color: rgba(242, 237, 230, 0.06);
+}
+.learning-service .eyebrow { color: var(--text-3); }
