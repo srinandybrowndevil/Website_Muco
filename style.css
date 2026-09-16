@@ -851,6 +851,122 @@ html[lang^="ta"] .rule-label b { font-family: var(--font-mono); }
   color: var(--text); border-color: var(--accent-line);
 }
 
+/* ----------------------------------------------------------------- contact
+   One section, two columns: the ways to reach a human on the left at the size
+   they deserve, the form on the right, level with them. The page used to stack
+   a header, a thin text strip and then the form, which put the two things
+   people come here to do a screen and a half apart and made the direct routes
+   the smallest text on the page.
+
+   The backdrop is a CSS gradient rather than a photograph. A background image
+   here would be the single heaviest asset on a 218KB site, and it would be
+   decoration -- it tells a visitor nothing about whether to get in touch. */
+.contact-hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: var(--sp-8) var(--sp-9);
+}
+.contact-hero-glow {
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 70%;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 60% at 18% 0%, rgba(207, 144, 97, 0.14), transparent 70%),
+    radial-gradient(50% 50% at 85% 10%, rgba(207, 144, 97, 0.07), transparent 70%);
+}
+.contact-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 80px);
+  align-items: start;
+}
+.contact-intro h1 { margin-bottom: var(--sp-4); }
+
+/* Each route is a row you can hit, not a word in a sentence. The address is
+   written out because people want to see an address before they trust it. */
+.contact-lines {
+  margin-top: var(--sp-6);
+  border-top: 1px solid var(--line-strong);
+}
+.contact-line {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-4);
+  padding-block: var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--transition), padding-left var(--transition);
+}
+.contact-line:hover, .contact-line:focus-visible {
+  background: linear-gradient(90deg, var(--accent-soft), transparent 70%);
+  padding-left: var(--sp-2);
+}
+.contact-line-icon {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--accent);
+}
+.contact-line-text { min-width: 0; }
+.contact-line-text b {
+  display: block;
+  font-size: var(--fs-600);
+  font-weight: 500;
+  /* An email address must not push the row sideways on a narrow phone. */
+  overflow-wrap: anywhere;
+}
+.contact-line-text small {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-400);
+  color: var(--text-3);
+}
+.contact-line-go { color: var(--accent); transition: transform var(--transition); }
+.contact-line:hover .contact-line-go { transform: translateX(4px); }
+
+.contact-facts {
+  display: grid;
+  gap: var(--sp-4);
+  margin: var(--sp-6) 0 0;
+}
+.contact-facts dt {
+  font-family: var(--font-mono); font-size: var(--fs-200);
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 4px;
+}
+.contact-facts dd { margin: 0; color: var(--text-2); max-width: 44ch; }
+
+.contact-social { margin-top: var(--sp-6); display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.contact-social-link {
+  display: inline-flex; align-items: center; min-height: 40px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  font-size: var(--fs-400); color: var(--text-2); text-decoration: none;
+}
+.contact-social-link:hover, .contact-social-link:focus-visible {
+  color: var(--text); border-color: var(--accent-line);
+}
+
+/* A positioning wrapper only. .form-card already carries the surface, border
+   and padding, so giving this the same three drew a box inside an identical
+   box -- the same border twice, eight pixels apart. */
+.contact-panel { min-width: 0; }
+.contact-panel > *:first-child { margin-top: 0; }
+
+@media (max-width: 900px) {
+  .contact-grid { grid-template-columns: 1fr; }
+  /* On a phone the form goes first: someone who scrolled to this page has
+     already decided to make contact, and the direct routes stay one thumb
+     away in the fixed bottom dock. */
+  .contact-panel { order: -1; }
+  .contact-hero { padding-block: var(--sp-6) var(--sp-7); }
+}
+
 .stack {
   display: flex;
   flex-direction: column;

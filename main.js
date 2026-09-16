@@ -771,10 +771,24 @@
     function track(name, params) {
       if (window.mucoTrackEvent) window.mucoTrackEvent(name, Object.assign({form_type: kind}, params || {}));
     }
+    // Preselect the service the visitor clicked through with. This guarded on
+    // tagName === 'SELECT', which stopped working the day the dropdown became
+    // radio chips: form.elements.service is a RadioNodeList then, it has no
+    // tagName, and the branch silently did nothing. Every ?service= link on the
+    // site -- and there are over a hundred -- landed on an empty choice, so the
+    // visitor had to re-pick the thing they had just clicked.
     var selected = new URLSearchParams(location.search).get('service');
-    if (selected && form.elements.service.tagName === 'SELECT') {
-      var option = Array.from(form.elements.service.options).find(function (item) { return item.value === selected; });
-      if (option) form.elements.service.value = selected;
+    if (selected) {
+      var field = form.elements.service;
+      if (field && field.tagName === 'SELECT') {
+        if (Array.from(field.options).some(function (item) { return item.value === selected; })) {
+          field.value = selected;
+        }
+      } else if (field) {
+        Array.from(field).forEach(function (radio) {
+          if (radio.value === selected) radio.checked = true;
+        });
+      }
     }
     form.addEventListener('input', function () {
       if (completed) {

@@ -124,32 +124,124 @@ def public_lead_form(audit=False):
 
 
 def build_public_contact():
-    body = page_header("Talk to the founder", "Tell us what your business needs.",
-        "A website that brings enquiries, an app for your customers, or software that saves your team time. "
-        "Start with a free conversation with %s, based in Erode, Tamil Nadu, with remote delivery available." % FOUNDER)
-    # The form comes first. It used to sit behind a full section of contact
-    # cards, which put the page's whole purpose one and a half screens below the
-    # fold on a phone. The three direct routes are still offered, as a compact
-    # strip rather than a section, so nobody has to scroll past them to reach
-    # the thing most people came to do.
-    body += '''<section class="section-divider"><div class="container container-narrow">
-      <nav class="reach-strip" aria-label="Contact MUCO LABS directly">
-        <span>Rather talk?</span>
-        <a href="%s" data-whatsapp>WhatsApp</a>
-        <a href="tel:+916381809844">Call</a>
-        <a href="mailto:%s">Email</a>
-      </nav>
-      %s</div></section>
-      <section class="section-divider"><div class="container container-narrow"><div class="section-head"><span class="eyebrow">After you send it</span><h2>What happens after your enquiry?</h2></div>
-      <ol class="feature-list"><li>We read your requirement and clarify the business problem.</li>
-      <li>We agree a discovery conversation if it is useful, then prepare a written scope and quote.</li>
-      <li>You decide whether to proceed. Customer workspace access is arranged during onboarding after agreement and payment confirmation.</li></ol>
-      <p>Want an existing website checked first? <a href="website-audit.html">Request a free website review</a>.</p></div></section>''' % (
-        WHATSAPP_URL, EMAIL, public_lead_form())
+    """The contact page, rebuilt as one section instead of three stacked ones.
+
+    The previous version put a page header, then a thin "Rather talk?" strip,
+    then the form -- which meant the two things people actually come here to do
+    were a screen and a half apart, and the direct routes were the smallest text
+    on the page. Somebody who wants to send a WhatsApp message should not have
+    to read past a headline to find out they can.
+
+    So: one section, two columns. The ways to reach a human on the left, at the
+    size they deserve, with the address written out rather than hidden behind
+    the word "Email" -- people want to see an address before they trust it. The
+    form on the right, level with them, so neither one is the consolation prize.
+    """
+    social = "".join(
+        '<a class="contact-social-link" href="%s" rel="me noopener">%s</a>' % (url, name)
+        for name, url in SOCIAL_LINKS)
+
+    body = '''    <section class="contact-hero">
+      <div class="contact-hero-glow" aria-hidden="true"></div>
+      <div class="container">
+        <div class="contact-grid">
+
+          <div class="contact-intro">
+            <span class="eyebrow">Talk to the founder</span>
+            <h1>Tell us what you want built, and we will tell you
+              what it <span class="accent-serif">actually takes</span>.</h1>
+            <p class="lead">No account, no sign-in, no sales sequence. Whichever
+              way you get in touch, the reply comes from %(founder)s &mdash; the
+              person who would do the work.</p>
+
+            <div class="contact-lines">
+              <a class="contact-line" href="%(wa)s" data-whatsapp>
+                <span class="contact-line-icon" aria-hidden="true">%(wa_icon)s</span>
+                <span class="contact-line-text">
+                  <b>WhatsApp</b>
+                  <small>Usually the fastest. Tamil or English.</small>
+                </span>
+                <span class="contact-line-go" aria-hidden="true">&rarr;</span>
+              </a>
+              <a class="contact-line" href="%(call)s">
+                <span class="contact-line-icon" aria-hidden="true">%(call_icon)s</span>
+                <span class="contact-line-text">
+                  <b>%(phone)s</b>
+                  <small>%(hours)s</small>
+                </span>
+                <span class="contact-line-go" aria-hidden="true">&rarr;</span>
+              </a>
+              <a class="contact-line" href="mailto:%(email)s">
+                <span class="contact-line-icon" aria-hidden="true">%(mail_icon)s</span>
+                <span class="contact-line-text">
+                  <b>%(email)s</b>
+                  <small>Best for anything with attachments.</small>
+                </span>
+                <span class="contact-line-go" aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+
+            <dl class="contact-facts">
+              <div><dt>Where we are</dt><dd>%(city)s, %(region)s &mdash; in person across the
+                district, remote everywhere else.</dd></div>
+              <div><dt>What it costs to ask</dt><dd>Nothing. A written scope is free and
+                carries no obligation.</dd></div>
+            </dl>
+
+            <p class="contact-social">%(social)s</p>
+          </div>
+
+          <div class="contact-panel">
+            %(form)s
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="section-head">
+          <span class="eyebrow">After you send it</span>
+          <h2>What happens to your enquiry</h2>
+        </div>
+        <ol class="feature-list">
+          <li>We read your requirement and clarify the business problem behind it.</li>
+          <li>We agree a discovery conversation if it is useful, then prepare a written
+            scope and quote.</li>
+          <li>You decide whether to proceed. Nothing is charged for reaching that point.</li>
+        </ol>
+        <p>Want an existing website checked first?
+          <a href="website-audit.html">Request a free website review</a>.</p>
+      </div>
+    </section>
+''' % {
+        "founder": FOUNDER,
+        "wa": WHATSAPP_URL,
+        "call": CALL_URL,
+        "phone": PHONE,
+        "hours": HOURS,
+        "email": EMAIL,
+        "city": CITY,
+        "region": REGION,
+        "social": social,
+        "form": public_lead_form(),
+        # WA_SVG is the filled brand mark, not a stroke path set, so it does not
+        # go through icon().
+        "wa_icon": WA_SVG,
+        "call_icon": icon(ICONS["phone"], 18),
+        "mail_icon": icon(ICONS["mail"], 18),
+    }
+
     return render("contact.html", "Start a Project with MUCO LABS | Erode, India & Remote",
-        "Talk to MUCO LABS in Erode about your website, app or software. Free project consultation, public enquiry form, WhatsApp, phone and email. No account needed.", body,
-        schema_blocks=[ORG_JSONLD, json.dumps({"@context": "https://schema.org", "@type": "ContactPage", "url": DOMAIN + "/contact",
-        "about": {"@id": DOMAIN + "/#organization"}}), breadcrumbs([("Home", ""), ("Contact", "contact")])])
+        "Talk to MUCO LABS in Erode about your website, app or software. WhatsApp, phone, "
+        "email or the enquiry form. A written scope costs nothing and no account is needed.",
+        body,
+        schema_blocks=[ORG_JSONLD, json.dumps({
+            "@context": "https://schema.org", "@type": "ContactPage",
+            "url": DOMAIN + "/contact",
+            "about": {"@id": DOMAIN + "/#organization"}}),
+            breadcrumbs([("Home", ""), ("Contact", "contact")])])
 
 
 def home_growth_sections():

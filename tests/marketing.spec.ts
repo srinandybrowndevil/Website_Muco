@@ -425,3 +425,42 @@ test.describe("Tamil locale", () => {
     }
   });
 });
+
+test.describe("service preselection", () => {
+  // Over a hundred CTAs link to /contact?service=<name>. That parameter stopped
+  // preselecting anything the day the dropdown became radio chips, and nothing
+  // failed -- the visitor just had to pick again the thing they had clicked.
+  const SERVICE = "Digital marketing & SEO";
+
+  test("a service link preselects the service it came from", async ({ page }) => {
+    await page.goto(
+      `${BASE}/contact?service=${encodeURIComponent(SERVICE)}#start-project`,
+      { waitUntil: "load" },
+    );
+    await expect(page.locator("input[name=service]:checked")).toHaveValue(SERVICE);
+  });
+
+  test("arriving with no service leaves the choice empty", async ({ page }) => {
+    await page.goto(`${BASE}/contact`, { waitUntil: "load" });
+    await expect(page.locator("input[name=service]:checked")).toHaveCount(0);
+  });
+
+  test("a service name that is not on the form selects nothing", async ({ page }) => {
+    await page.goto(`${BASE}/contact?service=Rocket%20surgery`, { waitUntil: "load" });
+    await expect(page.locator("input[name=service]:checked")).toHaveCount(0);
+  });
+
+  test("the direct contact routes are reachable without scrolling past the form", async ({ page }) => {
+    await page.goto(`${BASE}/contact`, { waitUntil: "load" });
+    const lines = page.locator(".contact-line");
+    await expect(lines).toHaveCount(3);
+    await expect(page.locator('.contact-line[href^="mailto:"]')).toContainText("@");
+    for (const line of await lines.all()) {
+      const icon = line.locator(".contact-line-icon svg");
+      await expect(icon).toBeVisible();
+      // An icon element that renders nothing looks like a styling bug, and the
+      // WhatsApp mark shipped exactly that way from a None entry in the set.
+      expect(await icon.evaluate(el => el.innerHTML.trim().length)).toBeGreaterThan(0);
+    }
+  });
+});

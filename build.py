@@ -371,6 +371,9 @@ def asset_v(name):
 
 
 def icon(paths, size=20):
+    # An empty icon is invisible in review and looks like a styling bug in
+    # production, so a missing glyph fails the build instead.
+    assert paths, "icon() called with no glyph"
     return (
         '<svg width="%d" height="%d" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
         'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%s</svg>'
@@ -393,7 +396,15 @@ ICONS = {
     "pin": '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1116 0z"/><circle cx="12" cy="10" r="3"/>',
     "user": '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
     "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-    "whatsapp_solid": None,
+    "phone": '<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 '
+             '01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 '
+             '2.7a2 2 0 01-.4 2.1L8.6 9.9a16 16 0 006 6l1.4-1.4a2 2 0 012.1-.4c.9.3 '
+             '1.8.5 2.7.6a2 2 0 011.7 2z"/>',
+    "mail": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/>',
+    # "whatsapp_solid" used to sit here as None. icon() wraps whatever it is
+    # given in an <svg>, so a None entry rendered a correctly sized, perfectly
+    # empty box with no error anywhere. The real mark is WA_SVG below, which is
+    # a complete filled glyph rather than a stroke path set.
 }
 
 WA_SVG = (
