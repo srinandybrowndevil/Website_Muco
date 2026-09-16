@@ -55,19 +55,22 @@ def field(name, label, kind="text", required=False, limit=120, autocomplete="", 
         hint=hint, placeholder=escape(placeholder, quote=True))
 
 
-def public_lead_form(audit=False):
+def public_lead_form(audit=False, preselect=""):
     name = field("name", "Your name", required=True, limit=100, autocomplete="name", placeholder="Your full name")
     phone = field("phone", "Phone / WhatsApp", "tel", True, 32, "tel", "Include your country code if outside India.", "+91 …")
     business = field("business", "Business name (optional)", autocomplete="organization", hint="Leave it blank if you are still deciding.")
     email = field("email", "Email (optional)", "email", limit=160, autocomplete="email", placeholder="you@example.com")
     website = field("website", "Website URL" if audit else "Existing website (optional)", "url", audit, 300,
                     hint="Use the full address, starting with https://.", placeholder="https://example.com")
+    assert not preselect or preselect in SERVICE_OPTIONS, (
+        "preselect %r is not one of the service choices" % preselect)
     service = '''<fieldset class="form-group service-picker" aria-describedby="err-service">
       <legend>What do you need? <span class="form-req">*</span></legend>
       <div class="service-chips">%s</div>
       <p class="form-error" id="err-service"></p></fieldset>''' % "".join(
-        '<label class="service-chip"><input type="radio" name="service" value="%s" required>'
-        '<span>%s</span></label>' % (escape(value, quote=True), escape(label))
+        '<label class="service-chip"><input type="radio" name="service" value="%s"%s required>'
+        '<span>%s</span></label>'
+        % (escape(value, quote=True), " checked" if value == preselect else "", escape(label))
         for value, label in SERVICE_CHOICES)
     # The project requirement is the one answer that makes an enquiry worth
     # anything, so it is visible and required. It used to sit inside the
@@ -123,36 +126,28 @@ def public_lead_form(audit=False):
         wa=WHATSAPP_URL, email_address=EMAIL)
 
 
-def build_public_contact():
-    """The contact page, rebuilt as one section instead of three stacked ones.
 
-    The previous version put a page header, then a thin "Rather talk?" strip,
-    then the form -- which meant the two things people actually come here to do
-    were a screen and a half apart, and the direct routes were the smallest text
-    on the page. Somebody who wants to send a WhatsApp message should not have
-    to read past a headline to find out they can.
+def contact_section(eyebrow, heading, lead, preselect="", level=2):
+    """The contact block: ways to reach a person on the left, the form on the right.
 
-    So: one section, two columns. The ways to reach a human on the left, at the
-    size they deserve, with the address written out rather than hidden behind
-    the word "Email" -- people want to see an address before they trust it. The
-    form on the right, level with them, so neither one is the consolation prize.
+    One implementation for /contact and for the foot of every service page. A
+    service page ending in a centred box with two buttons asked a reader who had
+    just spent two thousand words deciding to go and find the form somewhere
+    else; this puts it in front of them with their service already chosen.
     """
-    social = "".join(
-        '<a class="contact-social-link" href="%s" rel="me noopener">%s</a>' % (url, name)
-        for name, url in SOCIAL_LINKS)
-
-    body = '''    <section class="contact-hero">
+    tag = "h%d" % level
+    # No id here: public_lead_form already carries the #start-project anchor,
+    # and two elements sharing it is invalid HTML -- getElementById would find
+    # whichever came first, which is not the form.
+    return '''    <section class="contact-hero">
       <div class="contact-hero-glow" aria-hidden="true"></div>
       <div class="container">
         <div class="contact-grid">
 
           <div class="contact-intro">
-            <span class="eyebrow">Talk to the founder</span>
-            <h1>Tell us what you want built, and we will tell you
-              what it <span class="accent-serif">actually takes</span>.</h1>
-            <p class="lead">No account, no sign-in, no sales sequence. Whichever
-              way you get in touch, the reply comes from %(founder)s &mdash; the
-              person who would do the work.</p>
+            <span class="eyebrow">%(eyebrow)s</span>
+            <%(tag)s>%(heading)s</%(tag)s>
+            <p class="lead">%(lead)s</p>
 
             <div class="contact-lines">
               <a class="contact-line" href="%(wa)s" data-whatsapp>
@@ -198,8 +193,45 @@ def build_public_contact():
         </div>
       </div>
     </section>
+''' % {
+        "eyebrow": eyebrow,
+        "tag": tag,
+        "heading": heading,
+        "lead": lead,
+        "wa": WHATSAPP_URL,
+        "call": CALL_URL,
+        "phone": PHONE,
+        "hours": HOURS,
+        "email": EMAIL,
+        "city": CITY,
+        "region": REGION,
+        "social": "".join(
+            '<a class="contact-social-link" href="%s" rel="me noopener">%s</a>' % (url, name)
+            for name, url in SOCIAL_LINKS),
+        "form": public_lead_form(preselect=preselect),
+        # WA_SVG is the filled brand mark, not a stroke path set, so it does not
+        # go through icon().
+        "wa_icon": WA_SVG,
+        "call_icon": icon(ICONS["phone"], 18),
+        "mail_icon": icon(ICONS["mail"], 18),
+    }
 
-    <section class="section-divider">
+
+def build_public_contact():
+    """The contact page is now the shared section plus the follow-up note.
+
+    It used to hold its own copy of that markup. The service pages needed the
+    same block, and two copies of a contact section is how the phone number
+    ends up formatted one way here and another way there.
+    """
+    body = contact_section(
+        "Talk to the founder",
+        "Tell us what you want built, and we will tell you what it "
+        "<span class=\"accent-serif\">actually takes</span>.",
+        "No account, no sign-in, no sales sequence. Whichever way you get in touch, "
+        "the reply comes from %s &mdash; the person who would do the work." % FOUNDER,
+        level=1,
+    ) + '''    <section class="section-divider">
       <div class="container container-narrow">
         <div class="section-head">
           <span class="eyebrow">After you send it</span>
@@ -215,23 +247,7 @@ def build_public_contact():
           <a href="website-audit.html">Request a free website review</a>.</p>
       </div>
     </section>
-''' % {
-        "founder": FOUNDER,
-        "wa": WHATSAPP_URL,
-        "call": CALL_URL,
-        "phone": PHONE,
-        "hours": HOURS,
-        "email": EMAIL,
-        "city": CITY,
-        "region": REGION,
-        "social": social,
-        "form": public_lead_form(),
-        # WA_SVG is the filled brand mark, not a stroke path set, so it does not
-        # go through icon().
-        "wa_icon": WA_SVG,
-        "call_icon": icon(ICONS["phone"], 18),
-        "mail_icon": icon(ICONS["mail"], 18),
-    }
+'''
 
     return render("contact.html", "Start a Project with MUCO LABS | Erode, India & Remote",
         "Talk to MUCO LABS in Erode about your website, app or software. WhatsApp, phone, "

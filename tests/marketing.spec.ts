@@ -464,3 +464,39 @@ test.describe("service preselection", () => {
     }
   });
 });
+
+test.describe("service pages close with the enquiry form", () => {
+  const CASES = [
+    ["services-websites", "Website design & development"],
+    ["services-marketing", "Digital marketing & SEO"],
+    ["services-support", "Branding, IT & cloud support"],
+  ] as const;
+
+  for (const [slug, service] of CASES) {
+    test(`${slug} arrives with its own service chosen`, async ({ page }) => {
+      await page.goto(`${BASE}/${slug}`, { waitUntil: "load" });
+      await expect(page.locator("input[name=service]:checked")).toHaveValue(service);
+      // The hero button should reach the form on this page rather than loading
+      // /contact to ask the same question over again.
+      await expect(
+        page.locator('.page-header a.btn-accent, section a.btn-accent').first(),
+      ).toHaveAttribute("href", "#start-project");
+    });
+  }
+
+  test("no page uses an id twice", async ({ page }) => {
+    // The shared contact section and the form inside it both claimed
+    // #start-project, the anchor every CTA on the site points at.
+    for (const slug of ["contact", "services-websites", "website-audit"]) {
+      await page.goto(`${BASE}/${slug}`, { waitUntil: "load" });
+      const dupes = await page.evaluate(() => {
+        const seen: Record<string, number> = {};
+        for (const el of Array.from(document.querySelectorAll("[id]"))) {
+          seen[el.id] = (seen[el.id] || 0) + 1;
+        }
+        return Object.entries(seen).filter(([, n]) => n > 1).map(([id]) => id);
+      });
+      expect(dupes, `${slug} repeats these ids`).toEqual([]);
+    }
+  });
+});

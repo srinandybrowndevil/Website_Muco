@@ -29,6 +29,17 @@ for page in pages:
     doc = open(page, encoding="utf-8").read()
     flat = re.sub(r"<!--.*?-->", "", doc, flags=re.S)
 
+    # Two elements sharing an id is invalid, and getElementById silently takes
+    # whichever came first. A shared contact section and the form inside it both
+    # claimed #start-project -- the anchor every CTA on the site points at -- and
+    # nothing here noticed.
+    seen = {}
+    for found in re.findall(r'\sid="([^"]+)"', flat):
+        seen[found] = seen.get(found, 0) + 1
+    for found, count in sorted(seen.items()):
+        if count > 1:
+            add(page, "id %r is used %d times" % (found, count))
+
     if not re.search(r"<html[^>]*\blang=", flat):
         add(page, "no lang attribute on <html>")
 

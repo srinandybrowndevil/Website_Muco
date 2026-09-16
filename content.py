@@ -9,7 +9,9 @@ Editing rules that keep this site trustworthy:
 """
 
 from build import *  # noqa: F401,F403 — shared shell, tokens and helpers
-from growth_content import GROWTH_PAGES, SERVICE_SEARCH_TITLES, build_growth_page, build_public_contact, public_lead_form, home_growth_sections, service_resources
+from growth_content import (GROWTH_PAGES, SERVICE_SEARCH_TITLES, SERVICE_OPTIONS,
+                            build_growth_page, build_public_contact, contact_section,
+                            public_lead_form, home_growth_sections, service_resources)
 
 # ===========================================================================
 # Project archive → portfolio
@@ -1264,6 +1266,27 @@ assert set(SERVICE_FAQ_EXTRA) == set(SERVICE_DETAIL), (
     % (set(SERVICE_FAQ_EXTRA) ^ set(SERVICE_DETAIL)))
 
 
+# The enquiry form's service values are their own list, written for a form
+# rather than for a page heading, so the link between a service page and the
+# choice it should preselect is stated here instead of inferred from the title.
+SERVICE_FORM_VALUE = {
+    "websites": "Website design & development",
+    "mobile": "Mobile app development",
+    "product-design": "UI/UX & product design",
+    "software": "Custom software & SaaS",
+    "business-systems": "CRM / ERP / HRMS / LMS / billing",
+    "marketing": "Digital marketing & SEO",
+    "ai-automation": "AI & business automation",
+    "support": "Branding, IT & cloud support",
+}
+
+assert set(SERVICE_FORM_VALUE) == {sv["slug"] for sv in SERVICES}, (
+    "every service needs a form value; difference: %s"
+    % (set(SERVICE_FORM_VALUE) ^ {sv["slug"] for sv in SERVICES}))
+assert set(SERVICE_FORM_VALUE.values()) <= set(SERVICE_OPTIONS), (
+    "these form values are not offered by the form: %s"
+    % (set(SERVICE_FORM_VALUE.values()) - set(SERVICE_OPTIONS)))
+
 SERVICE_ASSURANCE = [
     "Tested on real devices, including a low-end Android phone, not only a desktop browser",
     "Contrast and keyboard operation checked rather than assumed",
@@ -2111,7 +2134,10 @@ def build_service_page(sv):
                           (sv["title"], None)]),
         title=sv["title"], outcome=sv["outcome"], bodytext=sv["body"] + ' Based in Erode, Tamil Nadu, with remote delivery available.', q=q,
         portal_contact=WHATSAPP_URL,
-        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup="/contact?service=" + q + "#lead-form", portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
+        wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, # The form is on this page now, with the service already chosen, so the
+        # hero button scrolls to it instead of loading /contact to ask the same
+        # question again.
+        portal_signup="#start-project", portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
         others=others, resources=service_resources(sv["slug"]),
         scope_rows="".join(
@@ -2120,10 +2146,16 @@ def build_service_page(sv):
         excludes="".join("<li>%s</li>" % x for x in SERVICE_SCOPE[sv["slug"]]["excludes"]),
         timeline=SERVICE_SCOPE[sv["slug"]]["timeline"],
         assurance="".join("<li>%s</li>" % x for x in SERVICE_ASSURANCE),
-        cta=final_cta(
-            "Tell us what you need",
-            "Describe the problem and we will come back with questions, an approach and a written "
-            "scope. The scope costs you nothing.",
+        # A reader who has got this far has spent two thousand words deciding.
+        # Sending them to another page to find a form, and then asking them to
+        # pick the service they just read about, loses people for no reason.
+        cta=contact_section(
+            "Start a project",
+            "Tell us about your %s project" % sv["title"].lower(),
+            "Describe the problem and we will come back with questions, an approach and a "
+            "written scope. The scope costs you nothing, and your requirement is already "
+            "selected below.",
+            preselect=SERVICE_FORM_VALUE[sv["slug"]],
         ),
     )
 
