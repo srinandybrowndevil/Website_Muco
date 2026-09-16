@@ -85,7 +85,7 @@
 }
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why not just buy existing software?","acceptedAnswer":{"@type":"Answer","text":"Often you should, and we will say so. Custom is worth it when the off-the-shelf option forces you to change how the business works, or when the per-user pricing overtakes the build cost. We work that out with you before quoting."}},{"@type":"Question","name":"What happens if we outgrow the first version?","acceptedAnswer":{"@type":"Answer","text":"That is the point of settling the architecture, data model and roles first. A first version built properly grows; one assembled quickly gets rewritten."}},{"@type":"Question","name":"Who owns the software?","acceptedAnswer":{"@type":"Answer","text":"You do. Source code, database and accounts transfer to you on final payment, with no licence to keep paying and no lock-in."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why not just buy existing software?","acceptedAnswer":{"@type":"Answer","text":"Often you should, and we will say so. Custom is worth it when the off-the-shelf option forces you to change how the business works, or when the per-user pricing overtakes the build cost. We work that out with you before quoting."}},{"@type":"Question","name":"What happens if we outgrow the first version?","acceptedAnswer":{"@type":"Answer","text":"That is the point of settling the architecture, data model and roles first. A first version built properly grows; one assembled quickly gets rewritten."}},{"@type":"Question","name":"Who owns the software?","acceptedAnswer":{"@type":"Answer","text":"You do. Source code, database and accounts transfer to you on final payment, with no licence to keep paying and no lock-in."}},{"@type":"Question","name":"Can we start small and add to it later?","acceptedAnswer":{"@type":"Answer","text":"That is usually the right approach. A narrow first release that people actually use tells you more about what to build next than a year of specification does, and it is cheaper to change. The architecture is set up so that the second release is not a rewrite."}},{"@type":"Question","name":"Where is our data stored, and who can see it?","acceptedAnswer":{"@type":"Answer","text":"Named in the scope before anything is built: the provider, the region and which roles can read what. The hosting and database accounts are in your name, so the data is yours and stays reachable to you whatever happens to our relationship."}},{"@type":"Question","name":"What happens if you are not available later?","acceptedAnswer":{"@type":"Answer","text":"You own the source code and the accounts, and the handover includes written documentation of the architecture, the deployment process and the decisions behind them. Another competent developer can pick it up. Software that only its author can run is a liability we do not hand over."}}]}
 </script>
 <!-- Consent Mode v2 default -->
 <script>
@@ -260,9 +260,83 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
+    <section class="section-grid band-deep">
+      <div class="container">
+        <div class="rule-label"><b>01</b> Scope and price<span class="rule-fill"></span></div>
+          <div class="section-head">
+          <h2>What changes the price</h2>
+          <p class="sub">We quote from a written scope rather than a rate card, so these are
+            the things that actually move the number. Read them against your own job before
+            you ask anyone for a quote &mdash; including us.</p>
+        </div>
+        <div class="split">
+          <div>
+            <div class="index-list">
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">01</span>
+            <div>
+              <h3>How many roles, and how different they are</h3>
+              <p class="index-body">Two roles seeing nearly the same thing is one system. Four that each see a different slice is four.</p>
+            </div>
+          </div>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">02</span>
+            <div>
+              <h3>One organisation or many</h3>
+              <p class="index-body">Multi-tenancy changes the data model, the permissions and the testing. Far cheaper decided at the start than retrofitted.</p>
+            </div>
+          </div>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">03</span>
+            <div>
+              <h3>Integrations and their documentation</h3>
+              <p class="index-body">A documented API is a task. An undocumented system with no test access is a risk, and it is priced as one.</p>
+            </div>
+          </div>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">04</span>
+            <div>
+              <h3>Data migration</h3>
+              <p class="index-body">How much, from where, and what condition it is in.</p>
+            </div>
+          </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="fs-xl">Quoted separately</h3>
+            <p class="mt-3">None of this is hidden and then invoiced. Where you need any of
+              it, we quote it as its own line so you can say no to it.</p>
+            <ul class="feature-list mt-4"><li>Server, database and third-party API running costs</li><li>Licences for commercial components or paid libraries</li><li>Cleaning data before migration, unless the scope names it</li><li>Feature work beyond the agreed release</li></ul>
+            <p class="note mt-5">Full detail on
+              <a class="accent" href="/pricing">how we quote</a>, and what a
+              <a class="accent" href="/website-cost-erode">proposal should answer</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-surface section-grid">
+      <div class="container">
+        <div class="rule-label"><b>02</b> Schedule and standards<span class="rule-fill"></span></div>
+          <div class="section-head">
+          <h2>What decides the timeline, and what we hold ourselves to</h2>
+        </div>
+        <div class="split">
+          <div>
+            <h3 class="fs-xl">What decides the schedule</h3>
+            <p class="mt-3">Discovery is not overhead here; it is what stops the build heading the wrong way for a month. After that the usual delay is access &mdash; credentials, test accounts and sample data from the systems we have to talk to. Acceptance testing is scheduled as a real phase with your people in it, because software signed off by the developer alone is not signed off.</p>
+          </div>
+          <div>
+            <h3 class="fs-xl">Performance, security and handover</h3>
+            <ul class="feature-list mt-4"><li>Tested on real devices, including a low-end Android phone, not only a desktop browser</li><li>Contrast and keyboard operation checked rather than assumed</li><li>HTTPS, security headers and dependency patching wherever we build or host</li><li>A written handover document, so the next person is not reverse-engineering it</li><li>Source code, design files and every account transferred on final payment</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="band-deep">
       <div class="container">
-        <div class="rule-label"><b>01</b> Related work<span class="rule-fill"></span></div>
+        <div class="rule-label"><b>03</b> Related work<span class="rule-fill"></span></div>
           <div class="section-head">
           <h2>Related builds and technical examples</h2>
         </div>
@@ -285,7 +359,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <section class="band-surface section-grid"><div class="container"><h2>Useful next reads</h2><ul class="feature-list"><li><a href="textile-software">Textile order and job-work workflows</a></li><li><a href="pricing">How a custom software quote is scoped</a></li></ul></div></section>    <section class="band-deep">
       <div class="container container-narrow">
-        <div class="rule-label"><b>02</b> Questions<span class="rule-fill"></span></div>
+        <div class="rule-label"><b>04</b> Questions<span class="rule-fill"></span></div>
           <div class="section-head">
           <h2>About custom software & saas</h2>
         </div>
@@ -301,12 +375,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <summary><h3>Who owns the software?</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>You do. Source code, database and accounts transfer to you on final payment, with no licence to keep paying and no lock-in.</p></div></div></div>
         </details>
+        <details class="faq-item">
+          <summary><h3>Can we start small and add to it later?</h3></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>That is usually the right approach. A narrow first release that people actually use tells you more about what to build next than a year of specification does, and it is cheaper to change. The architecture is set up so that the second release is not a rewrite.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h3>Where is our data stored, and who can see it?</h3></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>Named in the scope before anything is built: the provider, the region and which roles can read what. The hosting and database accounts are in your name, so the data is yours and stays reachable to you whatever happens to our relationship.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h3>What happens if you are not available later?</h3></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>You own the source code and the accounts, and the handover includes written documentation of the architecture, the deployment process and the decisions behind them. Another competent developer can pick it up. Software that only its author can run is a liability we do not hand over.</p></div></div></div>
+        </details>
       </div>
     </section>
 
     <section class="section-tight band-surface section-grid">
       <div class="container">
-        <div class="rule-label"><b>03</b> Other services<span class="rule-fill"></span></div>
+        <div class="rule-label"><b>05</b> Other services<span class="rule-fill"></span></div>
           <div class="section-head mb-5">
           <h2 class="fs-xl">We also do</h2>
         </div>

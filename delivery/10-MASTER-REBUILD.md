@@ -7,12 +7,15 @@
 
 ## A. Executive summary
 
-The brief covers eleven phases. This session completed Phases 0 through 6 and
-parts of Phases 8, 9 and 10. **Phase 7 — the complete English/Tamil bilingual
-site — has not been started, and it is the single largest outstanding item.** It
-is reported honestly in section O rather than partially implemented, because the
-brief itself forbids partial translation (§21: "If Tamil is enabled for a route,
-it must not silently fall back to partial English strings").
+The brief covers eleven phases. Phases 0 through 6 are complete, along with parts
+of Phases 8, 9 and 10. **Phase 7 — English/Tamil — now has its conversion core
+live: `/ta`, `/ta/services`, `/ta/about` and `/ta/contact`, with reciprocal
+hreflang, per-locale canonicals, sitemap entries and a switch in both
+directions.** The remaining routes stay English only and advertise no Tamil
+version at all, which is what §21 requires ("If Tamil is enabled for a route, it
+must not silently fall back to partial English strings"). Section O has the
+detail, including the one thing still outstanding: nobody has read the Tamil
+copy who speaks Tamil.
 
 What changed: the site now has one conversion concept instead of three, no
 sign-in anywhere in the public journey, one combined WhatsApp/Call control
@@ -32,7 +35,7 @@ Email provider:      Resend, via api/lead.js. Server-side validation.
 Analytics:           GA4 (G-ZZNRHGTEVJ) + GTM (GTM-W2XZ8QNQ), both gated behind
                      Consent Mode v2. analytics.js translates events; it stores
                      nothing and posts to no endpoint of ours.
-i18n system:         None yet. See section O.
+i18n system:         Locale routes under /ta, four pages. See section I.
 ```
 
 ## C. Routes
@@ -47,7 +50,7 @@ Final public English routes — 28 pages, all indexable except `404`:
 `/website-cost-erode`, `/business-website-growth`, `/textile-software`,
 `/privacy`, `/terms`, `/refund`, `/404`.
 
-Tamil routes: **none.** Not implemented.
+Tamil routes: `/ta`, `/ta/services`, `/ta/about`, `/ta/contact`.
 
 ## D. Removed legacy behaviour
 
@@ -122,7 +125,17 @@ A real keyword map needs Search Console or a keyword tool connected.
 
 ## I. Multilingual implementation
 
-**Not implemented.** See section O.
+Four Tamil routes live: `/ta`, `/ta/services`, `/ta/about`, `/ta/contact`.
+Reciprocal `hreflang` (`en-in`, `ta-in`, `x-default`), per-locale canonicals,
+`html lang="ta-IN"`, sitemap entries and a two-way language switch. Tamil pages
+carry their own header and footer rather than a translated copy of the English
+chrome. Fonts are the system Tamil faces, so the pages cost no extra bytes and
+add no third-party request.
+
+Publishing a Tamil page takes two steps on purpose — write it, then add its slug
+to `TAMIL_TWINS` in `build.py`. Only the second step creates the hreflang pair,
+so a half-finished translation cannot be advertised as a complete one. See
+section O.
 
 ## J. Performance
 
@@ -234,8 +247,15 @@ language without warning.
 
 ### Not implemented — other
 
-- **§13 content depth.** Service pages were not expanded to the fifteen-point
-  structure.
+- **§13 content depth.** Done. The eight service pages were missing five of the
+  fifteen points, and they were the five a buyer cares about: what is not
+  included, performance and security posture, what changes the price, what
+  decides the timeline, and enough questions to be worth reading. Pages went from
+  roughly 1,350 to roughly 2,000 words, with nothing padded to reach a number. No
+  price or turnaround is published — the site quotes from a written scope, and
+  printing either would contradict that — so the factors are named instead. FAQ
+  coverage went from three questions to six per service, and the FAQPage schema
+  follows from the same data.
 - **§14 content clusters.** No editorial articles were written.
 - **§16 location pages.** No opportunity matrix and no new city pages. Correct to
   defer: the brief requires demand research first.

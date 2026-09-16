@@ -85,7 +85,7 @@
 }
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can you move our existing data across?","acceptedAnswer":{"@type":"Answer","text":"Usually yes, from spreadsheets, Tally exports or an older system. Migration is scoped and priced as its own task because it is real work and it deserves testing."}},{"@type":"Question","name":"Does it handle GST properly?","acceptedAnswer":{"@type":"Answer","text":"Invoicing is built to your actual filing requirements, confirmed with whoever handles your accounts. We build to what your accountant needs, not to a generic template."}},{"@type":"Question","name":"Can staff use it without training?","acceptedAnswer":{"@type":"Answer","text":"That is a design requirement, not an afterthought. If your team needs a manual to record a sale, the interface is wrong."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can you move our existing data across?","acceptedAnswer":{"@type":"Answer","text":"Usually yes, from spreadsheets, Tally exports or an older system. Migration is scoped and priced as its own task because it is real work and it deserves testing."}},{"@type":"Question","name":"Does it handle GST properly?","acceptedAnswer":{"@type":"Answer","text":"Invoicing is built to your actual filing requirements, confirmed with whoever handles your accounts. We build to what your accountant needs, not to a generic template."}},{"@type":"Question","name":"Can staff use it without training?","acceptedAnswer":{"@type":"Answer","text":"That is a design requirement, not an afterthought. If your team needs a manual to record a sale, the interface is wrong."}},{"@type":"Question","name":"Can we keep using Tally or our accountant's system?","acceptedAnswer":{"@type":"Answer","text":"Usually yes. Most businesses do not want to change accountants to change software, so the practical approach is exports and reconciliation rather than replacement. Which system it has to talk to, and what your accountant needs out of it, is settled during discovery."}},{"@type":"Question","name":"What if staff will not use it?","acceptedAnswer":{"@type":"Answer","text":"That is the most common way these projects fail, and it is a design problem rather than a training problem. We review the screens with the people who will actually enter the data before the build finishes, and we start with one workflow instead of switching everything at once."}},{"@type":"Question","name":"Will it work on a slow or dropped connection?","acceptedAnswer":{"@type":"Answer","text":"It can, and whether it should is a real decision rather than a default. Offline capability costs engineering effort, so it is worth it for a shop floor or a delivery route and wasted for an office desk. We ask where it will actually be used."}}]}
 </script>
 <!-- Consent Mode v2 default -->
 <script>
@@ -260,9 +260,83 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
+    <section class="section-grid band-deep">
+      <div class="container">
+        <div class="rule-label"><b>01</b> Scope and price<span class="rule-fill"></span></div>
+          <div class="section-head">
+          <h2>What changes the price</h2>
+          <p class="sub">We quote from a written scope rather than a rate card, so these are
+            the things that actually move the number. Read them against your own job before
+            you ask anyone for a quote &mdash; including us.</p>
+        </div>
+        <div class="split">
+          <div>
+            <div class="index-list">
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">01</span>
+            <div>
+              <h3>Which modules are in the first release</h3>
+              <p class="index-body">Orders, stock, invoicing, attendance &mdash; a narrow first release that gets used beats a complete one that does not.</p>
+            </div>
+          </div>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">02</span>
+            <div>
+              <h3>Users and permissions</h3>
+              <p class="index-body">Ten people who all do the same thing is simpler than four who each need a different level of access to rates and adjustments.</p>
+            </div>
+          </div>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">03</span>
+            <div>
+              <h3>The condition of your current data</h3>
+              <p class="index-body">Consistent units and clean opening balances make migration routine. Mixed units and duplicate records make it a project.</p>
+            </div>
+          </div>
+          <div class="index-row reveal-on-scroll">
+            <span class="index-num">04</span>
+            <div>
+              <h3>Accounting and GST integration</h3>
+              <p class="index-body">Which system it must reconcile with, and which exports your accountant needs.</p>
+            </div>
+          </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="fs-xl">Quoted separately</h3>
+            <p class="mt-3">None of this is hidden and then invoiced. Where you need any of
+              it, we quote it as its own line so you can say no to it.</p>
+            <ul class="feature-list mt-4"><li>Accounting software licences and subscriptions</li><li>Statutory and tax advice &mdash; your accountant confirms the treatment</li><li>Hardware such as barcode scanners, printers and tablets</li><li>Cleaning up historical records before import</li></ul>
+            <p class="note mt-5">Full detail on
+              <a class="accent" href="/pricing">how we quote</a>, and what a
+              <a class="accent" href="/website-cost-erode">proposal should answer</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-surface section-grid">
+      <div class="container">
+        <div class="rule-label"><b>02</b> Schedule and standards<span class="rule-fill"></span></div>
+          <div class="section-head">
+          <h2>What decides the timeline, and what we hold ourselves to</h2>
+        </div>
+        <div class="split">
+          <div>
+            <h3 class="fs-xl">What decides the schedule</h3>
+            <p class="mt-3">Migration and reconciliation take longer than people expect, and running the new system alongside the old one for a period is usually worth the extra weeks. Staff training is part of the schedule rather than an afterthought: a system the people entering data do not trust gets worked around, and then the numbers are wrong in a new way.</p>
+          </div>
+          <div>
+            <h3 class="fs-xl">Performance, security and handover</h3>
+            <ul class="feature-list mt-4"><li>Tested on real devices, including a low-end Android phone, not only a desktop browser</li><li>Contrast and keyboard operation checked rather than assumed</li><li>HTTPS, security headers and dependency patching wherever we build or host</li><li>A written handover document, so the next person is not reverse-engineering it</li><li>Source code, design files and every account transferred on final payment</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="band-deep">
       <div class="container">
-        <div class="rule-label"><b>01</b> Related work<span class="rule-fill"></span></div>
+        <div class="rule-label"><b>03</b> Related work<span class="rule-fill"></span></div>
           <div class="section-head">
           <h2>Related builds and technical examples</h2>
         </div>
@@ -279,7 +353,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <section class="band-surface section-grid"><div class="container"><h2>Useful next reads</h2><ul class="feature-list"><li><a href="textile-software">Connecting orders, stock and job work</a></li></ul></div></section>    <section class="band-deep">
       <div class="container container-narrow">
-        <div class="rule-label"><b>02</b> Questions<span class="rule-fill"></span></div>
+        <div class="rule-label"><b>04</b> Questions<span class="rule-fill"></span></div>
           <div class="section-head">
           <h2>About crm, erp, hrms, lms & billing</h2>
         </div>
@@ -295,12 +369,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <summary><h3>Can staff use it without training?</h3></summary>
           <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>That is a design requirement, not an afterthought. If your team needs a manual to record a sale, the interface is wrong.</p></div></div></div>
         </details>
+        <details class="faq-item">
+          <summary><h3>Can we keep using Tally or our accountant's system?</h3></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>Usually yes. Most businesses do not want to change accountants to change software, so the practical approach is exports and reconciliation rather than replacement. Which system it has to talk to, and what your accountant needs out of it, is settled during discovery.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h3>What if staff will not use it?</h3></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>That is the most common way these projects fail, and it is a design problem rather than a training problem. We review the screens with the people who will actually enter the data before the build finishes, and we start with one workflow instead of switching everything at once.</p></div></div></div>
+        </details>
+        <details class="faq-item">
+          <summary><h3>Will it work on a slow or dropped connection?</h3></summary>
+          <div class="reveal-wrap"><div class="reveal-inner"><div class="faq-body"><p>It can, and whether it should is a real decision rather than a default. Offline capability costs engineering effort, so it is worth it for a shop floor or a delivery route and wasted for an office desk. We ask where it will actually be used.</p></div></div></div>
+        </details>
       </div>
     </section>
 
     <section class="section-tight band-surface section-grid">
       <div class="container">
-        <div class="rule-label"><b>03</b> Other services<span class="rule-fill"></span></div>
+        <div class="rule-label"><b>05</b> Other services<span class="rule-fill"></span></div>
           <div class="section-head mb-5">
           <h2 class="fs-xl">We also do</h2>
         </div>

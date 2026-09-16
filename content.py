@@ -1173,6 +1173,328 @@ def portfolio_counts():
     return "Across %d recorded projects there are %s." % (len(PROJECTS), listed)
 
 
+# ---------------------------------------------------------------------------
+# Service depth (brief 13: what is excluded, scope factors, timeline factors)
+# ---------------------------------------------------------------------------
+# The service pages said what a service is, who it is for, what you get and how
+# it runs. They did not say what changes the price, what gets quoted separately,
+# or what actually decides the schedule -- the three things a business owner
+# wants before sending an enquiry, and the three an agency usually leaves out.
+# "No hidden scope" is a claim on the services page; this is where it either is
+# or is not true.
+#
+# Nothing here publishes a number. The site quotes from a written scope, so a
+# price or a turnaround printed on the page would contradict that. These name
+# the factors instead, which is what lets someone judge their own job first.
+# Further questions per service (brief point 14). Appended rather than edited
+# into SERVICE_DETAIL above so that the original three stay visibly first and
+# the additions can be reviewed as a block.
+SERVICE_FAQ_EXTRA = {
+    'websites': [
+        ('Will it actually work properly on a phone?',
+         '<p>That is where most of your visitors are, so it is where we test. Layouts are checked from a 320px screen upward on a real low-end Android handset, not only in a resized desktop browser, because the two behave differently under a weak connection.</p>'),
+        ('Do you build on WordPress, Shopify or something custom?',
+         '<p>Whichever suits the job, and we tell you which before you commit. A shop that needs a catalogue, payments and stock is often better on an established platform. A site that mainly has to load fast and be found usually is not. We do not have one answer we sell to everybody.</p>'),
+        ('What if I want to move to another developer later?',
+         '<p>You take everything with you. The code, the design files, the domain, the hosting and the analytics accounts are in your name and transfer on final payment. There is no proprietary builder holding the site and no licence you have to keep renewing with us.</p>'),
+    ],
+    'mobile': [
+        ('Can the app be published under our own company name?',
+         '<p>Yes, and it should be. The Apple and Google developer accounts are registered to your business, with us added as a developer. If the accounts sit with the agency, the agency controls your app, and changing developers becomes a negotiation.</p>'),
+        ('What does it cost to keep an app running after launch?',
+         '<p>Store fees, servers and any third-party services, all of which we name before you commit rather than after. Beyond that, phones and operating systems change, so an app left untouched for two years usually needs work. That is quoted as its own arrangement.</p>'),
+        ('Can you take over an app somebody else built?',
+         '<p>Usually, after an audit. We need to see the code, the accounts and the build process before agreeing to maintain it, because inheriting something undocumented and then being responsible for it helps nobody. The audit is short and it is quoted separately.</p>'),
+    ],
+    'product-design': [
+        ('Do we get the design files?',
+         '<p>Yes, on final payment, along with the components and the system they were built from. A handoff that is only flat images means the next person redraws everything, which is a cost you pay twice.</p>'),
+        ('How many revision rounds are included?',
+         '<p>A named number, agreed in the scope. Design genuinely improves through rounds, so we plan for them rather than pretending the first version is final &mdash; but an unlimited-revisions promise either gets priced defensively or quietly abandoned, and we would rather write the number down.</p>'),
+        ('Can you work alongside our own developers?',
+         '<p>Yes. The handoff is built for that: specifications, states, assets and a design system your team can build from without guessing. We stay available for the questions that come up during the build, and that availability is part of the scope.</p>'),
+    ],
+    'software': [
+        ('Can we start small and add to it later?',
+         '<p>That is usually the right approach. A narrow first release that people actually use tells you more about what to build next than a year of specification does, and it is cheaper to change. The architecture is set up so that the second release is not a rewrite.</p>'),
+        ('Where is our data stored, and who can see it?',
+         '<p>Named in the scope before anything is built: the provider, the region and which roles can read what. The hosting and database accounts are in your name, so the data is yours and stays reachable to you whatever happens to our relationship.</p>'),
+        ('What happens if you are not available later?',
+         '<p>You own the source code and the accounts, and the handover includes written documentation of the architecture, the deployment process and the decisions behind them. Another competent developer can pick it up. Software that only its author can run is a liability we do not hand over.</p>'),
+    ],
+    'business-systems': [
+        ("Can we keep using Tally or our accountant's system?",
+         '<p>Usually yes. Most businesses do not want to change accountants to change software, so the practical approach is exports and reconciliation rather than replacement. Which system it has to talk to, and what your accountant needs out of it, is settled during discovery.</p>'),
+        ('What if staff will not use it?',
+         '<p>That is the most common way these projects fail, and it is a design problem rather than a training problem. We review the screens with the people who will actually enter the data before the build finishes, and we start with one workflow instead of switching everything at once.</p>'),
+        ('Will it work on a slow or dropped connection?',
+         '<p>It can, and whether it should is a real decision rather than a default. Offline capability costs engineering effort, so it is worth it for a shop floor or a delivery route and wasted for an office desk. We ask where it will actually be used.</p>'),
+    ],
+    'marketing': [
+        ('Will you work on a website you did not build?',
+         '<p>Yes. We start with an audit, because recommending content work on a site that search engines cannot crawl properly would be taking your money for nothing. The audit tells you what is worth fixing first, even if you then have someone else fix it.</p>'),
+        ('What do I actually receive each month?',
+         '<p>The work agreed in the scope, and a report you can read without a glossary: what was done, what moved, what did not, and what is next. Where a month did not deliver, the report says that. A dashboard screenshot with no interpretation is not a report.</p>'),
+        ('Can you set up our Google Business Profile?',
+         '<p>Yes, and for most local businesses in Erode it matters more than the website in the first few months. Categories, service areas, hours, photographs and the review flow are part of the local SEO scope. The account stays in your name.</p>'),
+    ],
+    'ai-automation': [
+        ('What happens when it gets something wrong?',
+         '<p>You decide that before it is built. Every workflow is set to full human review, sampled review or none, chosen by what the consequence of an error actually is. Anything touching money, a customer commitment or a legal record gets review by default, and there is always a way to see what it did and undo it.</p>'),
+        ('Do you need access to our customer data?',
+         '<p>Only the minimum the workflow requires, named in writing before we start. Where a third-party model is involved, we tell you which provider sees what, so the decision is yours and not a surprise found later in a terms-of-service page.</p>'),
+        ('Can it run on our own servers instead of a cloud service?',
+         '<p>Sometimes, and it depends on what the workflow needs. Smaller models can run on hardware you control, which suits sensitive data; the larger hosted ones cannot. We will tell you honestly which side your requirement falls on, including when the answer makes the project more expensive.</p>'),
+    ],
+    'support': [
+        ('What counts as an emergency?',
+         '<p>Defined in your agreement rather than decided in the moment. Typically the site or system being down, a security issue, or customers unable to complete the thing the system exists for. Everything else is normal-queue work, and the agreement says which is which so nobody is arguing about it during an incident.</p>'),
+        ('Do you monitor overnight?',
+         '<p>Automated monitoring runs continuously and alerts immediately. A human responding at 2 AM is a different commitment with a different price, and we will not imply it is included when it is not. Your agreement states the window we have actually committed to.</p>'),
+        ('Can we cancel?',
+         '<p>Yes, with the notice period in the agreement. On the way out you get the access, the backups and a written note of the current state, so the next person is not starting from nothing. Support that is hard to leave is just lock-in with a friendlier name.</p>'),
+    ],
+}
+
+for _slug, _extra in SERVICE_FAQ_EXTRA.items():
+    SERVICE_DETAIL[_slug]["faqs"] = SERVICE_DETAIL[_slug]["faqs"] + _extra
+
+assert set(SERVICE_FAQ_EXTRA) == set(SERVICE_DETAIL), (
+    "every service needs its further questions; difference: %s"
+    % (set(SERVICE_FAQ_EXTRA) ^ set(SERVICE_DETAIL)))
+
+
+SERVICE_ASSURANCE = [
+    "Tested on real devices, including a low-end Android phone, not only a desktop browser",
+    "Contrast and keyboard operation checked rather than assumed",
+    "HTTPS, security headers and dependency patching wherever we build or host",
+    "A written handover document, so the next person is not reverse-engineering it",
+    "Source code, design files and every account transferred on final payment",
+]
+
+SERVICE_SCOPE = {
+    "websites": {
+        "price": [
+            ("Pages, and who writes them",
+             "Ten pages of supplied copy is a different job from three pages we have to "
+             "work out with you. Content is usually the larger half."),
+            ("What a visitor has to be able to do",
+             "Read and enquire is one scope. Book a slot, pay, or sign in to check an "
+             "order is another."),
+            ("Images",
+             "Supplied, licensed or photographed. A product catalogue that needs shooting "
+             "changes both the price and the schedule."),
+            ("Integrations",
+             "Payment gateway, booking system, CRM or inventory &mdash; each one named in "
+             "the scope, because each one is real work."),
+        ],
+        "excludes": [
+            "Domain registration and hosting renewal, which you pay the provider directly",
+            "Copywriting and professional photography, unless the scope names them",
+            "Paid plugins, themes and stock licences",
+            "Ongoing SEO, content updates and advertising spend",
+        ],
+        "timeline": "Content readiness decides this more often than development does. A site "
+                    "waiting on photographs, product details or approvals sits still no matter "
+                    "how fast the build is. Integrations that need accounts on your side add "
+                    "calendar time we do not control. Dates go in the proposal against named "
+                    "milestones rather than as a turnaround that ignores all of that.",
+    },
+    "mobile": {
+        "price": [
+            ("One platform or both",
+             "A single codebase covers Android and iOS for most products, but not all. We "
+             "say which yours is before you commit."),
+            ("Whether it needs accounts and a backend",
+             "An app that works standalone on the phone is a far smaller build than one "
+             "with sign-in, roles and a server behind it."),
+            ("Offline and location behaviour",
+             "Working on a weak connection is a design and engineering decision, not a "
+             "setting. Worth paying for in some products, wasted in others."),
+            ("Store submission",
+             "One store or two, and whether the developer accounts already exist in your "
+             "company name."),
+        ],
+        "excludes": [
+            "Apple and Google developer account fees, held in your own name",
+            "Servers, database and push notification running costs after launch",
+            "App store optimisation and paid install campaigns",
+            "Physical devices for testing beyond the ones we own",
+        ],
+        "timeline": "Store review is calendar time nobody controls, and a rejection resets "
+                    "part of it. Beyond that the honest variables are how many screens have "
+                    "genuinely different states, and how early we can test on a real low-end "
+                    "device rather than an emulator. The submission window goes into the plan "
+                    "rather than being treated as instant.",
+    },
+    "product-design": {
+        "price": [
+            ("Screens and states, not pages",
+             "One screen with empty, loading, error, partial and full states is five "
+             "designs. Counting pages underestimates every interface."),
+            ("Whether a design system exists",
+             "Creating the type scale, spacing, colour and components once is what makes "
+             "every later screen cheaper."),
+            ("Research depth",
+             "None, stakeholder interviews, or testing with real users. Each is a "
+             "defensible choice; they cost differently."),
+            ("Who builds it",
+             "A developer-ready handoff to your team, or design carried through into a "
+             "build we do."),
+        ],
+        "excludes": [
+            "Commercial font licences and stock imagery",
+            "Recruiting and paying participants for usability testing",
+            "Development, unless the scope includes it",
+            "Brand identity and logo design, which is a separate service",
+        ],
+        "timeline": "Approval cycles set the pace. Design moves in rounds, and a round that "
+                    "waits four days for feedback costs four days. Research, where it is "
+                    "included, adds real weeks before any interface exists &mdash; which is the "
+                    "point of it. We agree how many review rounds are in scope, so a fifth one "
+                    "is a conversation rather than a surprise.",
+    },
+    "software": {
+        "price": [
+            ("How many roles, and how different they are",
+             "Two roles seeing nearly the same thing is one system. Four that each see a "
+             "different slice is four."),
+            ("One organisation or many",
+             "Multi-tenancy changes the data model, the permissions and the testing. Far "
+             "cheaper decided at the start than retrofitted."),
+            ("Integrations and their documentation",
+             "A documented API is a task. An undocumented system with no test access is a "
+             "risk, and it is priced as one."),
+            ("Data migration",
+             "How much, from where, and what condition it is in."),
+        ],
+        "excludes": [
+            "Server, database and third-party API running costs",
+            "Licences for commercial components or paid libraries",
+            "Cleaning data before migration, unless the scope names it",
+            "Feature work beyond the agreed release",
+        ],
+        "timeline": "Discovery is not overhead here; it is what stops the build heading the "
+                    "wrong way for a month. After that the usual delay is access &mdash; "
+                    "credentials, test accounts and sample data from the systems we have to "
+                    "talk to. Acceptance testing is scheduled as a real phase with your people "
+                    "in it, because software signed off by the developer alone is not signed "
+                    "off.",
+    },
+    "business-systems": {
+        "price": [
+            ("Which modules are in the first release",
+             "Orders, stock, invoicing, attendance &mdash; a narrow first release that gets "
+             "used beats a complete one that does not."),
+            ("Users and permissions",
+             "Ten people who all do the same thing is simpler than four who each need a "
+             "different level of access to rates and adjustments."),
+            ("The condition of your current data",
+             "Consistent units and clean opening balances make migration routine. Mixed "
+             "units and duplicate records make it a project."),
+            ("Accounting and GST integration",
+             "Which system it must reconcile with, and which exports your accountant needs."),
+        ],
+        "excludes": [
+            "Accounting software licences and subscriptions",
+            "Statutory and tax advice &mdash; your accountant confirms the treatment",
+            "Hardware such as barcode scanners, printers and tablets",
+            "Cleaning up historical records before import",
+        ],
+        "timeline": "Migration and reconciliation take longer than people expect, and running "
+                    "the new system alongside the old one for a period is usually worth the "
+                    "extra weeks. Staff training is part of the schedule rather than an "
+                    "afterthought: a system the people entering data do not trust gets worked "
+                    "around, and then the numbers are wrong in a new way.",
+    },
+    "marketing": {
+        "price": [
+            ("How many locations and service areas",
+             "Ranking in Erode is one job. Erode, Tiruppur, Karur and Coimbatore is four "
+             "sets of content and signals."),
+            ("The technical condition of the site",
+             "A fast, crawlable site needs content work. A slow one search engines struggle "
+             "with needs fixing first."),
+            ("Who writes the content",
+             "Supplied by you, or researched and written by us."),
+            ("Competition for the terms that matter",
+             "Some terms are winnable in months. Some are not winnable at all, and we will "
+             "say so rather than bill for the attempt."),
+        ],
+        "excludes": [
+            "Advertising spend, which goes to the platform and not to us",
+            "Paid tool and directory subscriptions",
+            "Third-party listing and citation fees",
+            "Design or development work the findings recommend",
+        ],
+        "timeline": "Local search moves faster than competitive national terms, and technical "
+                    "fixes show up sooner than content does. Indexation alone can take weeks "
+                    "after a change. We report what actually happened each month, including "
+                    "the months where the answer is that a change has not landed yet &mdash; "
+                    "which is why there is no guaranteed ranking anywhere on this site.",
+    },
+    "ai-automation": {
+        "price": [
+            ("How many workflows, and how many systems each touches",
+             "One workflow across two systems is a week. Four workflows across six systems "
+             "is a project."),
+            ("Whether the source systems have usable APIs",
+             "An API is a connection. No API means a bridge, and bridges need maintaining."),
+            ("Volume",
+             "This drives the monthly running cost far more than the build cost. It is "
+             "estimated before you commit, not after."),
+            ("How much a human must approve",
+             "Full review, sampled review, or none. The right answer depends on what happens "
+             "when it is wrong."),
+        ],
+        "excludes": [
+            "Model and API usage charges, billed to you by the provider",
+            "Subscriptions for the tools being connected",
+            "Preparing, labelling or cleaning the documents and data",
+            "Tuning after handover, unless a support plan covers it",
+        ],
+        "timeline": "Getting access to the systems is almost always the blocker, not building "
+                    "the automation. We start with one workflow, run it alongside the manual "
+                    "process until it is trusted, and widen from there. An automation switched "
+                    "on everywhere at once is very hard to debug and very easy to distrust.",
+    },
+    "support": {
+        "price": [
+            ("How many sites or systems are covered",
+             "Cover is quoted per system, because each has its own dependencies and its own "
+             "way of breaking."),
+            ("The response window you actually need",
+             "Next business day and same day are different commitments and different prices. "
+             "We only offer what we can honour."),
+            ("Whether we built it",
+             "Inheriting someone else's system means an audit first, so we know what we are "
+             "agreeing to keep running."),
+            ("Backups and restore testing",
+             "How far back, and how often we prove a restore actually works. An untested "
+             "backup is not a backup."),
+        ],
+        "excludes": [
+            "Hosting, domain and third-party subscription fees",
+            "New features, redesigns and content rewrites",
+            "Work outside the agreed response window, unless the plan states it",
+            "Renewals for commercial software licences",
+        ],
+        "timeline": "A system we built can go under cover immediately. One we are inheriting "
+                    "needs an audit first &mdash; dependencies, access, backup state and what "
+                    "is already broken &mdash; so the plan describes reality. That audit is "
+                    "short, and it is better than discovering the situation during an incident.",
+    },
+}
+
+assert set(SERVICE_SCOPE) == {sv["slug"] for sv in SERVICES}, (
+    "SERVICE_SCOPE must cover every service exactly; difference: %s"
+    % (set(SERVICE_SCOPE) ^ {sv["slug"] for sv in SERVICES}))
+for _slug, _detail in SERVICE_SCOPE.items():
+    assert len(_detail["price"]) >= 3, "%s needs three or more price factors" % _slug
+    assert len(_detail["excludes"]) >= 3, "%s needs three or more exclusions" % _slug
+    assert len(_detail["timeline"]) > 150, "%s timeline note is too thin" % _slug
+
+
 def service_card(s, span="", num=None):
     points = "".join("<li>%s</li>" % pt for pt in s["points"])
     # An index row, not a card. Eight bordered boxes in a grid is what made the
@@ -1719,6 +2041,52 @@ def build_service_page(sv):
       </div>
     </section>
 
+    <section class="section-grid">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Scope and price</span>
+          <h2>What changes the price</h2>
+          <p class="sub">We quote from a written scope rather than a rate card, so these are
+            the things that actually move the number. Read them against your own job before
+            you ask anyone for a quote &mdash; including us.</p>
+        </div>
+        <div class="split">
+          <div>
+            <div class="index-list">
+{scope_rows}            </div>
+          </div>
+          <div>
+            <h3 class="fs-xl">Quoted separately</h3>
+            <p class="mt-3">None of this is hidden and then invoiced. Where you need any of
+              it, we quote it as its own line so you can say no to it.</p>
+            <ul class="feature-list mt-4">{excludes}</ul>
+            <p class="note mt-5">Full detail on
+              <a class="accent" href="pricing.html">how we quote</a>, and what a
+              <a class="accent" href="website-cost-erode.html">proposal should answer</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Schedule and standards</span>
+          <h2>What decides the timeline, and what we hold ourselves to</h2>
+        </div>
+        <div class="split">
+          <div>
+            <h3 class="fs-xl">What decides the schedule</h3>
+            <p class="mt-3">{timeline}</p>
+          </div>
+          <div>
+            <h3 class="fs-xl">Performance, security and handover</h3>
+            <ul class="feature-list mt-4">{assurance}</ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
 {related}{resources}    <section class="section-divider">
       <div class="container container-narrow">
         <div class="section-head">
@@ -1746,6 +2114,12 @@ def build_service_page(sv):
         wa_svg=WA_SVG, icon=icon(ICONS[sv["icon"]], 20), who=who, portal_signup="/contact?service=" + q + "#lead-form", portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
         others=others, resources=service_resources(sv["slug"]),
+        scope_rows="".join(
+            index_row(n, title, body)
+            for n, (title, body) in enumerate(SERVICE_SCOPE[sv["slug"]]["price"], start=1)),
+        excludes="".join("<li>%s</li>" % x for x in SERVICE_SCOPE[sv["slug"]]["excludes"]),
+        timeline=SERVICE_SCOPE[sv["slug"]]["timeline"],
+        assurance="".join("<li>%s</li>" % x for x in SERVICE_ASSURANCE),
         cta=final_cta(
             "Tell us what you need",
             "Describe the problem and we will come back with questions, an approach and a written "
