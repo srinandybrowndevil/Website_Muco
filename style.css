@@ -260,11 +260,16 @@ html {
 body {
   font-family: var(--font-sans);
   /* Graded rather than flat. A single dark fill across a 6000px page is the
-     thing that makes a dark site feel like a dark rectangle. */
+     thing that makes a dark site feel like a dark rectangle.
+
+     Deliberately not background-attachment:fixed. That repaints the gradient on
+     every scroll frame, which is among the more reliable ways to make a page
+     stutter on the low-end Android these customers are actually holding -- and
+     it also looked worse: the glow followed the reader down the page instead of
+     staying where the light source is. */
   background:
     radial-gradient(120% 60% at 50% -10%, #101017 0%, transparent 60%),
     var(--bg);
-  background-attachment: fixed;
   color: var(--text);
   font-size: var(--fs-700);
   line-height: 1.6;
