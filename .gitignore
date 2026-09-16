@@ -47,3 +47,23 @@ playwright-report/
 node_modules/
 /.local-logs/
 /.local-preview/
+
+# Agent tooling. These stay on disk so local work is unaffected; they are
+# ignored so a public repository does not carry them. Nothing here is read
+# by the build: scripts/build-site.mjs runs build.py and packages
+# public-site/, and touches none of these paths.
+#
+# Ignoring a path does not untrack what git already holds. The 49 files still
+# tracked need one command, which a safety hook in this environment refuses
+# to run:
+#
+#   git rm -r --cached .claude .agents skills-lock.json CLAUDE.md AGENT.md AGENTS.md MUCO_LABS_MASTER_AGENT_PROFILE.md
+#
+# Everything stays on disk; only the tracking stops.
+.claude/
+.agents/
+skills-lock.json
+CLAUDE.md
+AGENT.md
+AGENTS.md
+MUCO_LABS_MASTER_AGENT_PROFILE.md
