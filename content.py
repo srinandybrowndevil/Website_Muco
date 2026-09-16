@@ -1173,35 +1173,28 @@ def portfolio_counts():
     return "Across %d recorded projects there are %s." % (len(PROJECTS), listed)
 
 
-def service_card(s, span=""):
+def service_card(s, span="", num=None):
     points = "".join("<li>%s</li>" % pt for pt in s["points"])
-    # The visible label was "Read more about website design & development",
-    # which repeats the heading directly above it, lowercases names that are not
-    # lowercase ("ui/ux and product design"), and wrapped so the arrow sat alone
-    # on its own line. Short on screen, full for a screen reader tabbing through
-    # eight of these in a row.
-    links = ['<a href="services-%s.html" class="card-cta">Read more'
-             '<span class="visually-hidden"> about %s</span>&nbsp;&rarr;</a>'
-             % (s["slug"], s["title"])]
-    if s.get("link"):
-        links.append('<a href="%s" class="card-cta card-cta-quiet">%s &rarr;</a>' % s["link"])
-    price = '<p class="card-links">%s</p>' % "".join(links)
-    return """          <article class="spotlight-card reveal-on-scroll {span}" id="{slug}">
-            <div class="icon-tile">{icon}</div>
-            <h3>{title}</h3>
-            <p class="card-outcome">{outcome}</p>
-            <ul class="feature-list">{points}</ul>
-            {price}
-          </article>
+    # An index row, not a card. Eight bordered boxes in a grid is what made the
+    # page one texture; a peer set that someone scans and picks from belongs on
+    # rules. The number is the position in the list, which is real information
+    # here -- it tells you how far through eight you are.
+    return """          <a class="index-row reveal-on-scroll {span}" href="services-{slug}.html" id="{slug}">
+            <span class="index-num">{num}</span>
+            <div>
+              <h3>{title}</h3>
+              <p class="index-outcome">{outcome}</p>
+              <ul class="index-points">{points}</ul>
+            </div>
+            <span class="index-go">Read more<span class="visually-hidden"> about {title}</span>&nbsp;&rarr;</span>
+          </a>
 """.format(
         span=span,
         slug=s["slug"],
-        icon=icon(ICONS[s["icon"]], 20),
+        num="%02d" % num if num else "",
         title=s["title"],
         outcome=s["outcome"],
-        body=s["body"],
         points=points,
-        price=price,
     )
 
 
@@ -1239,7 +1232,7 @@ HOME_FAQ_KEYS = [
 
 def build_home():
     services_html = "".join(
-        service_card(s) for s in SERVICES[:6]
+        service_card(s, num=i) for i, s in enumerate(SERVICES[:6], start=1)
     )
     cap_strip = "".join("<span>%s</span>" % c for c in CAPABILITIES)
 
@@ -1338,7 +1331,7 @@ def build_home():
             follows from that, not the other way round.</p>
         </div>
 
-        <div class="ecosystem-grid">
+        <div class="index-list">
 {services}        </div>
 
         <div class="center mt-7">
@@ -1492,17 +1485,27 @@ def build_services():
     assert not missing, "services missing from SERVICE_GROUPS: %s" % missing
     assert not unknown, "SERVICE_GROUPS names unknown services: %s" % unknown
 
-    cards = "".join(
-        """        <section class="service-group" data-band="none" aria-labelledby="group-%d">
+    # Each group renders an index of rows. The number is continuous across
+    # all eight so it tells a reader how far through the list they are,
+    # which is real information rather than decoration.
+    position = 0
+    blocks = []
+    for gi, (title, blurb, slugs) in enumerate(SERVICE_GROUPS, start=1):
+        rows = ""
+        for slug in slugs:
+            position += 1
+            rows += service_card(by_slug[slug], num=position)
+        blocks.append("""        <section class="service-group" data-band="none" aria-labelledby="group-%d">
+          <div class="rule-label"><b>%02d</b><span class="rule-fill"></span><span class="rule-aside">%d of %d services</span></div>
           <div class="service-group-head">
             <h2 id="group-%d">%s</h2>
             <p>%s</p>
           </div>
-          <div class="ecosystem-grid">
+          <div class="index-list">
 %s          </div>
         </section>
-""" % (n, n, title, blurb, "".join(service_card(by_slug[slug]) for slug in slugs))
-        for n, (title, blurb, slugs) in enumerate(SERVICE_GROUPS, start=1))
+""" % (gi, gi, len(slugs), len(SERVICES), gi, title, blurb, rows))
+    cards = "".join(blocks)
     industries = "".join('<span class="chip">%s</span>' % i for i in INDUSTRIES)
 
     body = page_header(

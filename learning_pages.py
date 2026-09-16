@@ -107,7 +107,7 @@ def build_learning(services):
       <p class="learning-source">Source: the supplied Form Responses 1 sheet. Student names are not displayed.</p>
     </div></section>
     <section class="section-divider"><div class="container learning-portal-callout">
-      <div><span class="eyebrow">Already a learner?</span><h2>Your learning, in one place.</h2><p>Use the separate learning portal entry to sign in or register with Way2Me.</p></div>
+      <div><span class="eyebrow">Already a learner?</span><h2>Your learning, in one place.</h2><p>Course enrolment and learner dashboards are handled by Way2Me. The portal page links you straight there.</p></div>
       <a href="learning-portal.html" class="btn btn-accent">Open learning portal <span aria-hidden="true">→</span></a>
     </div></section>'''
     return render('learning.html', 'Learning &amp; Courses | Way2Me &amp; MUCO LABS',
@@ -154,11 +154,11 @@ def build_learning_portal():
     body = page_header('Way2Me · Learning portal',
         'Pick up where<br><span class="accent-serif">you left off.</span>',
         'Your courses and learner account are hosted by Way2Me. Choose an option below to continue on way2me.in.',
-        extra=f'''<div class="btn-group mt-5"><a class="btn btn-accent btn-lg" href="{DASHBOARD_URL}">Sign in at Way2Me <span aria-hidden="true">↗</span></a><a class="btn btn-secondary btn-lg" href="{REGISTRATION_URL}">Register at Way2Me</a></div>''')
+        extra=f'''<div class="btn-group mt-5"><a class="btn btn-accent btn-lg" href="{DASHBOARD_URL}">Way2Me learner dashboard <span aria-hidden="true">↗</span></a><a class="btn btn-secondary btn-lg" href="{REGISTRATION_URL}">Enrol at Way2Me <span aria-hidden="true">↗</span></a></div>''')
     body += f'''<section class="section-divider"><div class="container">
       <div class="learning-grid learning-portal-grid">
         <article class="learning-course"><span class="eyebrow">01 · Discover</span><h2>Find a course</h2><p>Search our list of Way2Me course topics and choose your next skill.</p><a href="learning.html#courses">Browse learning &amp; courses →</a></article>
-        <article class="learning-course"><span class="eyebrow">02 · Learn</span><h2>Open your dashboard</h2><p>Sign in using your Way2Me learner account. Registration and access are managed by Way2Me.</p><a href="{DASHBOARD_URL}">Continue to Way2Me ↗</a></article>
+        <article class="learning-course"><span class="eyebrow">02 · Learn</span><h2>Open your dashboard</h2><p>Your learner account lives with Way2Me. Enrolment and access are handled entirely on their side.</p><a href="{DASHBOARD_URL}">Continue to Way2Me ↗</a></article>
         <article class="learning-course"><span class="eyebrow">03 · Get help</span><h2>Speak to Way2Me</h2><p>Ask about course suitability, fees, batches, enrolment or account access.</p><a class="learning-enquiry" href="{CONTACT_URL}">Enquire at Way2Me ↗</a></article>
       </div>
       <div class="learning-account-note"><h2>Learning accounts live at Way2Me.</h2><p>Courses, enrolment and your learner dashboard are all handled by Way2Me. MUCO LABS does not hold a learning account for you and you do not need one here.</p><p>If the Way2Me dashboard is unavailable, <a href="{CONTACT_URL}">contact the Way2Me team</a>. For a business project rather than a course, <a href="/contact#start-project">start a project with MUCO LABS</a>.</p></div>

@@ -147,7 +147,7 @@ def build_public_contact():
       <p>Want an existing website checked first? <a href="website-audit.html">Request a free website review</a>.</p></div></section>''' % (
         WHATSAPP_URL, EMAIL, public_lead_form())
     return render("contact.html", "Start a Project with MUCO LABS | Erode, India & Remote",
-        "Talk to MUCO LABS in Erode about your website, app or software. Free project consultation, public enquiry form, WhatsApp, phone and email. No sign-in.", body,
+        "Talk to MUCO LABS in Erode about your website, app or software. Free project consultation, public enquiry form, WhatsApp, phone and email. No account needed.", body,
         schema_blocks=[ORG_JSONLD, json.dumps({"@context": "https://schema.org", "@type": "ContactPage", "url": DOMAIN + "/contact",
         "about": {"@id": DOMAIN + "/#organization"}}), breadcrumbs([("Home", ""), ("Contact", "contact")])])
 
