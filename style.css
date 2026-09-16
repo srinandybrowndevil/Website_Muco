@@ -506,8 +506,13 @@ h1 {
   font-family: var(--font-display);
   font-size: clamp(46px, 6.4vw, 88px);
   font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
+  letter-spacing: -0.028em;
+  /* Measured against Linear, which sets its 64px headline at exactly 1.0.
+     At 88px, 1.05 left 92px between baselines and a three-line headline
+     drifted apart into three separate sentences. Not lower than this:
+     Instrument Serif has long descenders, and a "g" starts meeting the
+     cap-height of the line below at around 1.0. */
+  line-height: 1.0;
   margin-bottom: var(--sp-5);
   text-wrap: balance;
   font-feature-settings: 'kern' 1, 'liga' 1;
@@ -517,8 +522,8 @@ h2 {
   font-family: var(--font-display);
   font-size: clamp(34px, 4.4vw, 64px);
   font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.08;
+  letter-spacing: -0.022em;
+  line-height: 1.04;
   margin-bottom: var(--sp-4);
   text-wrap: balance;
   font-feature-settings: 'kern' 1, 'liga' 1;
@@ -1189,13 +1194,6 @@ table, .price-card, .hero-facts, .contact-facts, .def-list, .stat, time,
 .prose ul li::marker, .feature-list li::marker {
   color: var(--accent);
 }
-
-/* Display type wants less tracking as it gets larger: letterforms set for a
-   paragraph are too loose at 64px. This is the optical correction a type
-   designer would apply by hand. */
-h1 { letter-spacing: -0.028em; }
-h2 { letter-spacing: -0.022em; }
-h3 { letter-spacing: -0.012em; }
 
 /* A focused field should feel like it has been picked up, not merely outlined.
    The ring is the accent at a weight that reads on obsidian, with a soft bloom
