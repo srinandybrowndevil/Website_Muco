@@ -816,7 +816,7 @@
     }
 
     function showErrors(errors) {
-      var first;
+      var invalid = [];
       Object.keys(errors).forEach(function (name) {
         var input = controlFor(name);
         var slot = document.getElementById('err-' + name);
@@ -825,10 +825,23 @@
         if (input) {
           var disclosure = input.closest('details');
           if (disclosure) disclosure.open = true;
-          if (!first) first = input;
+          invalid.push(input);
         }
       });
-      if (first) first.focus();
+
+      // Focus the first invalid control on the PAGE, not the first key the
+      // validator happened to check. Object key order follows the validation
+      // code, so submitting an empty form announced "Please choose a
+      // requirement" at the top and then put the cursor in the name field
+      // below it -- dropping a keyboard or screen-reader user past the very
+      // error they had to fix first.
+      invalid.sort(function (a, b) {
+        var where = a.compareDocumentPosition(b);
+        if (where & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+        if (where & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+        return 0;
+      });
+      if (invalid[0]) invalid[0].focus();
     }
     form.addEventListener('submit', async function (event) {
       event.preventDefault();

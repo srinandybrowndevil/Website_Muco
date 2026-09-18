@@ -3139,7 +3139,11 @@
   /* ====================================================================== */
 
   /**
-   * The wait while personalisation runs.
+   * The wait for an explicitly requested regeneration.
+   *
+   * Only used when the visitor clicks Regenerate, where waiting is the point of
+   * the click. The first pass never shows this: the concepts appear immediately
+   * and improve in place.
    *
    * The four lines describe what the request is doing. They are not staged with
    * a timer and there is no percentage, because neither would correspond to
@@ -3166,8 +3170,13 @@
   }
 
   function renderDesigns() {
-    if (state.aiPending) { renderGenerating(); return; }
-
+    /* The concepts are drawn immediately, even while personalisation is still in
+       flight. They were behind a progress screen until a live key showed what
+       that actually costs: Gemini answers in 3s when healthy and 10-15s under
+       load, so a visitor sat looking at a spinner for a quarter of a minute
+       while five finished websites were already available locally. Now the
+       deterministic versions appear at once and the copy is refreshed in place
+       when the answer lands. Nobody waits for something they already have. */
     var chosen = state.selection && state.selection.templateId;
     var ai = activeAi();
     var recommended = ai && ai.recommendedTemplate;
@@ -3210,8 +3219,20 @@
     focusHeading();
   }
 
-  /** One plain sentence when personalisation did something worth mentioning. */
+  /**
+   * One plain line about personalisation: that it is running, or what it did.
+   *
+   * While it runs this sits above five finished concepts rather than replacing
+   * them, so it reads as "this is getting better" instead of "wait".
+   */
   function aiNotice() {
+    if (state.aiPending) {
+      return '<p class="wp-notice wp-notice-working" role="status">' +
+        '<span class="wp-pulse" aria-hidden="true"><i></i><i></i><i></i></span>' +
+        'Writing copy for ' + esc(state.business.businessName) +
+        '. The concepts below will update when it is ready &mdash; you can start ' +
+        'looking through them now.</p>';
+    }
     if (!state.aiNotice) return '';
     return '<p class="wp-notice" role="status">' + esc(state.aiNotice) + '</p>';
   }

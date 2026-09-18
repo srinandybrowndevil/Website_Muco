@@ -288,6 +288,12 @@
   @keyframes wp-beat { 0%, 100% { opacity: .3; } 45% { opacity: 1; } }
 }
 
+/* The working notice sits above five finished concepts, so it reads as an
+   improvement arriving rather than as a blocker. */
+.wp-notice-working { display: flex; align-items: center; gap: var(--sp-3); }
+.wp-notice-working .wp-pulse { margin: 0; flex: none; }
+.wp-notice-working .wp-pulse i { width: 7px; height: 7px; }
+
 .wp-pick-badge {
   margin-left: auto; flex: none; align-self: flex-start;
   font-size: var(--fs-200); letter-spacing: .08em; text-transform: uppercase;
