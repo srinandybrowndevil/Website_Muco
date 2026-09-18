@@ -1050,7 +1050,11 @@ html[lang^="ta"] .rule-label b { font-family: var(--font-mono); }
    leaving one tile stranded. It falls to two and then one on the way down. */
 .tile-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  /* min(330px, 100%), not a bare 330px. A fixed track minimum larger than the
+     viewport cannot shrink, so on a 320px phone the tile was forced to 330px
+     and the last 10px was clipped away by html's overflow-x: clip -- cut off
+     rather than scrollable, so nothing looked wrong until it was measured. */
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
   gap: var(--sp-5);
 }
 

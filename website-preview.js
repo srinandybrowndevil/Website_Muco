@@ -2934,7 +2934,7 @@
       var run = personalise(false);
       go('designs');
       run.then(function () {
-        if (state.step === 'designs') renderDesigns();
+        refreshDesigns();
       });
     });
 
@@ -3217,6 +3217,70 @@
 
     mountMiniPreviews();
     focusHeading();
+  }
+
+  /**
+   * Fold a personalisation result into the concepts already on screen.
+   *
+   * Re-rendering the whole step would be simpler and is wrong: the cards are
+   * live, someone is scrolling and reading them, and replacing the DOM under
+   * them throws away their scroll position and whatever they had focused. So
+   * the text is swapped in place and only the previews already drawn are
+   * repainted.
+   */
+  function refreshDesigns() {
+    if (state.step !== 'designs' || !screen.querySelector('.wp-cards')) return;
+    var ai = activeAi();
+
+    var notice = screen.querySelector('.wp-notice');
+    var markup = aiNotice();
+    if (markup) {
+      var holder = document.createElement('div');
+      holder.innerHTML = markup;
+      if (notice) notice.replaceWith(holder.firstElementChild);
+      else {
+        var flow = screen.querySelector('.wp-flow');
+        if (flow) flow.after(holder.firstElementChild);
+      }
+    } else if (notice) {
+      notice.remove();
+    }
+
+    var note = screen.querySelector('.wp-bar-note');
+    if (note && ai && ai.positioning) {
+      note.textContent = ai.positioning +
+        ' Every one below is a real page built from your details, not a picture of one.';
+    }
+
+    TEMPLATES.forEach(function (tpl) {
+      var slot = screen.querySelector('[data-mini="' + tpl.id + '"]');
+      var card = slot && slot.closest('.wp-card');
+      if (!card) return;
+
+      var detail = card.querySelector('.wp-card-detail');
+      var written = ai && ai.templates && ai.templates[tpl.id] && ai.templates[tpl.id].note;
+      if (detail) detail.textContent = written || tpl.detail;
+
+      var badge = card.querySelector('.wp-pick-badge');
+      var wanted = !!(ai && ai.recommendedTemplate === tpl.id) &&
+        !card.classList.contains('is-chosen');
+      if (wanted && !badge) {
+        card.querySelector('.wp-card-top').appendChild(
+          el('span', { class: 'wp-pick-badge', text: 'Recommended for your business' }));
+      } else if (!wanted && badge) {
+        badge.remove();
+      }
+
+      /* Repaint only what was already drawn; the rest stays lazy. */
+      var host = card.querySelector('.wp-host');
+      if (host && host.shadowRoot) {
+        paint(host, state.business, tpl, customFor(tpl), state.images, { mini: true, ai: ai });
+        host.setAttribute('aria-hidden', 'true');
+        host.removeAttribute('role');
+        host.removeAttribute('aria-label');
+        if ('inert' in HTMLElement.prototype) host.inert = true;
+      }
+    });
   }
 
   /**
@@ -3677,6 +3741,9 @@
       renderGenerating();
       announce('Refreshing your content.');
       personalise(true).then(function () {
+        /* Regenerate replaces the whole step on purpose: the visitor asked for
+           new content and is watching the wait screen, so there is no scroll
+           position or focus to protect. */
         if (state.step === 'designs') renderDesigns();
       });
       return;
