@@ -634,9 +634,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  /* Same-origin only. This endpoint spends money, so it is not a public API. */
-  const origin = req.headers.origin;
-  if (origin && process.env.VERCEL) {
+  /* Same-origin only, and it fails CLOSED.
+     This endpoint spends money on every call, so it is not a public API. The
+     check used to run only `if (origin)`, which meant any client that simply
+     omits the header -- curl, a script, anything that is not a browser --
+     skipped the gate entirely and went straight through to Gemini. Browsers
+     always send Origin on a POST, so requiring it costs real visitors nothing
+     and closes the hole. */
+  if (process.env.VERCEL) {
+    const origin = req.headers.origin;
+    if (!origin) return res.status(403).json({ ok: false, error: 'Forbidden' });
     const host = req.headers.host || '';
     let originHost = '';
     try { originHost = new URL(origin).host; } catch (error) { originHost = ''; }

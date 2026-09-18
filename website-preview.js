@@ -2156,7 +2156,14 @@
     this.loadImages = function () { return read(session, KEYS.images, { logo: '', shots: [] }); };
     this.saveImages = function (images) {
       var payload = JSON.stringify(images || {});
-      if (payload.length > IMAGE_BUDGET) return false;
+      if (payload.length > IMAGE_BUDGET) {
+        /* Clear rather than skip. Leaving the previous, smaller set in place
+           meant a refresh restored images the visitor had since replaced or
+           removed -- and contradicted the notice telling them their images
+           would not survive one. */
+        write(session, KEYS.images, null);
+        return false;
+      }
       return write(session, KEYS.images, images);
     };
     this.clear = function () {
@@ -2250,6 +2257,10 @@
     approved: repo.loadApproval(),
     imagesDropped: false,
     device: 'desktop',
+    /* Set the first time any customiser control is used. Personalisation may
+       reseed the five designs from its colour guidance, but only while nobody
+       has touched them -- see personalise(). */
+    customsTouched: false,
     /* {fingerprint, source, payload} or null. See the personalisation section. */
     ai: repo.loadPersonalisation(),
     aiPending: false,
@@ -2313,19 +2324,30 @@
       /* Phone, WhatsApp, email, socials and the address are not sent. The
          renderer inserts those itself; the model has no use for them. */
     };
+    /* The server has its own timeout, but a connection that is accepted and
+       then never answered would leave aiPending true for the rest of the
+       session -- silently turning Regenerate, and any later wizard submission,
+       into a no-op. This is the client's own floor under that. */
+    var controller = window.AbortController ? new AbortController() : null;
+    var timer = window.setTimeout(function () {
+      if (controller) controller.abort();
+    }, 25000);
+    var settle = function (value) { window.clearTimeout(timer); return value; };
+
     return fetch('/api/preview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal: controller ? controller.signal : undefined
     }).then(function (response) {
       return response.json().catch(function () { return { ok: false }; });
     }).then(function (data) {
       if (data && data.ok && data.source === 'ai' && data.payload) {
-        return { source: 'ai', payload: data.payload };
+        return settle({ source: 'ai', payload: data.payload });
       }
-      return { source: 'fallback' };
+      return settle({ source: 'fallback' });
     }).catch(function () {
-      return { source: 'fallback' };
+      return settle({ source: 'fallback' });
     });
   }
 
@@ -2350,11 +2372,27 @@
     state.aiNotice = '';
     return requestPersonalisation().then(function (result) {
       state.aiPending = false;
+
+      /* Details edited while this was in flight: the answer describes a
+         business that is no longer on screen. Run once more for the real one
+         rather than leaving the visitor to notice and press Regenerate. */
+      if (mark !== fingerprint(state.business)) {
+        state.ai = null;
+        return personalise(regenerate);
+      }
       state.ai = { fingerprint: mark, source: result.source, payload: result.payload || null };
       repo.savePersonalisation(state.ai);
 
-      if (result.source === 'ai' && !regenerate) {
-        /* Nothing is customised yet, so rebuild the five from the guidance. */
+      /* Reseeding the five from the colour guidance is only safe while the
+         visitor has not customised anything. The request takes 10-15s under
+         load and the designs are deliberately usable during it, so by the time
+         it lands they may well have chosen a template and changed its colours,
+         its sections and its headline. Wiping that would throw away work they
+         watched themselves do. The fingerprint is re-checked too: if they went
+         back and edited their details, this answer is about a business that is
+         no longer on screen. */
+      var untouched = !state.customsTouched && mark === fingerprint(state.business);
+      if (result.source === 'ai' && !regenerate && untouched) {
         state.customs = {};
         persist();
       } else if (result.source === 'ai') {
@@ -2461,10 +2499,15 @@
     try {
       if (replace) history.replaceState(null, '', target);
       else history.pushState(null, '', target);
+      navigating = false;
     } catch (error) {
+      /* Assigning location.hash queues a hashchange as a separate task, so the
+         guard has to survive past this turn of the event loop -- clearing it
+         synchronously let that queued event render the same step a second
+         time, rebuilding the DOM and jumping the scroll under the visitor. */
       location.hash = step === 'intro' ? '' : '/' + step;
+      window.setTimeout(function () { navigating = false; }, 0);
     }
-    navigating = false;
     render(step);
   }
 
@@ -2500,7 +2543,11 @@
   }
 
   function focusHeading() {
-    var heading = screen.querySelector('.wp-bar-title, h2');
+    /* .wp-step-title is the wizard's own heading. It was missing from this
+       selector, so every step change found nothing to focus and dropped the
+       caret to <body> -- leaving a keyboard user to tab down from the top of
+       the page to reach the field they had just been sent to. */
+    var heading = screen.querySelector('.wp-bar-title, .wp-step-title, h2');
     if (heading) {
       if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
       heading.focus({ preventScroll: true });
@@ -3129,9 +3176,15 @@
   }
 
   var liveFrames = [];
+  /* The observer watching the design cards. Held here rather than only inside
+     mountMiniPreviews(), because a visitor who opens Designs, goes to Preview
+     and comes back leaves the previous one observing detached nodes forever. */
+  var miniWatcher = null;
+
   function dropFrames() {
     liveFrames.forEach(function (frame) { frame.destroy(); });
     liveFrames = [];
+    if (miniWatcher) { miniWatcher.disconnect(); miniWatcher = null; }
   }
 
   /* ====================================================================== */
@@ -3204,8 +3257,14 @@
             className: 'wp-frame-mini' }) + '</div>' +
           '<p class="wp-card-detail">' + esc(note || tpl.detail) + '</p>' +
           '<div class="wp-card-actions">' +
-          '<button type="button" class="btn btn-secondary" data-open="' + tpl.id + '">Preview</button>' +
+          /* The visible label stays short; the accessible name says which
+             design, so a screen reader listing the buttons does not read five
+             identical "Preview" entries. */
+          '<button type="button" class="btn btn-secondary" data-open="' + tpl.id + '" ' +
+          'aria-label="Preview the ' + esc(tpl.name) + ' design">Preview</button>' +
           '<button type="button" class="btn btn-accent" data-choose="' + tpl.id + '" ' +
+          'aria-label="' + (selected ? 'The ' + esc(tpl.name) + ' design is chosen'
+            : 'Choose the ' + esc(tpl.name) + ' design') + '" ' +
           'aria-pressed="' + (selected ? 'true' : 'false') + '">' +
           (selected ? 'Chosen' : 'Choose This Design') + '</button></div></article>';
       }).join('') + '</div>' +
@@ -3327,14 +3386,15 @@
     };
 
     if (!window.IntersectionObserver) { slots.forEach(build); return; }
-    var watcher = new IntersectionObserver(function (entries) {
+    if (miniWatcher) miniWatcher.disconnect();
+    miniWatcher = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) return;
         build(entry.target);
-        watcher.unobserve(entry.target);
+        if (miniWatcher) miniWatcher.unobserve(entry.target);
       });
     }, { rootMargin: '400px' });
-    slots.forEach(function (slot) { watcher.observe(slot); });
+    slots.forEach(function (slot) { miniWatcher.observe(slot); });
   }
 
   /* ====================================================================== */
@@ -3779,6 +3839,7 @@
       state.customs = {};
       state.images = { logo: '', shots: [] };
       state.approved = null;
+      state.customsTouched = false;
       wizardIndex = 0;
       go('intro');
       announce('Cleared. You can start again.');
@@ -3818,6 +3879,7 @@
           return;
         }
         custom.hero[field] = text;
+        state.customsTouched = true;
         persist();
         if (box) box.value = text;
         if (status) status.textContent = 'Rewritten. Edit it freely, or clear the field to go back.';
@@ -3828,6 +3890,7 @@
     }
     if (target.hasAttribute('data-typeset')) {
       custom.typeset = target.getAttribute('data-typeset');
+      state.customsTouched = true;
       persist(); refreshRail(); repaintCustom(); return;
     }
     if (target.hasAttribute('data-reset')) {
@@ -3845,6 +3908,7 @@
       if (at === -1 || to < 0 || to >= order.length) return;
       order.splice(to, 0, order.splice(at, 1)[0]);
       custom.order = order;
+      state.customsTouched = true;
       persist(); refreshRail(); repaintCustom();
       announce(SECTION_LABEL[id] + ' moved.');
       return;
@@ -3853,8 +3917,29 @@
       var add = target.getAttribute('data-add-section');
       custom.order = (custom.order || []).concat([add]);
       custom.sections[add] = true;
+      state.customsTouched = true;
       persist(); refreshRail(); repaintCustom();
     }
+  });
+
+  /* The tablist uses roving tabindex: the selected tab is tabindex 0 and the
+     rest are -1. That pattern is only half a pattern without arrow keys to
+     move the roving focus -- without them four of the five tabs could not be
+     reached by keyboard at all. main.js has this handler, but it wires up only
+     the tablists present at DOMContentLoaded, and this one is built later. */
+  screen.addEventListener('keydown', function (event) {
+    var tab = event.target.closest && event.target.closest('[role="tab"]');
+    if (!tab) return;
+    var tabs = Array.prototype.slice.call(screen.querySelectorAll('[role="tab"]'));
+    var at = tabs.indexOf(tab);
+    var to = -1;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') to = (at + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') to = (at - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'Home') to = 0;
+    else if (event.key === 'End') to = tabs.length - 1;
+    if (to === -1) return;
+    event.preventDefault();
+    tabs[to].click();     /* selects the panel; the rail re-renders and refocuses */
   });
 
   function refreshRail() {
@@ -3884,6 +3969,7 @@
       var key = target.getAttribute('data-colour') || target.getAttribute('data-colour-hex');
       if (!isHex(target.value)) return;
       custom.colors[key] = target.value;
+      state.customsTouched = true;
       var twin = screen.querySelector(target.hasAttribute('data-colour')
         ? '[data-colour-hex="' + key + '"]' : '[data-colour="' + key + '"]');
       if (twin) twin.value = target.value;
@@ -3891,6 +3977,7 @@
     }
     if (target.hasAttribute('data-hero')) {
       custom.hero[target.getAttribute('data-hero')] = target.value;
+      state.customsTouched = true;
       persist(); queueRepaint();
     }
   });
@@ -3913,6 +4000,7 @@
     var custom = state.customs[tpl.id];
     if (!custom) return;
 
+    state.customsTouched = true;
     if (target.name === 'wp-mode') { custom.mode = target.value; }
     else if (target.name === 'wp-align') { custom.hero.align = target.value; }
     else if (target.name === 'wp-action') { custom.primaryAction = target.value; }
@@ -3927,6 +4015,24 @@
      behind it is inert, because a drawer you can tab out of is a drawer that
      reads as broken to anyone not using a mouse. */
   var sheetOpen = false;
+
+  /**
+   * Make everything except the sheet unreachable while it is open.
+   *
+   * Walks up from the sheet marking every sibling on the way, which covers the
+   * header, the footer, the mobile contact dock and the rest of the studio
+   * without needing a list of them that would rot the next time one moves.
+   */
+  function sheetInert(rail, on) {
+    if (!('inert' in HTMLElement.prototype)) return;
+    for (var node = rail; node && node !== document.body; node = node.parentElement) {
+      var siblings = node.parentElement ? node.parentElement.children : [];
+      for (var i = 0; i < siblings.length; i++) {
+        if (siblings[i] !== node) siblings[i].inert = on;
+      }
+    }
+  }
+
   function setSheet(open) {
     var rail = screen.querySelector('[data-rail]');
     var stage = screen.querySelector('.wp-stage');
@@ -3943,12 +4049,16 @@
           'aria-label': 'Close customisation controls', text: '×'
         }), rail.firstChild);
       }
-      if (stage && 'inert' in HTMLElement.prototype) stage.inert = true;
+      /* Everything outside the sheet, not just the preview beside it. Marking
+         only .wp-stage left the header, the footer, the mobile contact bar and
+         the toolbar tabbable behind a panel covering most of the screen -- so
+         aria-modal="true" was claiming a containment the page did not have. */
+      sheetInert(rail, true);
       var focusable = rail.querySelector('button, input, textarea, select');
       if (focusable) focusable.focus();
     } else {
       rail.removeAttribute('role');
-      if (stage && 'inert' in HTMLElement.prototype) stage.inert = false;
+      sheetInert(rail, false);
       var opener = screen.querySelector('[data-sheet-open]');
       if (opener) opener.focus();
     }
