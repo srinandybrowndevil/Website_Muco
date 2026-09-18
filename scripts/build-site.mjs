@@ -36,7 +36,11 @@ const LOCALE_DIRS = ["ta"];
 // Deliberately package only public artifacts, excluding .env, portal source,
 // raw images, SQL, tests and local configuration from the static web root.
 const files = readdirSync(root).filter(name => name.endsWith(".html"));
-files.push("style.css", "main.js", "attribution.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg");
+// website-preview.css and website-preview.js are loaded by /website-preview
+// alone. Leaving either out of this list builds and passes locally and then
+// 404s in production, which is the one failure mode an explicit list has --
+// so a page-specific asset has to be added here when it is added to a page.
+files.push("style.css", "main.js", "attribution.js", "analytics.js", "website-preview.css", "website-preview.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg");
 for (const name of files) if (existsSync(join(root, name))) copyFileSync(join(root, name), join(output, name));
 cpSync(join(root, "assets"), join(output, "assets"), { recursive: true });
 

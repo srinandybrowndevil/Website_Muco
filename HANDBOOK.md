@@ -53,8 +53,11 @@ Edit the Python that produces it. The rest of this file says which Python.
 | `growth_content.py` | 358 | The enquiry form, contact page, shared contact section, three local-SEO pages |
 | `tamil_content.py` | 583 | The four Tamil pages, with their own header and footer |
 | `learning_pages.py` | 168 | Learning page and learning portal |
+| `website_preview.py` | 230 | The `/website-preview` page — hero, three steps, FAQ, schema, and the div the studio mounts into |
 | `style.css` | 4,707 | All styling. Design tokens at `:root`, line 122 |
 | `main.js` | 1,012 | Form validation, consent bar, mobile nav, scroll reveals, learning filters |
+| `website-preview.js` | 3,600 | The Website Preview studio: colour engine, content engine, five website templates, wizard, customiser. Loaded on one page only |
+| `website-preview.css` | 500 | Studio chrome for that page. Deliberately not part of `style.css` |
 
 ---
 
@@ -79,6 +82,10 @@ Edit the Python that produces it. The rest of this file says which Python.
 | Enquiry form choices | `growth_content.py:9` — `SERVICE_CHOICES` |
 | The three local-SEO pages | `growth_content.py:286` — `GROWTH_PAGES` |
 | Colours, spacing, fonts, radius | `style.css:122` — `:root` |
+| The five preview designs | `website-preview.js` — `TEMPLATES`, then `RENDERERS.<family>` |
+| A business category in the preview | `website-preview.js` — `CATEGORIES` |
+| Preview type sets | `website-preview.js` — `TYPESETS` |
+| Preview page copy and FAQ | `website_preview.py` — `STEPS`, `FAQS` |
 | Tamil navigation and pages | `tamil_content.py:25`, `:578` |
 | Publishing a new Tamil page | `build.py` — `TAMIL_TWINS` |
 | "Last updated" date on legal pages and sitemap | `build.py:110` — `SITE_REVISED` |
@@ -109,6 +116,21 @@ exactly what was forgotten.
 | `… needs three or more price factors / exclusions` | A new service has an incomplete `SERVICE_SCOPE`. Those sections are the "no hidden scope" promise; a thin one breaks it |
 | `… timeline note is too thin` | Same entry. Under 150 characters is not an answer |
 | `icon() called with no glyph` | You referenced an icon name not in `ICONS`. Without this check the page shipped a correctly sized, perfectly empty box and reported nothing |
+
+---
+
+## What does not stop you
+
+One thing the build will not catch, because it is not a build error.
+
+**A page-specific asset lives in two allowlists.** `style.css` and `main.js` reach
+the browser because they are named in `files.push(...)` in `scripts/build-site.mjs`
+(which packages `public-site/`) and again in the `allowed` list in
+`scripts/dev-site.mjs` (which serves locally). Add a new asset to only one of them
+and it works in exactly one of the two places — missing from the dev list it 404s
+locally while being fine in production, and missing from the build list it does the
+reverse, which is the harder one to notice. `website-preview.css` and
+`website-preview.js` are in both.
 
 ---
 

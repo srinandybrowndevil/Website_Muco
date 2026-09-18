@@ -12,6 +12,7 @@ from build import *  # noqa: F401,F403 — shared shell, tokens and helpers
 from growth_content import (GROWTH_PAGES, SERVICE_SEARCH_TITLES, SERVICE_OPTIONS,
                             build_growth_page, build_public_contact, contact_section,
                             public_lead_form, home_growth_sections, service_resources)
+import website_preview
 
 # ===========================================================================
 # Project archive → portfolio
@@ -1622,15 +1623,23 @@ def build_home():
               final payment.
             </p>
 
-            <!-- One primary action, one quieter path to proof. The second
+            <!-- One primary action, then the two quieter paths. The second
                  button used to be WhatsApp, which rendered 239px wide against
                  Start a Project's 148px -- the secondary out-shouting the
                  primary on the most important screen on the site. WhatsApp did
                  not need to be here twice either: it is in the header dock and
-                 the mobile dock already. -->
+                 the mobile dock already.
+
+                 Preview Your Website sits second because it is the step before
+                 a decision, and See our work drops to the small size rather
+                 than being removed: it is the same kind of proof, but it is
+                 also in the top nav and has its own section further down, so it
+                 does not need to be the same weight here. -->
+
             <div class="btn-group">
               <a href="{portal_signup}" class="btn btn-accent btn-lg">Start a Project</a>
-              <a href="work.html" class="btn btn-secondary btn-lg">See our work</a>
+              <a href="website-preview.html" class="btn btn-secondary btn-lg">Preview Your Website</a>
+              <a href="work.html" class="btn btn-secondary">See our work</a>
             </div>
 
             {trust}
@@ -1646,6 +1655,42 @@ def build_home():
             <div class="hero-fact"><dt>Where we work</dt>
               <dd>Erode and Tamil Nadu in person, India and abroad remotely.</dd></div>
           </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">Website preview</span>
+            <h2>See your business online before you build.</h2>
+            <p class="lead">Enter a few details about your business and explore five different
+              website design directions built around your name, your services and your town.
+              It runs in your browser &mdash; no account, no upload, nothing sent anywhere.</p>
+            <div class="btn-group mt-6">
+              <a href="website-preview.html" class="btn btn-accent btn-lg">Create My Website Preview</a>
+            </div>
+            <p class="note mt-4">A design preview, not a published website. Free, and there is
+              nothing to sign up for.</p>
+          </div>
+          <div class="card card-lg">
+            <h3 class="fs-lg">Five directions, not five colour schemes</h3>
+            <p class="fs-sm mt-3">Each one differs in structure, not just palette &mdash; a
+              different header, a different opening, a different rhythm down the page.</p>
+            <div class="tag-row mt-5">
+              <span class="chip">Minimalist</span>
+              <span class="chip">Maximalist</span>
+              <span class="chip">Modern Business</span>
+              <span class="chip">Geometric Editorial</span>
+              <span class="chip">Premium</span>
+            </div>
+            <ul class="feature-list mt-5">
+              <li>Built from your details, by fixed rules &mdash; not by AI</li>
+              <li>Change colours, type, sections and buttons as you watch</li>
+              <li>Keep it as the starting point for a real project</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -2029,6 +2074,22 @@ def build_service_page(sv):
         for o in SERVICES if o["slug"] != sv["slug"]
     )
 
+    # Only on the website page. On the other seven the preview tool would be an
+    # unrelated offer -- nobody comparing HRMS vendors wants a bakery homepage.
+    preview_cta = """    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="callout">
+          <p><strong>Not sure what your website should look like?</strong> Create a free visual
+          preview from your business details and see your own name, services and town inside
+          five different website designs before you decide anything.</p>
+          <a href="website-preview.html" class="btn btn-accent mt-4">Generate My Website Preview</a>
+          <p class="note mt-4">Runs in your browser. No account, and nothing is sent to us.</p>
+        </div>
+      </div>
+    </section>
+
+""" if sv["slug"] == "websites" else ""
+
     body = """    <section>
       <div class="container">
         {crumbs}
@@ -2072,7 +2133,7 @@ def build_service_page(sv):
       </div>
     </section>
 
-    <section class="section-grid">
+{preview_cta}    <section class="section-grid">
       <div class="container">
         <div class="section-head">
           <span class="eyebrow">Scope and price</span>
@@ -2147,7 +2208,7 @@ def build_service_page(sv):
         # question again.
         portal_signup="#start-project", portal_signup_note=PORTAL_SIGNUP_NOTE, deliver=deliver,
         process=process, related=rel_html, faqs=faqs, lower=sv["title"].lower(),
-        others=others, resources=service_resources(sv["slug"]),
+        others=others, resources=service_resources(sv["slug"]), preview_cta=preview_cta,
         scope_rows="".join(
             index_row(n, title, body)
             for n, (title, body) in enumerate(SERVICE_SCOPE[sv["slug"]]["price"], start=1)),
@@ -2365,6 +2426,17 @@ def build_pricing():
             <thead><tr><th scope="col">Factor</th><th scope="col">Why it matters</th></tr></thead>
             <tbody>{rows}</tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-divider">
+      <div class="container container-narrow">
+        <div class="callout">
+          <p><strong>Want to see the design first?</strong> Preview how your business website
+          could look &mdash; in five different design directions &mdash; before you choose
+          anything here. It takes a minute and costs nothing.</p>
+          <a href="website-preview.html" class="btn btn-secondary mt-4">Preview My Website &rarr;</a>
         </div>
       </div>
     </section>
@@ -3480,6 +3552,7 @@ SITEMAP_PAGES = [
     ("maintenance.html", "0.6", "monthly"),
     ("website-development-erode.html", "0.8", "monthly"),
     ("website-audit.html", "0.8", "monthly"),
+    ("website-preview.html", "0.9", "monthly"),
     ("careers.html", "0.5", "monthly"),
     ("privacy.html", "0.3", "yearly"),
     ("terms.html", "0.3", "yearly"),
@@ -4059,6 +4132,7 @@ def build_all():
         ("faq.html", build_faq),
         ("careers.html", build_careers),
         ("website-audit.html", build_website_audit),
+        ("website-preview.html", website_preview.build_website_preview),
         ("privacy.html", build_privacy),
         ("terms.html", build_terms),
         ("refund.html", build_refund),
