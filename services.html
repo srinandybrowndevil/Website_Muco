@@ -37,7 +37,7 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": ["Organization", "ProfessionalService", "LocalBusiness"],
   "@id": "https://mucolabs.com/#organization",
   "name": "MUCO LABS",
   "alternateName": "MUCO Labs",
@@ -48,7 +48,29 @@
   "logo": "https://mucolabs.com/logo-full.svg",
   "telephone": "+91 6381809844",
   "email": "founder@mucolabs.com",
-  "founder": { "@type": "Person", "@id": "https://mucolabs.com/about#founder", "name": "Srinivash Mahalingam", "url": "https://mucolabs.com/about", "jobTitle": "Founder", "sameAs": ["https://www.linkedin.com/in/srinivash-mahalingam/"] },
+  "priceRange": "$$",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "opens": "09:00",
+      "closes": "19:00"
+    }
+  ],
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "11.3410",
+    "longitude": "77.7172"
+  },
+  "founder": {
+    "@type": "Person",
+    "@id": "https://mucolabs.com/about#founder",
+    "name": "Srinivash Mahalingam",
+    "url": "https://mucolabs.com/about",
+    "jobTitle": "Founder & Chairman",
+    "knowsAbout": ["Software Engineering", "AI Systems", "Web Architecture", "Custom Software", "SaaS", "Local SEO"],
+    "sameAs": ["https://www.linkedin.com/in/srinivash-mahalingam/"]
+  },
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "Erode",
@@ -62,7 +84,17 @@
     "name": "Services",
     "itemListElement": [{"@type":"Offer","itemOffered":{"@type":"Service","name":"Website design and development","description":"Business websites, landing pages, e-commerce and customer portals."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Mobile app development","description":"Android and iOS applications taken through store submission."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"UI/UX and product design","description":"User flows, interface design and a reusable design system."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Custom software and SaaS","description":"Multi-tenant systems, role-based access, portals, reporting and integrations."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"CRM, ERP, HRMS, LMS and billing systems","description":"Bookings, inventory, GST-aware invoicing, attendance and dashboards."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Digital marketing and SEO","description":"Local SEO, technical SEO, conversion optimisation and honest reporting."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"AI and business automation","description":"Lead routing, internal assistants, data operations and process automation."}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Branding, IT and cloud support","description":"Identity design, uptime monitoring, backups, security updates and hosting."}}]
   },
-  "knowsAbout": ["Website development","Mobile app development","Custom software","SaaS","AI automation","Digital marketing","SEO"]
+  "knowsAbout": [
+    "Website Development",
+    "Mobile App Development",
+    "Custom Software",
+    "SaaS Architecture",
+    "CRM, ERP, HRMS, LMS & Billing Systems",
+    "AI & Business Automation",
+    "Digital Marketing & SEO",
+    "Answer Engine Optimization (AEO)",
+    "Generative Engine Optimization (GEO)"
+  ]
 }
 </script>
 <script type="application/ld+json">
@@ -81,6 +113,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-websites",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Website design & development Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Website design & development Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Website design & development Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -98,6 +152,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-mobile",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Mobile app development Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Mobile app development Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Mobile app development Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -115,6 +191,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-product-design",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "UI/UX and product design Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "UI/UX and product design Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "UI/UX and product design Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -132,6 +230,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-software",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Custom software & SaaS Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Custom software & SaaS Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Custom software & SaaS Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -149,6 +269,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-business-systems",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "CRM, ERP, HRMS, LMS & billing Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "CRM, ERP, HRMS, LMS & billing Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "CRM, ERP, HRMS, LMS & billing Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -166,6 +308,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-marketing",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Digital marketing & SEO Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Digital marketing & SEO Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Digital marketing & SEO Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -183,6 +347,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-ai-automation",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "AI & business automation Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AI & business automation Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AI & business automation Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
@@ -200,6 +386,28 @@
   "provider": { "@id": "https://mucolabs.com/#organization" },
   "areaServed": [{"@type":"City","name":"Erode"},{"@type":"City","name":"Pallipalayam"},{"@type":"City","name":"Namakkal"},{"@type":"City","name":"Coimbatore"},{"@type":"City","name":"Tiruppur"},{"@type":"City","name":"Karur"}],
   "url": "https://mucolabs.com/services-support",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Branding, IT & cloud support Features",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Branding, IT & cloud support Consulting & Discovery",
+          "description": "Written scope, feature requirements, and technical architecture."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Branding, IT & cloud support Development & Implementation",
+          "description": "Full production engineering with source code ownership."
+        }
+      }
+    ]
+  },
   "availableChannel": {
     "@type": "ServiceChannel",
     "serviceUrl": "https://mucolabs.com/contact",
