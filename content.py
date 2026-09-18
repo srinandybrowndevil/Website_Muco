@@ -3926,9 +3926,23 @@ custom-domain assignments, deploy the current commit, and repeat the checklist.
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Optional. CRM / analytics project URL. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Optional. Publishable / anon key for CRM RPC calls. |
+| `RESEND_API_KEY` | Server only. Sends the enquiry email. |
+| `GEMINI_API_KEY` | Server only. Personalises the Website Preview copy. |
+| `GEMINI_MODEL` | Optional. Overrides the default Gemini model. |
+| `GEMINI_TIMEOUT_MS` | Optional. Defaults to 15000. |
 
 No secret keys should be exposed in the browser bundle or in source. The four
 workspace apps use the same public values from the Supabase project.
+
+`GEMINI_API_KEY` is read only by `api/preview.js`, which runs on the server.
+There is deliberately no `NEXT_PUBLIC_` equivalent, and the key is never written
+to a page, a bundle or browser storage. Set it in `.env.local` for development
+and in Vercel -> Settings -> Environment Variables for deployment.
+
+**The Website Preview works without it.** With no key the endpoint answers
+"fallback" and the studio renders its own deterministic content, so a visitor
+still gets five complete website concepts. Gemini improves the copy; it is not
+what makes the feature work. See `.env.example` for the full notes.
 """.format(brand=BRAND, tagline=TAGLINE, founder=FOUNDER,
            domain=DOMAIN, email=EMAIL, phone=PHONE, ga_id=GA_MEASUREMENT_ID,
            gtm_id=GTM_CONTAINER_ID)
