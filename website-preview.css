@@ -310,6 +310,7 @@
 
 /* ------------------------------------------------------------------ frames */
 .wp-frame {
+  max-width: 100%;
   border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
   background: var(--surface-2); box-shadow: var(--lift-strong), var(--shadow-lg);
   overflow: hidden;
@@ -327,8 +328,10 @@
   background: var(--bg); border-radius: var(--radius-pill); padding: 4px var(--sp-4);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.wp-scroll { position: relative; background: #ffffff; }
-.wp-sizer { position: relative; margin: 0 auto; }
+.wp-scroll { position: relative; background: #ffffff; max-width: 100%; }
+/* The sizer carries an inline pixel width from Frame.fit(). Capping it here
+   means a stale value from a wider layout cannot widen the card it sits in. */
+.wp-sizer { position: relative; margin: 0 auto; max-width: 100%; }
 .wp-scale { position: absolute; top: 0; left: 0; transform-origin: top left; }
 .wp-host { display: block; }
 
@@ -345,10 +348,17 @@
 }
 
 /* --------------------------------------------------------- design selection */
-.wp-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-5); }
-@media (min-width: 1400px) { .wp-cards { grid-template-columns: repeat(3, 1fr); } }
+/* minmax(0, 1fr), not 1fr.
+   A grid item's automatic minimum size is its min-content width, so a preview
+   frame carrying an inline pixel width could push its own column wider than the
+   container -- 573px inside a 338px column on a phone. The page did not scroll,
+   because html clips overflow-x, so the right-hand third of every concept card
+   was simply cut off and unreachable. minmax(0, …) forbids that, and min-width
+   on the card stops the same thing happening one level down. */
+.wp-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5); }
+@media (min-width: 1400px) { .wp-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .wp-card {
-  display: flex; flex-direction: column; gap: var(--sp-4);
+  display: flex; flex-direction: column; gap: var(--sp-4); min-width: 0;
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface); box-shadow: var(--lift); padding: var(--sp-5);
 }

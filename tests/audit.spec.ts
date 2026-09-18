@@ -58,18 +58,33 @@ test("sweep every page at three widths", async ({ browser }) => {
         const out: string[] = [];
         const de = document.documentElement;
 
-        // Sideways scroll is the single most common phone defect.
+        // Sideways scroll is the most common phone defect -- but measuring
+        // scrollWidth alone MISSES the worse version of it. This site sets
+        // html { overflow-x: clip }, so an element wider than the viewport does
+        // not make the page scroll: it is silently cut off and unreachable.
+        // scrollWidth - clientWidth reads 0 and everything looks fine, which is
+        // exactly how a concept card 573px wide in a 338px column shipped.
+        // So the elements are measured directly, and reported either way.
+        const past = [...document.querySelectorAll<HTMLElement>("body *")]
+          .filter(el => {
+            const r = el.getBoundingClientRect();
+            if (r.width === 0 || r.right <= de.clientWidth + 1) return false;
+            const cs = getComputedStyle(el);
+            if (cs.position === "fixed") return false;
+            // A child inside its own scroller is meant to extend past.
+            for (let p = el.parentElement; p; p = p.parentElement) {
+              const pcs = getComputedStyle(p);
+              if (/auto|scroll|hidden/.test(pcs.overflowX)) return false;
+              if (p === document.body) break;
+            }
+            return true;
+          })
+          .map(el => `${el.tagName.toLowerCase()}.${(el.className || "").toString().split(" ")[0]} (${Math.round(el.getBoundingClientRect().width)}px)`);
+
         const overflow = de.scrollWidth - de.clientWidth;
-        if (overflow > 1) {
-          const wide = [...document.querySelectorAll<HTMLElement>("body *")]
-            .filter(el => {
-              const r = el.getBoundingClientRect();
-              return r.width > 0 && r.right > de.clientWidth + 1 &&
-                getComputedStyle(el).position !== "fixed";
-            })
-            .slice(0, 3)
-            .map(el => `${el.tagName.toLowerCase()}.${(el.className || "").toString().split(" ")[0]}`);
-          out.push(`horizontal overflow ${overflow}px (${wide.join(", ") || "source unclear"})`);
+        if (overflow > 1) out.push(`page scrolls sideways ${overflow}px`);
+        if (past.length) {
+          out.push(`content past the viewport edge: ${[...new Set(past)].slice(0, 3).join(", ")}`);
         }
 
         // Anything a finger has to hit.
