@@ -194,9 +194,16 @@ test.describe("marketing site", () => {
         await expect(page.locator(`#err-${field}`), `${field} error`).not.toBeEmpty();
       }
       // Focus lands on the first thing to fix, rather than leaving someone to
-      // hunt for red text.
-      await expect(page.locator("#lead-name")).toBeFocused();
+      // hunt for red text — and "first" means first on the PAGE.
+      //
+      // This previously asserted #lead-name, which encoded a defect: the
+      // service radio group sits above the name field and is also invalid, so
+      // focusing the name field dropped a keyboard user past the very error
+      // they had to fix first. The service group is what should receive focus.
+      await expect(page.locator('input[name="service"]').first()).toBeFocused();
       await expect(page.locator("#lead-name")).toHaveAttribute("aria-invalid", "true");
+      await expect(page.locator('input[name="service"]').first())
+        .toHaveAttribute("aria-invalid", "true");
     });
 
     // One suite run posts twice here, desktop and mobile, against an endpoint
@@ -647,7 +654,10 @@ test.describe("website preview studio", () => {
     // rather than scrolling to the grid.
     const cards = page.locator(".wp-card");
     for (let i = 0; i < 5; i++) await cards.nth(i).scrollIntoViewIfNeeded();
-    await expect(page.locator(".wp-card [data-built]")).toHaveCount(5, { timeout: 15000 });
+    // Painting five shadow-DOM previews is real work, and both projects run at
+    // once. The observer fires after the scroll settles, so give it room --
+    // this was flaky at 15s under parallel load while passing alone.
+    await expect(page.locator(".wp-card [data-built]")).toHaveCount(5, { timeout: 45000 });
 
     // Measured, not asserted: the properties that would be identical if these
     // were one layout in five colours.
@@ -758,7 +768,7 @@ test.describe("website preview studio", () => {
     const cards = page.locator(".wp-card");
     await expect(cards).toHaveCount(5);
     for (let i = 0; i < 5; i++) await cards.nth(i).scrollIntoViewIfNeeded();
-    await expect(page.locator(".wp-card [data-built]")).toHaveCount(5, { timeout: 15000 });
+    await expect(page.locator(".wp-card [data-built]")).toHaveCount(5, { timeout: 45000 });
   }
 
   test("personalised copy reaches every concept without collapsing them", async ({ page }) => {

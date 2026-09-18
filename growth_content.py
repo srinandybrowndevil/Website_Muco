@@ -115,7 +115,7 @@ def public_lead_form(audit=False, preselect=""):
         <input id="lead-company-website" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
       <div class="form-group"><label class="consent-label" for="lead-consent">
         <input id="lead-consent" name="consent" type="checkbox" required aria-describedby="err-consent">
-        <span>I agree that MUCO LABS may contact me about this enquiry. <a href="privacy.html">Privacy policy</a>.</span></label>
+        <span>I agree that MUCO LABS may contact me about this enquiry. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy<span class="visually-hidden"> (opens in a new tab)</span></a>.</span></label>
         <p class="form-error" id="err-consent"></p></div>
       <input type="hidden" name="form_type" value="{kind}">
       <button class="btn btn-accent btn-lg" type="submit" id="lead-submit">{submit}</button></fieldset>
