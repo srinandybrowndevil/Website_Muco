@@ -608,3 +608,110 @@ test.describe("both directions of the language switch", () => {
     expect(await page.locator('input[name="service"][required]').count()).toBe(1);
   });
 });
+
+// The Website Preview studio. The page itself is already covered by the
+// discovery loop above; these cover the three promises that are easy to break
+// silently and impossible to notice from a screenshot.
+test.describe("website preview studio", () => {
+  const PREVIEW = `${BASE}/website-preview?demo=1`;
+
+  /** Fill the wizard from a demo preset and land on the design picker. */
+  async function generate(page: Page) {
+    await page.goto(PREVIEW, { waitUntil: "load" });
+    await page.locator('a[href="#/create"]').first().click();
+    await page.locator('[data-demo="0"]').click();
+    for (let i = 0; i < 5; i++) {
+      await page.locator('[data-wizard] button[type="submit"]').click();
+    }
+    await expect(page.locator(".wp-card")).toHaveCount(5);
+  }
+
+  test("required details are asked for, in words a person can act on", async ({ page }) => {
+    await page.goto(PREVIEW, { waitUntil: "load" });
+    await page.locator('a[href="#/create"]').first().click();
+    await page.locator('[data-wizard] button[type="submit"]').click();
+
+    // Three errors, and none of them says "this field is required".
+    const errors = await page.locator(".wp-error").allTextContents();
+    expect(errors).toHaveLength(3);
+    for (const message of errors) expect(message).not.toMatch(/required/i);
+    // Focus lands on the first thing to fix rather than leaving the visitor to
+    // hunt for it.
+    await expect(page.locator("#wp-businessName")).toBeFocused();
+  });
+
+  test("the five concepts are five different websites, not five palettes", async ({ page }) => {
+    await generate(page);
+    // The previews are built as their card nears the viewport. On a phone the
+    // five cards are stacked, so reaching them means scrolling past each one
+    // rather than scrolling to the grid.
+    const cards = page.locator(".wp-card");
+    for (let i = 0; i < 5; i++) await cards.nth(i).scrollIntoViewIfNeeded();
+    await expect(page.locator(".wp-card [data-built]")).toHaveCount(5, { timeout: 15000 });
+
+    // Measured, not asserted: the properties that would be identical if these
+    // were one layout in five colours.
+    const shapes = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wp-card .wp-host")].map(host => {
+        const root = host.shadowRoot!;
+        const h1 = getComputedStyle(root.querySelector("h1")!);
+        const header = getComputedStyle(root.querySelector("header")!);
+        return [h1.fontSize, h1.fontWeight, h1.fontFamily, h1.letterSpacing,
+          h1.textAlign, header.position].join("|");
+      }));
+    expect(shapes).toHaveLength(5);
+    expect(new Set(shapes).size, "each concept needs its own composition").toBe(5);
+
+    // And every one of them is about the visitor's business.
+    const named = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wp-card .wp-host")]
+        .every(host => /SLS Gym/.test(host.shadowRoot!.textContent || "")));
+    expect(named).toBe(true);
+  });
+
+  test("switching design keeps the business details and each design's own styling", async ({ page }) => {
+    await generate(page);
+    const business = () => page.evaluate(() => localStorage.getItem("muco.wp.business.v1"));
+    const before = await business();
+
+    await page.locator('[data-choose="premium"]').click();
+    await expect(page.locator(".wp-bar-title")).toContainText("Premium");
+    const premiumPrimary = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("muco.wp.custom.v1")!).premium.colors.primary);
+
+    await page.locator("[data-back-designs]").click();
+    await page.locator('[data-choose="maximal"]').click();
+    await expect(page.locator(".wp-bar-title")).toContainText("Maximalist");
+
+    // Business content is independent of presentation.
+    expect(await business()).toBe(before);
+    // Presentation is per design, so the new one arrives with its own palette
+    // rather than inheriting the previous design's.
+    const maximalPrimary = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("muco.wp.custom.v1")!).maximal.colors.primary);
+    expect(maximalPrimary).not.toBe(premiumPrimary);
+  });
+
+  test("approval is honest about having sent nothing", async ({ page }) => {
+    // Nothing the visitor typed may leave the browser, at any point in the
+    // flow. Site-wide analytics beacons are a different subject -- they are
+    // consent-gated and carry no preview data -- so this watches our own origin,
+    // which is where a leak would actually go.
+    const posted: string[] = [];
+    page.on("request", request => {
+      if (request.method() === "GET") return;
+      if (!request.url().startsWith(BASE)) return;
+      posted.push(`${request.method()} ${request.url()}`);
+    });
+
+    await generate(page);
+    await page.locator('[data-choose="business"]').click();
+    await page.locator("[data-approve-step]").click();
+    await page.locator("[data-approve]").click();
+
+    await expect(page.locator(".wp-done h2")).toHaveText("Your website concept is ready.");
+    await expect(page.locator(".wp-done p"))
+      .toContainText("Nothing has been sent to MUCO LABS yet");
+    expect(posted, "the preview must not submit anything").toEqual([]);
+  });
+});

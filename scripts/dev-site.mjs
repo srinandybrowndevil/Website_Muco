@@ -73,7 +73,11 @@ http.createServer(async (req, res) => {
            // predates locale directories. Admit exactly the locale prefixes;
            // dot segments and anything outside root are still rejected above.
            || /^ta[\\/][a-z0-9-]+\.html$/.test(name)
-           || (!/[\\/]/.test(name) && (name.endsWith(".html") || ["style.css", "main.js", "attribution.js", "analytics.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg"].includes(name))));
+           // Keep this list in step with files.push(...) in build-site.mjs.
+           // They are two allowlists over the same set: a file missing here
+           // 404s locally while working in production, and a file missing there
+           // does the reverse -- which is the harder of the two to notice.
+           || (!/[\\/]/.test(name) && (name.endsWith(".html") || ["style.css", "main.js", "attribution.js", "analytics.js", "website-preview.css", "website-preview.js", "robots.txt", "sitemap.xml", "llms.txt", "site.webmanifest", "favicon.svg", "logo-mark.svg", "logo-full.svg"].includes(name))));
     const found = allowed && existsSync(path) && statSync(path).isFile();
     res.statusCode = found ? 200 : 404;
     const selected = found ? path : resolve(root, "404.html");

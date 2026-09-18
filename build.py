@@ -461,6 +461,10 @@ NAV = [
     ("index.html", "Home"),
     ("services.html", "Services"),
     ("work.html", "Work"),
+    # Placed between the proof and the price on purpose: it is the step a
+    # visitor wants after seeing what we build and before deciding what to
+    # spend. It is a product, not a utility, so it is not buried in the footer.
+    ("website-preview.html", "Website Preview"),
     ("pricing.html", "Pricing"),
     ("about.html", "About"),
     ("learning.html", "Learning"),
@@ -472,6 +476,7 @@ FOOTER_COLS = [
                  ("contact.html", "Contact"), ("learning.html", "Learning & Courses"),
                  ("learning-portal.html", "Learning Portal")]),
     ("Explore", [("services.html", "Services"), ("pricing.html", "Pricing"), ("faq.html", "FAQ"),
+                 ("website-preview.html", "Website preview tool"),
                  ("website-audit.html", "Free website review"),
                  ("maintenance.html", "Maintenance"),
                  ("services-websites.html", "Website development"),
@@ -894,14 +899,14 @@ SHELL = """<!DOCTYPE html>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
 <link rel="stylesheet" href="{css}" />
-{schema}{analytics}{gtm_head}</head>
+{head_extra}{schema}{analytics}{gtm_head}</head>
 <body>
 {gtm_body}{header}
   <main id="main">
 {body}
   </main>
 
-{footer}"""
+{footer}{scripts}"""
 
 
 # Two gate strengths. GATE_ALL is the site default: WhatsApp, phone and email
@@ -932,7 +937,16 @@ def gate_contact_links(html, mode=GATE_ALL):
 
 def render(slug, title, description, body, current=None, og_type="website",
            schema_blocks=None, noindex=False, contact_gate=None,
-           lang="en-IN", header=None, footer=None):
+           lang="en-IN", header=None, footer=None,
+           head_extra="", scripts=""):
+    """head_extra / scripts: per-page assets, for the rare page that needs them.
+
+    Both default to empty, so every existing page renders byte-identically. They
+    exist because the Website Preview studio carries roughly twenty kilobytes of
+    CSS and a large JavaScript module that nothing else on the site uses --
+    putting either into style.css or main.js would charge all thirty-two pages
+    for a feature that lives on one of them.
+    """
     key = re.sub(r"[^a-z0-9]", "", slug.replace(".html", "")) or "home"
     canonical = canonical_path(slug)
     # Consent Mode first, then the Google tag, then Tag Manager further down the
@@ -975,6 +989,8 @@ def render(slug, title, description, body, current=None, og_type="website",
         header=header if header is not None else header_html(current or slug, key),
         body=body,
         footer=footer if footer is not None else footer_html(),
+        head_extra=head_extra,
+        scripts=scripts,
     )
 
     html = clean_urls(html)

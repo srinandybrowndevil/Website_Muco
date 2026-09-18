@@ -33,7 +33,7 @@
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-tight-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/jetbrains-mono-latin.woff2" crossorigin />
-<link rel="stylesheet" href="/style.css?v=e0b65521ee" />
+<link rel="stylesheet" href="/style.css?v=ecd6fcb6b7" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -155,6 +155,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><a href="/" aria-current="page">Home</a></li>
           <li><a href="/services">Services</a></li>
           <li><a href="/work">Work</a></li>
+          <li><a href="/website-preview">Website Preview</a></li>
           <li><a href="/pricing">Pricing</a></li>
           <li><a href="/about">About</a></li>
           <li><a href="/learning">Learning</a></li>
@@ -188,6 +189,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a href="/" aria-current="page">Home</a>
       <a href="/services">Services</a>
       <a href="/work">Work</a>
+      <a href="/website-preview">Website Preview</a>
       <a href="/pricing">Pricing</a>
       <a href="/about">About</a>
       <a href="/learning">Learning</a>
@@ -222,15 +224,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               final payment.
             </p>
 
-            <!-- One primary action, one quieter path to proof. The second
+            <!-- One primary action, then the two quieter paths. The second
                  button used to be WhatsApp, which rendered 239px wide against
                  Start a Project's 148px -- the secondary out-shouting the
                  primary on the most important screen on the site. WhatsApp did
                  not need to be here twice either: it is in the header dock and
-                 the mobile dock already. -->
+                 the mobile dock already.
+
+                 Preview Your Website sits second because it is the step before
+                 a decision, and See our work drops to the small size rather
+                 than being removed: it is the same kind of proof, but it is
+                 also in the top nav and has its own section further down, so it
+                 does not need to be the same weight here. -->
+
             <div class="btn-group">
               <a href="/contact#start-project" class="btn btn-accent btn-lg">Start a Project</a>
-              <a href="/work" class="btn btn-secondary btn-lg">See our work</a>
+              <a href="/website-preview" class="btn btn-secondary btn-lg">Preview Your Website</a>
+              <a href="/work" class="btn btn-secondary">See our work</a>
             </div>
 
             <div class="trust-row"><span class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg> You own the code and the accounts</span><span class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> You talk to the person building it</span><span class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1116 0z"/><circle cx="12" cy="10" r="3"/></svg> Erode-based, working across Tamil Nadu</span><span class="trust-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Every enquiry read by the founder</span></div>
@@ -250,7 +260,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-<section class="band-surface section-grid"><div class="container"><div class="split">
+    <section class="band-surface section-grid">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">Website preview</span>
+            <h2>See your business online before you build.</h2>
+            <p class="lead">Enter a few details about your business and explore five different
+              website design directions built around your name, your services and your town.
+              It runs in your browser &mdash; no account, no upload, nothing sent anywhere.</p>
+            <div class="btn-group mt-6">
+              <a href="/website-preview" class="btn btn-accent btn-lg">Create My Website Preview</a>
+            </div>
+            <p class="note mt-4">A design preview, not a published website. Free, and there is
+              nothing to sign up for.</p>
+          </div>
+          <div class="card card-lg">
+            <h3 class="fs-lg">Five directions, not five colour schemes</h3>
+            <p class="fs-sm mt-3">Each one differs in structure, not just palette &mdash; a
+              different header, a different opening, a different rhythm down the page.</p>
+            <div class="tag-row mt-5">
+              <span class="chip">Minimalist</span>
+              <span class="chip">Maximalist</span>
+              <span class="chip">Modern Business</span>
+              <span class="chip">Geometric Editorial</span>
+              <span class="chip">Premium</span>
+            </div>
+            <ul class="feature-list mt-5">
+              <li>Built from your details, by fixed rules &mdash; not by AI</li>
+              <li>Change colours, type, sections and buttons as you watch</li>
+              <li>Keep it as the starting point for a real project</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+<section class="band-deep"><div class="container"><div class="split">
       <div><span class="eyebrow">A practical place to start</span><h2>A business website with a clear route to an enquiry.</h2>
       <p class="lead">For local businesses that need a professional online presence and a simple way for customers to get in touch.</p>
       <a class="btn btn-accent" href="business-website-growth">Explore the website & local search offer</a></div>
@@ -258,12 +304,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <li>Business website with clear service pages</li><li>Local search foundation and Google Business Profile support</li>
       <li>WhatsApp, phone and public enquiry form</li><li>Analytics to measure enquiry actions</li>
       <li>Code ownership and a written handover</li></ul><p class="note mt-5">Custom quote. Domain, hosting, ongoing SEO and advertising are itemised separately.</p></div>
-      </div></div></section><section class="band-deep"><div class="container">
+      </div></div></section><section class="band-surface section-grid"><div class="container">
       <div class="rule-label"><b>01</b> Start with the problem<span class="rule-fill"></span></div>
           <div class="section-head"><h2>What can we help you fix?</h2></div>
       <div class="grid grid-3"><a class="card card-interactive" href="business-website-growth"><h3>I need a website customers can find</h3><p>Business website, local search setup and clear enquiry actions.</p><span class="card-cta">Explore the next step &rarr;</span></a><a class="card card-interactive" href="website-audit"><h3>My website gets no enquiries</h3><p>Review mobile usability, search visibility and the path to contact.</p><span class="card-cta">Explore the next step &rarr;</span></a><a class="card card-interactive" href="services-marketing"><h3>My business is hard to find on Google</h3><p>Check local relevance, your Business Profile and service pages.</p><span class="card-cta">Explore the next step &rarr;</span></a><a class="card card-interactive" href="services-business-systems"><h3>Orders and customer details are in spreadsheets</h3><p>Connect enquiries, follow-ups, orders and reporting.</p><span class="card-cta">Explore the next step &rarr;</span></a><a class="card card-interactive" href="services-ai-automation"><h3>My team repeats the same office tasks</h3><p>Plan automation with review steps and exception handling.</p><span class="card-cta">Explore the next step &rarr;</span></a><a class="card card-interactive" href="textile-software"><h3>Our textile orders are difficult to track</h3><p>Map samples, job work, stock movements and dispatch.</p><span class="card-cta">Explore the next step &rarr;</span></a></div></div></section>
 
-    <section class="band-surface section-grid">
+    <section class="band-deep">
       <div class="container">
         <div class="rule-label"><b>02</b> What we do<span class="rule-fill"></span></div>
           <div class="section-head reveal-on-scroll">
@@ -347,7 +393,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-deep">
+    <section class="band-surface section-grid">
       <div class="container">
         <div class="rule-label"><b>03</b> Industries<span class="rule-fill"></span></div>
           <div class="section-head reveal-on-scroll">
@@ -359,7 +405,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-surface section-grid">
+    <section class="band-deep">
       <div class="container">
         <div class="row-between reveal-on-scroll">
           <div>
@@ -492,7 +538,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-deep">
+    <section class="band-surface section-grid">
       <div class="container">
         <div class="split split-sticky">
           <div class="reveal-on-scroll">
@@ -518,7 +564,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-surface section-grid">
+    <section class="band-deep">
       <div class="container">
         <div class="card card-lg border-beam-card reveal-on-scroll">
           <div class="split gap-7">
@@ -541,7 +587,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-deep">
+    <section class="band-surface section-grid">
       <div class="container container-narrow">
         <div class="rule-label"><b>04</b> Before you ask<span class="rule-fill"></span></div>
           <div class="section-head reveal-on-scroll">
@@ -569,7 +615,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-surface section-grid">
+    <section class="band-deep">
       <div class="container">
         <div class="rule-label"><b>05</b> One of our own builds<span class="rule-fill"></span></div>
           <div class="section-head">
@@ -620,7 +666,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </section>
 
-    <section class="band-deep">
+    <section class="band-surface section-grid">
       <div class="container">
         <div class="cta-box reveal-on-scroll">
           <span class="eyebrow">Next step</span>
@@ -668,6 +714,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <li><a href="/services">Services</a></li>
             <li><a href="/pricing">Pricing</a></li>
             <li><a href="/faq">FAQ</a></li>
+            <li><a href="/website-preview">Website preview tool</a></li>
             <li><a href="/website-audit">Free website review</a></li>
             <li><a href="/maintenance">Maintenance</a></li>
             <li><a href="/services-websites">Website development</a></li>

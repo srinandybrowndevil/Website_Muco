@@ -1313,6 +1313,27 @@ header nav {
   gap: var(--sp-6);
   align-items: center;
   position: relative;
+  /* A wrapped primary nav reads as a broken header, and it is the failure mode
+     that arrives silently the day an item is added. Refusing to wrap makes the
+     gap absorb the pressure instead, and the two steps below give it room to. */
+  flex-wrap: nowrap;
+}
+
+.nav-links a {
+  white-space: nowrap;
+}
+
+/* The desktop nav is shown from 980px up, and eight items at a 32px gap need
+   more room than a 1024px laptop has once the logo and the header actions are
+   accounted for. Tightening the gap keeps all eight on one line; it is the
+   cheapest of the three options, the other two being dropping an item or
+   abbreviating a label into something nobody searches for. */
+@media (min-width: 981px) and (max-width: 1179px) {
+  .nav-links { gap: var(--sp-4); }
+}
+
+@media (min-width: 1180px) and (max-width: 1319px) {
+  .nav-links { gap: var(--sp-5); }
 }
 
 /* With JS running, one shared underline slides from item to item instead of
