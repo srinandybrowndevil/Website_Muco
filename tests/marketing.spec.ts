@@ -692,19 +692,160 @@ test.describe("website preview studio", () => {
     expect(maximalPrimary).not.toBe(premiumPrimary);
   });
 
+  /**
+   * Personalisation must not flatten the five designs.
+   *
+   * The payload is seeded through storage rather than by stubbing the network,
+   * because that exercises the real merge path and does not depend on a key
+   * being configured. The record below is the shape api/preview.js returns
+   * after validation, so what is under test is what actually reaches the page.
+   */
+  const AI_PAYLOAD = {
+    positioning: "A neighbourhood gym built around coached, progressive training.",
+    tone: "direct, encouraging",
+    hero: {
+      headline: "Stronger Every Week in Erode",
+      subheadline: "Coached strength and personal training, six days a week.",
+      ctaLabel: "Book a Trial"
+    },
+    about: { heading: "About SLS Gym", body: "A training floor in Erode for people who want coaching." },
+    services: [
+      { title: "Strength training", description: "Barbell work coached from your first session." },
+      { title: "Weight loss programme", description: "Structured training paired with simple habits." }
+    ],
+    faq: [{ question: "Do I need experience?", answer: "No. Every programme starts from where you are." }],
+    design: {
+      primaryColor: "#1f6f4a", accentColor: "#e8b53a",
+      typeset: "grotesk", mood: "energetic", primaryAction: "book"
+    },
+    recommendedTemplate: "maximal",
+    templates: {
+      minimal: { headline: "Train with intent", note: "Quiet layout.", sections: ["about", "services", "contact"] },
+      maximal: { headline: "STRONGER EVERY WEEK", note: "Loud and physical.", sections: ["services", "about", "contact"] },
+      business: { headline: "Coached training in Erode", note: "Clear and enquirable.", sections: ["services", "about", "contact"] },
+      editorial: { headline: "A floor built for progress", note: "Editorial rhythm.", sections: ["about", "services", "contact"] },
+      premium: { headline: "Considered training", note: "Refined and unhurried.", sections: ["about", "services", "contact"] }
+    }
+  };
+
+  /** Seed a business plus a matching personalisation record, then open designs. */
+  async function seedPersonalised(page: Page) {
+    await page.goto(PREVIEW, { waitUntil: "load" });
+    await page.evaluate((payload) => {
+      const biz = {
+        businessName: "SLS Gym", category: "gym", location: "Erode", tagline: "",
+        description: "", services: ["Strength training", "Weight loss programme"],
+        products: [], address: "", phone: "6381809844", whatsapp: "", email: "",
+        instagram: "", facebook: "", mapsUrl: "", language: "en",
+        preferredMode: "recommended", preferredPrimaryColor: ""
+      };
+      // The same fingerprint the studio computes, so the record counts as current.
+      const parts = [biz.businessName, biz.category, biz.location, biz.tagline,
+        biz.description, biz.services.join("|"), biz.products.join("|"),
+        biz.language, biz.preferredPrimaryColor].join("");
+      let hash = 5381;
+      for (let i = 0; i < parts.length; i++) hash = ((hash << 5) + hash + parts.charCodeAt(i)) | 0;
+      localStorage.clear();
+      localStorage.setItem("muco.wp.business.v1", JSON.stringify(biz));
+      localStorage.setItem("muco.wp.ai.v1", JSON.stringify({
+        fingerprint: String(hash >>> 0) + "." + parts.length, source: "ai", payload
+      }));
+    }, AI_PAYLOAD);
+    // A goto that differs only by fragment is a same-document navigation: the
+    // script would not re-run and the studio would still hold the pre-seed
+    // state. The extra parameter forces a real load.
+    await page.goto(`${BASE}/website-preview?demo=1&seeded=1#/designs`, { waitUntil: "load" });
+    const cards = page.locator(".wp-card");
+    await expect(cards).toHaveCount(5);
+    for (let i = 0; i < 5; i++) await cards.nth(i).scrollIntoViewIfNeeded();
+    await expect(page.locator(".wp-card [data-built]")).toHaveCount(5, { timeout: 15000 });
+  }
+
+  test("personalised copy reaches every concept without collapsing them", async ({ page }) => {
+    await seedPersonalised(page);
+
+    const shapes = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wp-card .wp-host")].map(host => {
+        const root = host.shadowRoot!;
+        const h1 = getComputedStyle(root.querySelector("h1")!);
+        return {
+          headline: root.querySelector("h1")!.textContent!.trim(),
+          shape: [h1.fontFamily, h1.fontWeight, h1.fontSize, h1.letterSpacing].join("|"),
+          usesGeneratedCopy: /Barbell work coached/.test(root.textContent || "")
+        };
+      }));
+
+    // Each concept carries the headline written for it.
+    expect(shapes.map(s => s.headline)).toEqual([
+      "Train with intent", "STRONGER EVERY WEEK", "Coached training in Erode",
+      "A floor built for progress", "Considered training"
+    ]);
+    // And the generated service copy.
+    expect(shapes.every(s => s.usesGeneratedCopy)).toBe(true);
+
+    // The failure this guards against: one suggested typeface applied to all
+    // five turned every family into the same voice. The suggestion belongs to
+    // the recommended design only.
+    expect(new Set(shapes.map(s => s.shape)).size,
+      "personalisation must not flatten the five typographic voices").toBe(5);
+
+    const families = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>(".wp-card .wp-host")].map(host =>
+        getComputedStyle(host.shadowRoot!.querySelector("h1")!).fontFamily.split(",")[0]));
+    expect(new Set(families).size,
+      "at least three distinct typefaces across the five").toBeGreaterThan(2);
+  });
+
+  test("one design is recommended, and all five remain choosable", async ({ page }) => {
+    await seedPersonalised(page);
+    await expect(page.locator(".wp-pick-badge")).toHaveCount(1);
+    await expect(page.locator(".wp-pick-badge")).toHaveText("Recommended for your business");
+    await expect(page.locator("[data-choose]")).toHaveCount(5);
+    // A recommendation, not a promise about results.
+    const text = (await page.locator(".wp-cards").textContent()) || "";
+    expect(text).not.toMatch(/best converting|guaranteed|more sales/i);
+  });
+
+  test("with no key configured the studio still produces five concepts", async ({ page }) => {
+    // Nothing is stubbed: there is no key in CI, so this is the real fallback.
+    await generate(page);
+    await expect(page.locator(".wp-card")).toHaveCount(5);
+    await expect(page.locator(".wp-notice")).toContainText("standard website content system");
+    const stored = await page.evaluate(() => localStorage.getItem("muco.wp.ai.v1"));
+    expect(JSON.parse(stored!).source).toBe("fallback");
+    expect(JSON.parse(stored!).payload).toBe(null);
+  });
+
   test("approval is honest about having sent nothing", async ({ page }) => {
-    // Nothing the visitor typed may leave the browser, at any point in the
-    // flow. Site-wide analytics beacons are a different subject -- they are
-    // consent-gated and carry no preview data -- so this watches our own origin,
-    // which is where a leak would actually go.
-    const posted: string[] = [];
+    /* V2 does send business details to our own /api/preview, so "nothing leaves
+       the browser" is no longer true and this test does not pretend it is. Two
+       narrower promises are what actually matter, and both are checked here:
+       contact details never leave, and approval submits nothing at all.
+       Site-wide analytics beacons are a separate, consent-gated subject and
+       carry no preview data, so only our own origin is watched. */
+    const posted: { url: string; body: string }[] = [];
     page.on("request", request => {
       if (request.method() === "GET") return;
       if (!request.url().startsWith(BASE)) return;
-      posted.push(`${request.method()} ${request.url()}`);
+      posted.push({ url: request.url(), body: request.postData() || "" });
     });
 
     await generate(page);
+
+    const personalisation = posted.filter(r => r.url.includes("/api/preview"));
+    const other = posted.filter(r => !r.url.includes("/api/preview"));
+    expect(other, "nothing but personalisation may be posted").toEqual([]);
+    expect(personalisation.length,
+      "one personalisation request per generation, not one per concept")
+      .toBeLessThanOrEqual(1);
+
+    // The demo preset carries a phone number. It must never be transmitted.
+    for (const request of personalisation) {
+      expect(request.body).not.toContain("6381809844");
+      expect(request.body.toLowerCase()).not.toContain("whatsapp");
+    }
+
+    const beforeApproval = posted.length;
     await page.locator('[data-choose="business"]').click();
     await page.locator("[data-approve-step]").click();
     await page.locator("[data-approve]").click();
@@ -712,6 +853,7 @@ test.describe("website preview studio", () => {
     await expect(page.locator(".wp-done h2")).toHaveText("Your website concept is ready.");
     await expect(page.locator(".wp-done p"))
       .toContainText("Nothing has been sent to MUCO LABS yet");
-    expect(posted, "the preview must not submit anything").toEqual([]);
+    expect(posted.length, "choosing and approving must submit nothing")
+      .toBe(beforeApproval);
   });
 });

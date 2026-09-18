@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
 import lead from "../api/lead.js";
 import event from "../api/event.js";
+import previewApi from "../api/preview.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const preview = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_LOCAL_PREVIEW === "1";
@@ -23,10 +24,11 @@ http.createServer(async (req, res) => {
       res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MUCO LABS · Local preview</title><style>body{margin:0;background:#0e1824;color:#edf4fb;font:17px/1.65 system-ui}main{max-width:900px;margin:auto;padding:60px 24px}h1{font-size:clamp(32px,5vw,56px);line-height:1.15}nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:32px 0}a{color:inherit;text-decoration:none;border:1px solid #48627e;background:#172a3b;border-radius:12px;padding:24px;display:block}a:hover,a:focus-visible{outline:2px solid #9cdbff}small,p{color:#b5c8dc}strong{display:block;font-size:21px}</style><main><small>MUCO LABS · DEVELOPMENT</small><h1>Public website preview</h1><p>This local server previews the static public website only. Portals, authentication and database features have been removed from this architecture.</p><nav><a href="/"><strong>Public website</strong>Services, learning and contact</a></nav></main></html>`);
       return;
     }
-    if (["/api/lead", "/api/event"].includes(url.pathname)) {
+    if (["/api/lead", "/api/event", "/api/preview"].includes(url.pathname)) {
       if (preview) {
         res.setHeader("Content-Type", "application/json");
         if (url.pathname === "/api/event") res.writeHead(200).end(JSON.stringify({ ok: true, preview: true, recorded: false }));
+        else if (url.pathname === "/api/preview") res.writeHead(200).end(JSON.stringify({ ok: true, source: "fallback", reason: "local_preview_mode" }));
         else res.writeHead(409).end(JSON.stringify({ ok: false, error: "Use the local Customer workspace Support page to save a sample request. No email or WhatsApp message has been sent." }));
         return;
       }
@@ -40,7 +42,9 @@ http.createServer(async (req, res) => {
       req.headers["x-forwarded-for"] = req.socket.remoteAddress || "local";
       res.status = code => { res.statusCode = code; return res; };
       res.json = value => { res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify(value)); return res; };
-      await (url.pathname === "/api/lead" ? lead : event)(req, res);
+      const handler = url.pathname === "/api/lead" ? lead
+        : url.pathname === "/api/preview" ? previewApi : event;
+      await handler(req, res);
       return;
     }
     if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405).end(); return; }

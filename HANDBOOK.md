@@ -58,6 +58,7 @@ Edit the Python that produces it. The rest of this file says which Python.
 | `main.js` | 1,012 | Form validation, consent bar, mobile nav, scroll reveals, learning filters |
 | `website-preview.js` | 3,600 | The Website Preview studio: colour engine, content engine, five website templates, wizard, customiser. Loaded on one page only |
 | `website-preview.css` | 500 | Studio chrome for that page. Deliberately not part of `style.css` |
+| `api/preview.js` | 620 | Server-side Gemini personalisation for that studio. Self-contained, no SDK, no dependency |
 
 ---
 
@@ -86,6 +87,9 @@ Edit the Python that produces it. The rest of this file says which Python.
 | A business category in the preview | `website-preview.js` — `CATEGORIES` |
 | Preview type sets | `website-preview.js` — `TYPESETS` |
 | Preview page copy and FAQ | `website_preview.py` — `STEPS`, `FAQS` |
+| What Gemini is told | `api/preview.js` — `SYSTEM_INSTRUCTION` |
+| What Gemini may return | `api/preview.js` — `RESPONSE_SCHEMA`, then `validatePayload()` |
+| The Gemini model | `GEMINI_MODEL` in the environment, or `DEFAULT_MODEL` |
 | Tamil navigation and pages | `tamil_content.py:25`, `:578` |
 | Publishing a new Tamil page | `build.py` — `TAMIL_TWINS` |
 | "Last updated" date on legal pages and sitemap | `build.py:110` — `SITE_REVISED` |
@@ -122,6 +126,13 @@ exactly what was forgotten.
 ## What does not stop you
 
 One thing the build will not catch, because it is not a build error.
+
+**Two lists name the five designs.** `website-preview.js` has `TEMPLATES`,
+`TYPESETS`, `SECTIONS` and `ACTIONS`; `api/preview.js` has `TEMPLATE_IDS`,
+`TYPESET_IDS`, `SECTION_IDS` and `ACTION_IDS`. They are the contract between the
+browser and the model. Add a sixth design to the first and not the second and
+Gemini will never be told it exists; add it to the second only and the validator
+will accept a name nothing can render. Neither fails loudly.
 
 **A page-specific asset lives in two allowlists.** `style.css` and `main.js` reach
 the browser because they are named in `files.push(...)` in `scripts/build-site.mjs`

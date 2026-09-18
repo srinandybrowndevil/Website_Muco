@@ -257,6 +257,51 @@
 }
 .wp-demo-row { display: flex; gap: var(--sp-3); flex-wrap: wrap; margin-top: var(--sp-3); }
 
+/* ------------------------------------------------- personalisation (V2) */
+.wp-generating {
+  text-align: center; max-width: 560px; margin: 0 auto;
+  padding: var(--sp-8) var(--sp-4);
+}
+.wp-generating h2 { font-size: var(--fs-1000); margin-bottom: var(--sp-4); }
+.wp-generating > p { color: var(--text-2); font-size: var(--fs-700); }
+.wp-generating .wp-hint { margin-top: var(--sp-6); }
+.wp-generating-list {
+  list-style: none; padding: 0;
+  margin: var(--sp-6) auto 0; max-width: 340px; text-align: left;
+}
+.wp-generating-list li {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-2) 0; font-size: var(--fs-500); color: var(--text-2);
+}
+.wp-generating-list li::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex: none; opacity: .55;
+}
+/* An indeterminate mark, not a progress bar. One request is in flight and we
+   cannot see inside it, so nothing here pretends to measure it. */
+.wp-pulse { display: flex; gap: 7px; justify-content: center; margin-bottom: var(--sp-5); }
+.wp-pulse i { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); opacity: .3; }
+@media (prefers-reduced-motion: no-preference) {
+  .wp-pulse i { animation: wp-beat 1.1s var(--ease) infinite; }
+  .wp-pulse i:nth-child(2) { animation-delay: .16s; }
+  .wp-pulse i:nth-child(3) { animation-delay: .32s; }
+  @keyframes wp-beat { 0%, 100% { opacity: .3; } 45% { opacity: 1; } }
+}
+
+.wp-pick-badge {
+  margin-left: auto; flex: none; align-self: flex-start;
+  font-size: var(--fs-200); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  border-radius: var(--radius-pill); padding: 4px 10px; text-align: center;
+  max-width: 130px; line-height: 1.35;
+}
+
+.wp-rewrite { border-top: 1px solid var(--line); padding-top: var(--sp-5); }
+.wp-rewrite-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.wp-rewrite-row .btn { flex: 1 1 auto; justify-content: center; }
+.wp-rewrite-row .btn:disabled { opacity: .5; cursor: progress; }
+
 /* ------------------------------------------------------------------ frames */
 .wp-frame {
   border: 1px solid var(--line-strong); border-radius: var(--radius-lg);

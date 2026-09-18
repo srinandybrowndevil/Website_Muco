@@ -551,29 +551,55 @@
   /* says something true and general instead of inventing a specific.        */
   /* ====================================================================== */
 
-  function derive(biz) {
+  /**
+   * Build the content for one business.
+   *
+   * `ai` is the validated personalisation payload, or null. The ranking it
+   * implements is the whole of brief section 33, and it only ever runs one way:
+   *
+   *     what the visitor typed  >  what the model wrote  >  the V1 default
+   *
+   * So a supplied tagline is never replaced by a generated headline, and a
+   * supplied description is never replaced by generated prose. The model fills
+   * blanks; it does not overrule a person about their own business.
+   */
+  function derive(biz, ai) {
     var cat = category(biz.category);
     var name = (biz.businessName || '').trim() || 'Your Business';
     var city = (biz.location || '').trim();
     var services = (biz.services || []).filter(Boolean);
     var products = (biz.products || []).filter(Boolean);
 
-    /* Services and products fall back to category examples. They are shown with
-       a visible "example" note wherever they are used, so nobody mistakes them
-       for a claim about this business. */
-    var serviceItems = services.length ? services : cat.examples.slice(0, 4);
-    var serviceIsExample = !services.length;
+    /* Titles the model wrote, used only when the visitor listed none of their
+       own. Its descriptions are keyed by title and consumed by itemBody(). */
+    var aiServices = (ai && ai.services) || [];
+    var aiTitles = aiServices.map(function (entry) { return entry.title; }).filter(Boolean);
+    var aiDescriptions = {};
+    aiServices.forEach(function (entry) {
+      if (entry.title && entry.description) {
+        aiDescriptions[entry.title.toLowerCase()] = entry.description;
+      }
+    });
+
+    /* Services and products fall back to model titles, then to category
+       examples. Only the category examples are labelled "example", because only
+       those are generic -- the model's are about this business. */
+    var serviceItems = services.length ? services
+      : (aiTitles.length ? aiTitles.slice(0, 5) : cat.examples.slice(0, 4));
+    var serviceIsExample = !services.length && !aiTitles.length;
     var productItems = products.length ? products : cat.examples.slice(0, 4);
     var productIsExample = !products.length;
 
     var headline = biz.tagline
-      ? biz.tagline
-      : (city ? cat.verbs.hero + ' ' + name : cat.verbs.alt + ' ' + name);
+      || (ai && ai.hero && ai.hero.headline)
+      || (city ? cat.verbs.hero + ' ' + name : cat.verbs.alt + ' ' + name);
 
     var where = city ? ' in ' + city : '';
     var subheadline;
     if (biz.description) {
       subheadline = biz.description;
+    } else if (ai && ai.hero && ai.hero.subheadline) {
+      subheadline = ai.hero.subheadline;
     } else if (services.length) {
       subheadline = listSentence(services.slice(0, 3)) + where + '.';
     } else {
@@ -583,6 +609,8 @@
     var aboutBody = [];
     if (biz.description) {
       aboutBody.push(biz.description);
+    } else if (ai && ai.about && ai.about.body) {
+      aboutBody.push(ai.about.body);
     } else {
       aboutBody.push(name + ' is a ' + cat.label.toLowerCase().split(' / ')[0] +
         ' business' + where + '. This paragraph is where you would describe it in your own words.');
@@ -604,7 +632,9 @@
 
     /* Questions a visitor can genuinely answer from what they typed, or that are
        true of any business. Nothing here asserts a policy we were not told. */
-    var faq = [
+    var faq = (ai && ai.faq && ai.faq.length)
+      ? ai.faq.slice(0, 5).map(function (entry) { return [entry.question, entry.answer]; })
+      : [
       ['Where are you based?',
         contact.address ? contact.address : (city ? name + ' is based in ' + city + '.' :
           'Add your address in the details step and it will appear here.')],
@@ -629,6 +659,7 @@
       serviceIsExample: serviceIsExample,
       products: productItems,
       productIsExample: productIsExample,
+      aiDescriptions: aiDescriptions,
       faq: faq,
       contact: contact,
       hasContact: hasContact,
@@ -641,6 +672,11 @@
    * the item and the town, which are both things the visitor told us.
    */
   function itemBody(content, item, index) {
+    /* A description the model wrote for exactly this service wins. Matching on
+       the title rather than on position means reordering the list cannot pair a
+       description with the wrong service. */
+    var written = content.aiDescriptions && content.aiDescriptions[String(item).toLowerCase()];
+    if (written) return written;
     var lines = [
       'Tell your customers what ' + item.toLowerCase() + ' involves, in one or two sentences.',
       'A short description of ' + item.toLowerCase() + ' goes here.',
@@ -1894,7 +1930,9 @@
    */
   function buildContext(biz, tpl, custom, images, options) {
     var opts = options || {};
-    var content = derive(biz);
+    var ai = opts.ai || null;
+    var perTemplate = (ai && ai.templates && ai.templates[tpl.id]) || null;
+    var content = derive(biz, ai);
     var theme = resolveTheme(tpl, custom);
     var set = typeset(custom.typeset || tpl.typeset);
 
@@ -1941,9 +1979,11 @@
       mini: !!opts.mini,
       action: action,
       actionRel: action.external ? ' target="_blank" rel="noopener noreferrer"' : '',
-      heroHeadline: hero.headline || content.headline,
+      /* A hand-edit in the customiser, then this template's own generated
+         headline, then the shared one. Same ranking as everywhere else. */
+      heroHeadline: hero.headline || (perTemplate && perTemplate.headline) || content.headline,
       heroSub: hero.subheadline || content.subheadline,
-      heroCta: hero.ctaLabel || action.label,
+      heroCta: hero.ctaLabel || (ai && ai.hero && ai.hero.ctaLabel) || action.label,
       steps: processSteps(content),
       quote: 'This is where a customer review would sit once you have one to show.',
       imageNote: (images && images.shots && images.shots.length)
@@ -2057,7 +2097,8 @@
     custom: 'muco.wp.custom.v1',
     step: 'muco.wp.step.v1',
     approved: 'muco.wp.approved.v1',
-    images: 'muco.wp.images.v1'
+    images: 'muco.wp.images.v1',
+    ai: 'muco.wp.ai.v1'
   };
 
   /* Images are data URLs and can be large. They go to sessionStorage, under a
@@ -2109,6 +2150,9 @@
     this.saveStep = function (step) { return write(local, KEYS.step, step); };
     this.loadApproval = function () { return read(local, KEYS.approved, null); };
     this.saveApproval = function (record) { return write(local, KEYS.approved, record); };
+    /* The personalisation payload, never a key and never a prompt. */
+    this.loadPersonalisation = function () { return read(local, KEYS.ai, null); };
+    this.savePersonalisation = function (record) { return write(local, KEYS.ai, record); };
     this.loadImages = function () { return read(session, KEYS.images, { logo: '', shots: [] }); };
     this.saveImages = function (images) {
       var payload = JSON.stringify(images || {});
@@ -2141,26 +2185,58 @@
    * were looking at a moment ago. That separation is brief section 19, and it is
    * the reason this function takes the template as an argument.
    */
-  function defaultCustomization(tpl, biz) {
+  function defaultCustomization(tpl, biz, ai) {
     var cat = category(biz.category);
     var mode = resolveMode(tpl, biz.preferredMode);
     var base = tpl.palettes[mode];
-    var primary = isHex(biz.preferredPrimaryColor) ? biz.preferredPrimaryColor : base.primary;
+    var guide = (ai && ai.design) || {};
+    var perTemplate = (ai && ai.templates && ai.templates[tpl.id]) || null;
+
+    /* Colour: the visitor's own choice, then the model's, then the template's.
+       Every one of these still goes through resolveTheme(), so a suggestion
+       that would be illegible is corrected before it reaches text. */
+    var primary = isHex(biz.preferredPrimaryColor) ? biz.preferredPrimaryColor
+      : (isHex(guide.primaryColor) ? guide.primaryColor : base.primary);
+    var accent = isHex(biz.preferredPrimaryColor) ? rotateHue(biz.preferredPrimaryColor, 168)
+      : (isHex(guide.accentColor) ? guide.accentColor : base.accent);
+
+    /* Section order the model suggested, but only sections this category
+       actually offers -- it does not get to invent a Products block for a
+       consultancy. Anything it left out keeps its place at the end. */
+    var order = cat.sections.slice();
+    if (perTemplate && perTemplate.sections && perTemplate.sections.length) {
+      var suggested = perTemplate.sections.filter(function (id) {
+        return cat.sections.indexOf(id) !== -1;
+      });
+      order = suggested.concat(cat.sections.filter(function (id) {
+        return suggested.indexOf(id) === -1;
+      }));
+    }
+
     var sections = {};
     SECTIONS.forEach(function (id) { sections[id] = cat.sections.indexOf(id) !== -1; });
+
+    /* The suggested typeface applies to the recommended design ONLY.
+       Applying it to all five collapsed them into one voice -- measured, not
+       theorised: a single "grotesk" suggestion put system-ui at weight 700 on
+       the Minimalist, the Modern Business and the Editorial at once, wiping out
+       the serif, the mono and the heavy display that are those families'
+       identity. A typeface is not a brand preference here, it is part of what
+       makes five designs five designs. Colour is different and is applied
+       everywhere: it is genuinely the visitor's brand, and the greyscale test
+       means no differentiation was ever resting on it. */
+    var suggestedTypeset = (ai && ai.recommendedTemplate === tpl.id && guide.typeset)
+      ? guide.typeset : '';
+
     return {
       templateId: tpl.id,
       mode: biz.preferredMode === 'recommended' ? 'recommended' : mode,
-      colors: {
-        primary: primary,
-        accent: isHex(biz.preferredPrimaryColor)
-          ? rotateHue(biz.preferredPrimaryColor, 168) : base.accent
-      },
-      typeset: tpl.typeset,
+      colors: { primary: primary, accent: accent },
+      typeset: suggestedTypeset || tpl.typeset,
       hero: { headline: '', subheadline: '', ctaLabel: '', align: 'left' },
       sections: sections,
-      order: cat.sections.slice(),
-      primaryAction: cat.action
+      order: order,
+      primaryAction: guide.primaryAction || cat.action
     };
   }
 
@@ -2173,8 +2249,144 @@
     images: repo.loadImages() || { logo: '', shots: [] },
     approved: repo.loadApproval(),
     imagesDropped: false,
-    device: 'desktop'
+    device: 'desktop',
+    /* {fingerprint, source, payload} or null. See the personalisation section. */
+    ai: repo.loadPersonalisation(),
+    aiPending: false,
+    aiNotice: ''
   };
+
+  /* ====================================================================== */
+  /* Personalisation (V2)                                                   */
+  /*                                                                        */
+  /* One request, after the wizard, to our own endpoint. It returns copy and */
+  /* a colour direction; the five templates still decide every layout. If it */
+  /* fails for any reason the studio draws exactly what V1 drew, so nothing  */
+  /* here is on the critical path.                                          */
+  /* ====================================================================== */
+
+  /**
+   * A stable fingerprint of the fields that would change the copy.
+   *
+   * Contact details and images are excluded deliberately: adding a phone number
+   * changes which button appears, not a single word the model wrote, and paying
+   * for a regeneration because someone typed their email would be waste.
+   */
+  function fingerprint(biz) {
+    var parts = [biz.businessName, biz.category, biz.location, biz.tagline,
+      biz.description, (biz.services || []).join('|'), (biz.products || []).join('|'),
+      biz.language, biz.preferredPrimaryColor].join('');
+    var hash = 5381;
+    for (var i = 0; i < parts.length; i++) {
+      hash = ((hash << 5) + hash + parts.charCodeAt(i)) | 0;
+    }
+    return String(hash >>> 0) + '.' + parts.length;
+  }
+
+  /** The payload to personalise with, or null when it is stale or absent. */
+  function activeAi() {
+    if (!state.ai || state.ai.source !== 'ai' || !state.ai.payload) return null;
+    return state.ai.fingerprint === fingerprint(state.business) ? state.ai.payload : null;
+  }
+
+  function aiIsStale() {
+    return !!state.ai && state.ai.fingerprint !== fingerprint(state.business);
+  }
+
+  /**
+   * Ask the server for personalisation. Resolves to a source, never rejects:
+   * a failure here is an ordinary outcome that means "use the V1 content".
+   */
+  function requestPersonalisation() {
+    var biz = state.business;
+    var body = {
+      businessName: biz.businessName,
+      category: category(biz.category).label,
+      location: biz.location,
+      tagline: biz.tagline,
+      description: biz.description,
+      services: biz.services || [],
+      products: biz.products || [],
+      language: biz.language,
+      preferredMode: biz.preferredMode,
+      preferredPrimaryColor: biz.preferredPrimaryColor
+      /* Phone, WhatsApp, email, socials and the address are not sent. The
+         renderer inserts those itself; the model has no use for them. */
+    };
+    return fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (response) {
+      return response.json().catch(function () { return { ok: false }; });
+    }).then(function (data) {
+      if (data && data.ok && data.source === 'ai' && data.payload) {
+        return { source: 'ai', payload: data.payload };
+      }
+      return { source: 'fallback' };
+    }).catch(function () {
+      return { source: 'fallback' };
+    });
+  }
+
+  /**
+   * Run one personalisation pass.
+   *
+   * `regenerate` false is the first pass, straight after the wizard: no design
+   * has been customised yet, so the AI's colour and typeface direction is
+   * allowed to seed the five templates. `regenerate` true is a later, explicit
+   * request: the visitor may have customised by then, and overwriting their
+   * choices with a fresh opinion would be taking the work off them.
+   */
+  function personalise(regenerate) {
+    if (state.aiPending) return Promise.resolve();
+    var mark = fingerprint(state.business);
+
+    if (!regenerate && state.ai && state.ai.fingerprint === mark) {
+      return Promise.resolve();   /* nothing changed; do not spend a request */
+    }
+
+    state.aiPending = true;
+    state.aiNotice = '';
+    return requestPersonalisation().then(function (result) {
+      state.aiPending = false;
+      state.ai = { fingerprint: mark, source: result.source, payload: result.payload || null };
+      repo.savePersonalisation(state.ai);
+
+      if (result.source === 'ai' && !regenerate) {
+        /* Nothing is customised yet, so rebuild the five from the guidance. */
+        state.customs = {};
+        persist();
+      } else if (result.source === 'ai') {
+        state.aiNotice = 'Content refreshed. Your colours, typeface and layout choices were kept.';
+      } else {
+        state.aiNotice = regenerate
+          ? 'We could not refresh the content just now. Your current preview is unchanged.'
+          : 'We created your preview using our standard website content system.';
+      }
+      persist();
+    });
+  }
+
+  /** One short rewrite of one field. Same endpoint, same refusal to break. */
+  function requestRewrite(task, text) {
+    return fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessName: state.business.businessName,
+        category: category(state.business.category).label,
+        location: state.business.location,
+        language: state.business.language,
+        task: task,
+        text: text
+      })
+    }).then(function (response) { return response.json(); })
+      .then(function (data) {
+        return data && data.ok && data.source === 'ai' && data.text ? data.text : '';
+      })
+      .catch(function () { return ''; });
+  }
 
   function activeTemplate() {
     return template(state.selection && state.selection.templateId);
@@ -2182,7 +2394,7 @@
 
   function customFor(tpl) {
     if (!state.customs[tpl.id]) {
-      state.customs[tpl.id] = defaultCustomization(tpl, state.business);
+      state.customs[tpl.id] = defaultCustomization(tpl, state.business, activeAi());
     }
     return state.customs[tpl.id];
   }
@@ -2192,6 +2404,7 @@
     repo.saveSelection(state.selection);
     repo.saveCustomizations(state.customs);
     repo.saveStep(state.step);
+    repo.savePersonalisation(state.ai);
     if (!repo.saveImages(state.images)) state.imagesDropped = true;
   }
 
@@ -2715,7 +2928,14 @@
         return;
       }
       persist();
+      /* Started before the navigation, so the designs screen already knows a
+         request is in flight and renders the wait -- rather than flashing five
+         un-personalised cards and replacing them a second later. */
+      var run = personalise(false);
       go('designs');
+      run.then(function () {
+        if (state.step === 'designs') renderDesigns();
+      });
     });
 
   }
@@ -2918,34 +3138,82 @@
   /* Step 2 — the five concepts                                             */
   /* ====================================================================== */
 
+  /**
+   * The wait while personalisation runs.
+   *
+   * The four lines describe what the request is doing. They are not staged with
+   * a timer and there is no percentage, because neither would correspond to
+   * anything real -- one request is in flight and we cannot see inside it.
+   * Inventing a progress bar to fill the silence is the same class of dishonesty
+   * as inventing a customer count.
+   */
+  function renderGenerating() {
+    screen.innerHTML = crumb('designs') +
+      '<div class="wp-generating"><div class="wp-pulse" aria-hidden="true"><i></i><i></i><i></i></div>' +
+      '<h2 class="wp-bar-title" tabindex="-1">Personalising your website concepts</h2>' +
+      '<p>Writing copy for ' + esc(state.business.businessName) +
+      ' and matching it to the five design directions. This usually takes a few seconds.</p>' +
+      '<ul class="wp-generating-list">' +
+      ['Reading your business details',
+        'Writing your website content',
+        'Matching design directions',
+        'Preparing five previews'].map(function (line) {
+          return '<li>' + esc(line) + '</li>';
+        }).join('') + '</ul>' +
+      '<p class="wp-hint">If this does not work, you will still get all five concepts &mdash; ' +
+      'built from your details the same way they always were.</p></div>';
+    focusHeading();
+  }
+
   function renderDesigns() {
+    if (state.aiPending) { renderGenerating(); return; }
+
     var chosen = state.selection && state.selection.templateId;
-    screen.innerHTML = crumb('designs') + storageNotice() +
+    var ai = activeAi();
+    var recommended = ai && ai.recommendedTemplate;
+
+    screen.innerHTML = crumb('designs') + storageNotice() + aiNotice() +
       bar('Five directions for ' + esc(state.business.businessName),
-        'Every one of these is a real page built from your details, not a picture of one. ' +
-        'Open any of them full size, or pick one and start customising.') +
+        (ai && ai.positioning)
+          ? esc(ai.positioning) + ' Every one below is a real page built from your details, ' +
+            'not a picture of one.'
+          : 'Every one of these is a real page built from your details, not a picture of one. ' +
+            'Open any of them full size, or pick one and start customising.') +
       '<div class="wp-cards">' + TEMPLATES.map(function (tpl, i) {
         var selected = tpl.id === chosen;
+        var note = ai && ai.templates && ai.templates[tpl.id] && ai.templates[tpl.id].note;
+        var isPick = recommended === tpl.id;
         return '<article class="wp-card' + (selected ? ' is-chosen' : '') + '">' +
           '<div class="wp-card-top"><span class="wp-card-n">' + ('0' + (i + 1)) + '</span>' +
           '<div><h3>' + esc(tpl.name) + '</h3><p>' + esc(tpl.blurb) + '</p></div>' +
-          (selected ? '<span class="wp-chosen-badge">Chosen</span>' : '') + '</div>' +
+          (selected ? '<span class="wp-chosen-badge">Chosen</span>'
+            : isPick ? '<span class="wp-pick-badge">Recommended for your business</span>' : '') +
+          '</div>' +
           '<div class="wp-card-preview" data-mini="' + tpl.id + '">' +
           frameMarkup({ chrome: true, url: state.business.businessName
             ? slugify(state.business.businessName) + '.com' : 'example.com',
             className: 'wp-frame-mini' }) + '</div>' +
-          '<p class="wp-card-detail">' + esc(tpl.detail) + '</p>' +
+          '<p class="wp-card-detail">' + esc(note || tpl.detail) + '</p>' +
           '<div class="wp-card-actions">' +
           '<button type="button" class="btn btn-secondary" data-open="' + tpl.id + '">Preview</button>' +
           '<button type="button" class="btn btn-accent" data-choose="' + tpl.id + '" ' +
           'aria-pressed="' + (selected ? 'true' : 'false') + '">' +
           (selected ? 'Chosen' : 'Choose This Design') + '</button></div></article>';
       }).join('') + '</div>' +
-      '<div class="wp-after"><button type="button" class="btn btn-secondary" data-edit-details>' +
-      'Change my details</button></div>';
+      '<div class="wp-after wp-after-split">' +
+      '<button type="button" class="btn btn-secondary" data-edit-details>Change my details</button>' +
+      '<button type="button" class="btn btn-secondary" data-regenerate>' +
+      (aiIsStale() ? 'Update content for my new details' : 'Regenerate content') + '</button>' +
+      '</div>';
 
     mountMiniPreviews();
     focusHeading();
+  }
+
+  /** One plain sentence when personalisation did something worth mentioning. */
+  function aiNotice() {
+    if (!state.aiNotice) return '';
+    return '<p class="wp-notice" role="status">' + esc(state.aiNotice) + '</p>';
   }
 
   /**
@@ -2960,7 +3228,8 @@
       slot.setAttribute('data-built', '1');
       var tpl = template(slot.getAttribute('data-mini'));
       var host = slot.querySelector('.wp-host');
-      paint(host, state.business, tpl, customFor(tpl), state.images, { mini: true });
+      paint(host, state.business, tpl, customFor(tpl), state.images,
+        { mini: true, ai: activeAi() });
       /* A picture of a website should not put forty links in the tab order of a
          comparison screen. */
       host.setAttribute('aria-hidden', 'true');
@@ -3010,7 +3279,7 @@
         className: 'wp-frame-full', device: state.device });
 
     var host = screen.querySelector('.wp-host');
-    paint(host, state.business, tpl, customFor(tpl), state.images, {});
+    paint(host, state.business, tpl, customFor(tpl), state.images, { ai: activeAi() });
     previewFrame = new Frame(screen.querySelector('.wp-frame'), DEVICES[state.device].width);
     var note = screen.querySelector('[data-scale-note]');
     previewFrame.onScale = function (k) {
@@ -3068,7 +3337,7 @@
     var tpl = activeTemplate();
     var host = screen.querySelector('.wp-stage .wp-host');
     if (!host) return;
-    paint(host, state.business, tpl, customFor(tpl), state.images, {});
+    paint(host, state.business, tpl, customFor(tpl), state.images, { ai: activeAi() });
     if (!customFrame || customFrame.host !== host) {
       if (customFrame) customFrame.destroy();
       customFrame = new Frame(screen.querySelector('.wp-stage .wp-frame'), 1280);
@@ -3135,7 +3404,7 @@
       }).join('') + '</div>';
     }
     if (customTab === 'hero') {
-      var content = derive(state.business);
+      var content = derive(state.business, activeAi());
       return '<div class="wp-ctl"><label for="wp-h-head">Headline</label>' +
         '<textarea id="wp-h-head" rows="2" data-hero="headline" placeholder="' +
         esc(content.headline) + '">' + esc(custom.hero.headline) + '</textarea>' +
@@ -3147,6 +3416,7 @@
         '<input type="text" id="wp-h-cta" data-hero="ctaLabel" placeholder="' +
         esc(actionFor(content, custom.primaryAction).label) + '" value="' +
         esc(custom.hero.ctaLabel) + '" /></div>' +
+        rewriteBar('headline', 'wp-h-head') +
         (tpl.supportsAlign
           ? '<div class="wp-ctl"><span class="wp-ctl-label">Alignment</span><div class="wp-seg">' +
             [['left', 'Left'], ['center', 'Centred']].map(function (pair) {
@@ -3187,7 +3457,7 @@
       'no way to get in touch is a dead end.</p>';
     }
     /* action */
-    var derived = derive(state.business);
+    var derived = derive(state.business, activeAi());
     return '<ul class="wp-actions-list">' + ACTION_ORDER.map(function (id) {
       var def = ACTIONS[id];
       var missing = def.needs && !derived.contact[def.needs === 'mapsUrl' ? 'maps' : def.needs];
@@ -3201,6 +3471,32 @@
           : '<small>Button reads &ldquo;' + esc(def.cta) + '&rdquo;</small>') +
         '</span></label></li>';
     }).join('') + '</ul>';
+  }
+
+  /**
+   * Four rewrites of the headline, and nothing else.
+   *
+   * An AI button beside every field turns a customiser into a slot machine. The
+   * headline is the one line that carries the page, so it gets the help; the
+   * result lands in the same field the visitor types into, and they can edit or
+   * undo it like any other text. Nothing is locked.
+   */
+  var REWRITES = [
+    ['improve', 'Sharpen it'],
+    ['shorten', 'Make it shorter'],
+    ['professional', 'More formal'],
+    ['friendly', 'More friendly']
+  ];
+
+  function rewriteBar(field, targetId) {
+    return '<div class="wp-ctl wp-rewrite"><span class="wp-ctl-label">Rewrite the headline</span>' +
+      '<div class="wp-rewrite-row">' + REWRITES.map(function (pair) {
+        return '<button type="button" class="btn btn-secondary btn-sm" data-rewrite="' +
+          pair[0] + '" data-field="' + field + '" data-target="' + targetId + '">' +
+          esc(pair[1]) + '</button>';
+      }).join('') + '</div>' +
+      '<p class="wp-hint" data-rewrite-status role="status">You can edit the result, or ' +
+      'clear the field to go back to the generated headline.</p></div>';
   }
 
   /* ====================================================================== */
@@ -3266,7 +3562,7 @@
     var tpl = activeTemplate();
     var host = screen.querySelector('.wp-host');
     if (!host) return;
-    paint(host, state.business, tpl, customFor(tpl), state.images, {});
+    paint(host, state.business, tpl, customFor(tpl), state.images, { ai: activeAi() });
     var frame = new Frame(screen.querySelector('.wp-frame'), 1280);
     liveFrames.push(frame);
     nextFrame(function () { frame.fit(); });
@@ -3339,7 +3635,8 @@
     var target = event.target.closest('[data-open],[data-choose],[data-edit-details],' +
       '[data-back-designs],[data-like],[data-customize],[data-keep],[data-approve-step],' +
       '[data-approve],[data-goto],[data-start-over],[data-tab],[data-typeset],[data-reset],' +
-      '[data-move],[data-add-section],[data-sheet-open],[data-sheet-close]');
+      '[data-move],[data-add-section],[data-sheet-open],[data-sheet-close],' +
+      '[data-regenerate],[data-rewrite]');
     if (!target) return;
 
     if (target.hasAttribute('data-open')) {
@@ -3353,6 +3650,16 @@
       go('customize'); return;
     }
     if (target.hasAttribute('data-edit-details')) { wizardIndex = 0; go('create'); return; }
+    if (target.hasAttribute('data-regenerate')) {
+      if (state.aiPending) return;
+      target.disabled = true;
+      renderGenerating();
+      announce('Refreshing your content.');
+      personalise(true).then(function () {
+        if (state.step === 'designs') renderDesigns();
+      });
+      return;
+    }
     if (target.hasAttribute('data-back-designs')) { go('designs'); return; }
     if (target.hasAttribute('data-like')) {
       choose(target.getAttribute('data-like'));
@@ -3404,12 +3711,39 @@
       if (active) active.focus();
       return;
     }
+    if (target.hasAttribute('data-rewrite')) {
+      var field = target.getAttribute('data-field');
+      var box = screen.querySelector('#' + target.getAttribute('data-target'));
+      var status = screen.querySelector('[data-rewrite-status]');
+      /* Whatever is on the page right now, which is what the visitor can see --
+         their own edit if they made one, otherwise the generated line. */
+      var source = (box && box.value) ||
+        buildContext(state.business, tpl, custom, state.images, { ai: activeAi() }).heroHeadline;
+      if (!source) return;
+      var buttons = screen.querySelectorAll('[data-rewrite]');
+      Array.prototype.forEach.call(buttons, function (b) { b.disabled = true; });
+      if (status) status.textContent = 'Rewriting…';
+      requestRewrite(target.getAttribute('data-rewrite'), source).then(function (text) {
+        Array.prototype.forEach.call(buttons, function (b) { b.disabled = false; });
+        if (!text) {
+          if (status) status.textContent = 'That could not be rewritten just now. Your headline is unchanged.';
+          return;
+        }
+        custom.hero[field] = text;
+        persist();
+        if (box) box.value = text;
+        if (status) status.textContent = 'Rewritten. Edit it freely, or clear the field to go back.';
+        queueRepaint();
+        announce('Headline rewritten.');
+      });
+      return;
+    }
     if (target.hasAttribute('data-typeset')) {
       custom.typeset = target.getAttribute('data-typeset');
       persist(); refreshRail(); repaintCustom(); return;
     }
     if (target.hasAttribute('data-reset')) {
-      state.customs[tpl.id] = defaultCustomization(tpl, state.business);
+      state.customs[tpl.id] = defaultCustomization(tpl, state.business, activeAi());
       persist(); refreshRail(); repaintCustom();
       announce('The ' + tpl.name + ' design is back to its defaults.');
       return;
